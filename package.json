@@ -1,0 +1,40 @@
+{
+  "private": true,
+  "scripts": {
+    "dev": "next",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@ajna/pagination": "^1.4.19",
+    "@chakra-ui/icons": "^2.0.2",
+    "@chakra-ui/react": "^2.2.1",
+    "@chakra-ui/theme-tools": "^2.0.2",
+    "@emotion/react": "^11.9.0",
+    "@emotion/styled": "^11.9.0",
+    "@fontsource/zen-dots": "^4.5.8",
+    "@rainbow-me/rainbowkit": "^0.8.0",
+    "@react-icons/all-files": "^4.1.0",
+    "@types/big.js": "^6.1.6",
+    "axios": "^1.1.3",
+    "big.js": "^6.2.1",
+    "chakra-ui-steps": "^1.8.0",
+    "dotenv": "^16.0.3",
+    "ethers": "^5.7.2",
+    "framer-motion": "^6.3.0",
+    "lightweight-charts": "^3.8.0",
+    "next": "latest",
+    "next-transpile-modules": "^10.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-icons": "^4.6.0",
+    "socket.io-client": "^4.5.4",
+    "wagmi": "^0.8.3"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "typescript": "^4.7.2"
+  }
+}
