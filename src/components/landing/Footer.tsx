@@ -35,7 +35,7 @@ export const Footer = () => (
 >
   Join the revolution
 </Text>
-<Flex gap={5} my={2}>
+<Flex gap={5} my={2} flexDir={{xs: 'column', sm: 'column', md: 'row'}}>
   <ChakraLink
     isExternal
     href="https://github.com/ze-xe"

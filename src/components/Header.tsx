@@ -44,6 +44,7 @@ import { useAccount, useConnect, chain, Chain } from 'wagmi';
 import { ChainID, chainIndex, chains } from '../utils/chains';
 import { LeverDataContext } from '../context/LeverDataProvider';
 
+
 export const Header = () => {
 	const router = useRouter();
 	const { isOpen, onToggle } = useDisclosure();
@@ -52,17 +53,30 @@ export const Header = () => {
 	const [init, setInit] = useState(false);
 	const { fetchData: fetchLeverData } = useContext(LeverDataContext);
 
-	const {address, isConnected, isConnecting} = useAccount({
+	const {address, isConnected, isConnecting, connector: activeConnector} = useAccount({
 		onConnect({ address, connector, isReconnected }) {
 			console.log('Connected', address)
 			fetchData(address, connector.chains[0].id);
 			fetchLeverData(address, connector.chains[0].id);
 			setChain(connector.chains[0].id);
+		},
+		onDisconnect() {
+			console.log('Disconnected');
+			fetchData(null, ChainID.ARB_GOERLI);
+			fetchLeverData(null, ChainID.ARB_GOERLI);
 		}
 	});
+
 	// const {connectAsync: connectEvm, connectors} = useConnect();
 
 	useEffect(() => {
+		if(activeConnector) window.ethereum.on('accountsChanged', function (accounts: any[]) {
+			console.log(activeConnector)
+			// Time to reload your interface with accounts[0]!
+			fetchData(accounts[0], activeConnector?.chains[0].id);
+			fetchLeverData(accounts[0], activeConnector?.chains[0].id);
+			setChain(activeConnector?.chains[0].id);
+		})
 		if (localStorage.getItem('chakra-ui-color-mode') === 'light') {
 			localStorage.setItem('chakra-ui-color-mode', 'dark');
 		}
@@ -70,7 +84,7 @@ export const Header = () => {
 			fetchData(null, ChainID.ARB_GOERLI);
 			fetchLeverData(null, ChainID.ARB_GOERLI);
 		}
-	}, [isConnected, isConnecting]);
+	}, [isConnected, isConnecting, activeConnector]);
 
 	if (router.pathname === '/') {
 		return <></>;
@@ -130,13 +144,7 @@ export const Header = () => {
 						justify={'flex-end'}
 						gap={4} 
 						>
-						{isConnected && <Box>
-							<Link href={'/portfolio'}>
-								<Button variant={'unstyled'} fontSize="sm">
-									Portfolio
-								</Button>
-							</Link>
-						</Box>}
+						{isConnected && <MenuOption href='/portfolio' title='Portfolio'/>}
 						<Box>
 						<ConnectButton chainStatus={'icon'} showBalance={false}/>
 						</Box>
@@ -151,6 +159,8 @@ export const Header = () => {
 };
 
 const MenuOption = ({ href, title, disabled = false, size = 'sm' }) => {
+	const route = useRouter();
+	
 	return (
 		<Box height={'100%'} pt={1} px={2}>
 			<Link href={href}>
@@ -163,7 +173,12 @@ const MenuOption = ({ href, title, disabled = false, size = 'sm' }) => {
 					<Button
 						variant={'unstyled'}
 						disabled={disabled}
+						color={route.pathname.includes(href) ? 'primary' : 'gray.200'}
+						textDecoration={route.pathname.includes(href) ? 'underline' : 'none'}
+						fontWeight={route.pathname.includes(href) ? 'bold' : 'medium'}
+						textUnderlineOffset="4px"
 						size={size}
+						_hover={{textDecoration:'underline'}}
 						fontSize="sm">
 						{title}
 					</Button>

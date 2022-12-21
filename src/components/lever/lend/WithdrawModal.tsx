@@ -60,6 +60,7 @@ import { ChainID } from "../../../utils/chains";
 import axios from "axios";
 import { AiFillMinusSquare } from "react-icons/ai";
 import { MinusIcon } from "@chakra-ui/icons";
+import { LeverDataContext } from "../../../context/LeverDataProvider";
 
 export default function WithdrawModal({ market, token }) {
 	const { isOpen, onOpen, onClose } = useDisclosure();
@@ -74,6 +75,7 @@ export default function WithdrawModal({ market, token }) {
 
 	const { chain, explorer } = useContext(DataContext);
 	const { isConnected: isEvmConnected, address: EvmAddress } = useAccount();
+	const { incrementAllowance, updateCollateralBalance, updateWalletBalance } = useContext(LeverDataContext);
 
 	const updateSliderValue = (value: number) => {
 		setSliderValue(value);
@@ -97,7 +99,7 @@ export default function WithdrawModal({ market, token }) {
 		return Number(inputAmount) > depositBalance();
 	};
 
-	const deposit = async () => {
+	const withdraw = async () => {
 		setLoading(true);
 		setConfirmed(false);
 		setHash(null);
@@ -117,6 +119,8 @@ export default function WithdrawModal({ market, token }) {
 					await res.wait(1);
 					setConfirmed(true);
 					setResponse("Transaction Successful!");
+					updateWalletBalance(market?.id, Big(inputAmount).times(10**token?.decimals).toString());
+					updateCollateralBalance(market?.id, Big(inputAmount).times(10**token?.decimals).neg().toString());
 				}
 			})
 			.catch((err: any) => {
@@ -174,7 +178,7 @@ export default function WithdrawModal({ market, token }) {
 		onClose();
 	};
 
-	const depositBalance = () => market?.collateralBalance;
+	const depositBalance = () => market?.collateralBalance / 10 ** token?.decimals;
 
 	return (
 		<>
@@ -318,7 +322,7 @@ export default function WithdrawModal({ market, token }) {
 									disabled={inputAmount == '0' || amountExceedsBalance() || loading}
 									isLoading={loading}
 									loadingText="Sign the transaction in your wallet"
-									onClick={deposit}
+									onClick={withdraw}
 								>
 									{amountExceedsBalance()
 										? "Insufficient Balance"

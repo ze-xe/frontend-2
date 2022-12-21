@@ -11,7 +11,6 @@ export default function UserOrders({ pair }) {
 				<TabList>
 					<Tab>Active Orders</Tab>
 					<Tab>Order History</Tab>
-					{/* <Tab>Cancelled Orders</Tab> */}
 				</TabList>
 
 				<TabPanels>

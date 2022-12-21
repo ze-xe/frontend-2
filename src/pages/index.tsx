@@ -56,7 +56,7 @@ const Index = () => {
 				bgImage="/round.png"
 				bgRepeat={"no-repeat"}
 				bgPosition={{ sm: "70vw 40vh", md: "70vw -160px" }}
-				bgSize={{ sm: "600px", md: "contain" }}
+				bgSize={{ xs: '0', sm: "600px", md: "contain" }}
 			>
 				<Box maxW={"1200px"} ml={"10%"}>
 					<Box
@@ -71,14 +71,15 @@ const Index = () => {
 					>
 						<Text
 							fontFamily={"Zen Dots"}
-							fontSize={{ sm: "100px", md: "180px" }}
+							fontSize={{ xs:'50px', sm: "100px", md: "140px" }}
 							// fontWeight='bold'
+							mb={0}
 						>
 							zexe
 						</Text>
 					</Box>
-					<Flex flexDir={"column"} justify={"center"} mb={20}>
-						<Text fontSize={"xl"} fontWeight={"bold"}>
+					<Flex flexDir={"column"} justify={"center"} mb={20} mr={10}>
+						<Text fontSize={"xl"} fontWeight='bold'>
 							Orderbook DEX with onchain spot and derivatives
 							market
 						</Text>
@@ -89,8 +90,8 @@ const Index = () => {
 						</Text> */}
 					</Flex>
 
-					<Flex my={10} height="90px" wrap={"wrap"}>
-						<Box w={"200px"}>
+					<Flex wrap={"wrap"}>
+						<Box w={"200px"} my={5}>
 							<BsCurrencyExchange {...featuresIcon} />
 							<Text {...featuresTitle}>Spot Trading</Text>
 							<Text {...featuresText}>
@@ -102,9 +103,11 @@ const Index = () => {
 							orientation="vertical"
 							borderColor={"#fff"}
 							mx={4}
+							my={5}
+							height='100px'
 						/>
 
-						<Box w={"200px"}>
+						<Box w={"200px"} my={5}>
 							<RiExchangeFundsFill {...featuresIcon} />
 							<Text {...featuresTitle}>Margin and Futures</Text>
 							<Text {...featuresText}>
@@ -116,9 +119,11 @@ const Index = () => {
 							orientation="vertical"
 							borderColor={"#fff"}
 							mx={4}
+							my={5}
+							height='100px'
 						/>
 
-						<Box w={"200px"}>
+						<Box w={"200px"} my={5}>
 							<GiCardExchange {...featuresIcon} />
 							<Text {...featuresTitle}>Option Calls</Text>
 							<Text {...featuresText}>
@@ -130,9 +135,11 @@ const Index = () => {
 							orientation="vertical"
 							borderColor={"#fff"}
 							mx={4}
+							my={5}
+							height='100px'
 						/>
 
-						<Box w={"200px"}>
+						<Box w={"200px"} my={5}>
 							<GiBank {...featuresIcon} />
 							<Text {...featuresTitle}>Money Markets</Text>
 							<Text {...featuresText}>
@@ -141,7 +148,7 @@ const Index = () => {
 						</Box>
 					</Flex>
 
-					<Flex gap={2} mt={20}>
+					<Flex gap={2} mt={20} mb={{xs: '200', sm: '200', md: '0'}}>
 						<Link href={"/trade"}>
 							<Button size={"lg"} bgColor="white" color={"black"} _hover={{bgColor: 'gray'}}>
 								Trade Now

@@ -64,11 +64,13 @@ export default function BuySellModal2({
 
 	const { address, isConnected: isEvmConnected } = useAccount();
 
-	const { chain, incrementAllowance, addPlacedOrder } = useContext(DataContext);
-	const { data, isError, isLoading, isSuccess, signTypedDataAsync } = useSignTypedData();
+	const { chain, incrementAllowance, addPlacedOrder, updateWalletBalance } =
+		useContext(DataContext);
+	const { data, isError, isLoading, isSuccess, signTypedDataAsync } =
+		useSignTypedData();
 
 	const amountExceedsBalance = () => {
-		if(!token1 || !token0) return true
+		if (!token1 || !token0) return true;
 		const amount = buy ? token0Amount * price : token0Amount;
 		const balance = buy
 			? token1.balance / 10 ** token1.decimals
@@ -123,153 +125,174 @@ export default function BuySellModal2({
 				.toFixed(0);
 		}
 
-		try{
-		const _orders = (
-			await axios.get(
-				Endpoints[chain] +
-					`order/${limit ? "limit" : "market"}/matched/` +
-					pair.id,
-				{
-					params: {
-						amount: _amount,
-						exchangeRate: Big(price)
-							.times(10 ** 18)
-							.toFixed(0),
-						buy,
-						chainId: chain,
-					},
-				}
-			)
-		).data.data;
-
-		console.log(_orders)
-
-		if (_orders.length > 0) {
-			const exchange = await getContract("Exchange", chain);
-			toast.close(toastIdRef.current);
-			(toastIdRef as any).current = toast({
-				title: "Sending transaction...",
-				description: `Executing orders within ${tokenFormatter(null).format(price)} ${token1.symbol}/${token0.symbol} limit`,
-				status: "loading",
-				duration: null,
-			});
-			console.log(_amount);
-			const res = await send(
-				exchange,
-				(buy && !limit) ? "executeMultipleMarketOrders": "executeMultipleLimitOrders",
-				[
-					_orders.map((order: any) => order.signature),
-					_orders.map((order: any) => order.value),
-					_amount,
-				],
-				chain
-			);
-			const receipt = await res.wait(1);
-			const exchangeItf = await getInterface("Exchange", chain);
-			let total = Big(0);
-			receipt.logs.forEach((log: any) => {
-				try {
-					const parsed = exchangeItf.parseLog(log);
-					if (parsed.name == "OrderExecuted") {
-						console.log(parsed);
-						total = total.plus(parsed.args.fillAmount);
+		try {
+			const _orders = (
+				await axios.get(
+					Endpoints[chain] +
+						`order/${limit ? "limit" : "market"}/matched/` +
+						pair.id,
+					{
+						params: {
+							amount: _amount,
+							exchangeRate: Big(price)
+								.times(10 ** 18)
+								.toFixed(0),
+							buy,
+							chainId: chain,
+						},
 					}
-				} catch (err) {}
-			});
-			
-			_amount = Big(_amount).sub(total).toFixed(0);
-		}
-		if (Big(_amount).gt(0) && limit) {
-			toast.close(toastIdRef.current);
-			(toastIdRef as any).current = toast({
-				title: "Placing order...",
-				description: `Creating limit order of ${tokenFormatter(null).format(_amount/1e18)} ${token0.symbol} at ${tokenFormatter(null).format(price)} ${token1.symbol}/${token0.symbol}`,
-				status: "loading",
-				duration: null,
-			});
-			const domain: any = {
-				name: "zexe",
-				version: "1",
-				chainId: chain.toString(),
-				verifyingContract: getAddress("Exchange", chain),
-			};
+				)
+			).data.data;
 
-			// The named list of all type definitions
-			const types = {
-				Order: [
-					{ name: "maker", type: "address" },
-					{ name: "token0", type: "address" },
-					{ name: "token1", type: "address" },
-					{ name: "amount", type: "uint256" },
-					{ name: "buy", type: "bool" },
-					{ name: "salt", type: "uint32" },
-					{ name: "exchangeRate", type: "uint216" },
-				],
-			};
+			console.log(_orders);
 
-			const value = {
-				maker: address,
-				token0: token0.id,
-				token1: token1.id,
-				amount: _amount,
-				buy,
-				salt: (Math.random() * 1000000).toFixed(0),
-				exchangeRate: ethers.utils
-					.parseEther(price.toString())
-					.toString(),
-			};
+			if (_orders.length > 0) {
+				const exchange = await getContract("Exchange", chain);
+				toast.close(toastIdRef.current);
+				(toastIdRef as any).current = toast({
+					title: "Sending transaction...",
+					description: `Executing orders within ${tokenFormatter(
+						null
+					).format(price)} ${token1.symbol}/${token0.symbol} limit`,
+					status: "loading",
+					duration: null,
+				});
+				console.log(_amount);
+				const res = await send(
+					exchange,
+					buy && !limit
+						? "executeMultipleMarketOrders"
+						: "executeMultipleLimitOrders",
+					[
+						_orders.map((order: any) => order.signature),
+						_orders.map((order: any) => order.value),
+						_amount,
+					],
+					chain
+				);
+				const receipt = await res.wait(1);
+				const exchangeItf = await getInterface("Exchange", chain);
+				let total = Big(0);
+				receipt.logs.forEach((log: any) => {
+					try {
+						const parsed = exchangeItf.parseLog(log);
+						if (parsed.name == "OrderExecuted") {
+							console.log('Filled', parsed.args.fillAmount.toString(), token0.symbol);
+							total = total.plus(parsed.args.fillAmount);
+						}
+					} catch (err) {}
+				});
+				if(buy) {
+					updateWalletBalance(token0.id, total.toString())
+					updateWalletBalance(token1.id, Big(total).times(price).neg().toString())
+				} else {
+					updateWalletBalance(token0.id, total.neg().toString())
+					updateWalletBalance(token1.id, Big(total).times(price).toString())
+				}
 
-			signTypedDataAsync({
-				domain,
-				types,
-				value,
-			}).then((signature) => {
-				console.log(signature);
-				axios
-					.post(Endpoints[chain] + "order/create", {
-						signature,
-						data: value,
-						chainId: chain.toString(),
-					})
-					.then((res) => {
-						addPlacedOrder({signature: signature, pair: pair.id, value: value})
-						setLoading(false);
-						toast.close(toastIdRef.current);
-						toast({
-							title: "Order created successfully!",
-							description: "Order created successfully!",
-							status: "success",
+				_amount = Big(_amount).sub(total).toFixed(0);
+			}
+			if (Big(_amount).gt(0) && limit) {
+				toast.close(toastIdRef.current);
+				(toastIdRef as any).current = toast({
+					title: "Placing order...",
+					description: `Creating limit order of ${tokenFormatter(
+						null
+					).format(_amount / 1e18)} ${
+						token0.symbol
+					} at ${tokenFormatter(null).format(price)} ${
+						token1.symbol
+					}/${token0.symbol}`,
+					status: "loading",
+					duration: null,
+				});
+				const domain: any = {
+					name: "zexe",
+					version: "1",
+					chainId: chain.toString(),
+					verifyingContract: getAddress("Exchange", chain),
+				};
+
+				// The named list of all type definitions
+				const types = {
+					Order: [
+						{ name: "maker", type: "address" },
+						{ name: "token0", type: "address" },
+						{ name: "token1", type: "address" },
+						{ name: "amount", type: "uint256" },
+						{ name: "buy", type: "bool" },
+						{ name: "salt", type: "uint32" },
+						{ name: "exchangeRate", type: "uint216" },
+					],
+				};
+
+				const value = {
+					maker: address,
+					token0: token0.id,
+					token1: token1.id,
+					amount: _amount,
+					buy,
+					salt: (Math.random() * 1000000).toFixed(0),
+					exchangeRate: ethers.utils
+						.parseEther(price.toString())
+						.toString(),
+				};
+
+				signTypedDataAsync({
+					domain,
+					types,
+					value,
+				}).then((signature) => {
+					console.log(signature);
+					axios
+						.post(Endpoints[chain] + "order/create", {
+							signature,
+							data: value,
+							chainId: chain.toString(),
+						})
+						.then((res) => {
+							addPlacedOrder({
+								signature: signature,
+								pair: pair.id,
+								value: value,
+							});
+							setLoading(false);
+							toast.close(toastIdRef.current);
+							toast({
+								title: "Order created successfully!",
+								description: "Order created successfully!",
+								status: "success",
+							});
+						})
+						.catch((err) => {
+							setLoading(false);
+							toast.close(toastIdRef.current);
+							toast({
+								title: "Order failed. Please try again!",
+								description: err.response.data.error,
+								status: "error",
+							});
 						});
-					})
-					.catch((err) => {
-						setLoading(false);
-						toast.close(toastIdRef.current);
-						toast({
-							title: "Order failed. Please try again!",
-							description: err.response.data.error,
-							status: "error",
-						});
-					});
-			});
-		} else {
+				});
+			} else {
+				setLoading(false);
+				toast.close(toastIdRef.current);
+				toast({
+					title: "Order executed successfully!",
+					description: "Amount was filled within limit!",
+					status: "success",
+				});
+			}
+		} catch (err) {
+			console.log(err);
 			setLoading(false);
 			toast.close(toastIdRef.current);
 			toast({
-				title: "Order executed successfully!",
-				description: "Amount was filled within limit!",
-				status: "success",
+				title: "Order failed. Please try again!",
+				description: "Order failed",
+				status: "error",
 			});
 		}
-	} catch(err) {
-		console.log(err);
-		setLoading(false);
-		toast.close(toastIdRef.current);
-		toast({
-			title: "Order failed. Please try again!",
-			description: 'Order failed',
-			status: "error",
-		});
-	}
 	};
 
 	const tokenAmountToSpend = buy ? token1Amount : token0Amount;
@@ -285,7 +308,7 @@ export default function BuySellModal2({
 					onClick={execute}
 					disabled={
 						loading ||
-						isNaN(Number(token0Amount)) || 
+						isNaN(Number(token0Amount)) ||
 						!Big(token0Amount).gt(0) ||
 						!isEvmConnected ||
 						amountExceedsBalance() ||
@@ -297,11 +320,13 @@ export default function BuySellModal2({
 				>
 					{!isEvmConnected
 						? "Please connect wallet to continue"
-						: (isNaN(Number(token0Amount)) || !Big(token0Amount).gt(0))
+						: isNaN(Number(token0Amount)) ||
+						  !Big(token0Amount).gt(0)
 						? "Enter Amount"
 						: amountExceedsBalance()
 						? "Insufficient Trading Balance"
-						: (limit ? "Limit " : "Market ") + (buy ? "Buy" : "Sell")}
+						: (limit ? "Limit " : "Market ") +
+						  (buy ? "Buy" : "Sell")}
 				</Button>
 			) : (
 				<Button

@@ -130,7 +130,7 @@ export default function LendingTable() {
 													{isConnected ? tokenFormatter(
 														null
 													).format(
-														market.collateralBalance
+														market.collateralBalance / 10 ** market.inputToken.decimals
 													) : '-'}{" "}
 													{market.inputToken.symbol}
 												</Text>
@@ -141,7 +141,7 @@ export default function LendingTable() {
 													).format(
 														market.collateralBalance *
 															market.inputToken
-																.lastPriceUSD
+																.lastPriceUSD / 10 ** market.inputToken.decimals
 													) : '-'}
 												</Text>
 											</Td>

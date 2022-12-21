@@ -76,7 +76,7 @@ export default function LendModal({ market, token }) {
 
 	const { chain, explorer } = useContext(DataContext);
 	const { isConnected: isEvmConnected, address: EvmAddress } = useAccount();
-	const { availableToBorrow } = useContext(LeverDataContext);
+	const { availableToBorrow, updateBorrowBalance, updateWalletBalance } = useContext(LeverDataContext);
 
 	const updateSliderValue = (value: number) => {
 		setSliderValue(value);
@@ -121,6 +121,9 @@ export default function LendModal({ market, token }) {
 					await res.wait(1);
 					setConfirmed(true);
 					setResponse("Transaction Successful!");
+
+					updateWalletBalance(market?.id, amount.toString());
+					updateBorrowBalance(market?.id, amount.toString());
 				}
 			})
 			.catch((err: any) => {

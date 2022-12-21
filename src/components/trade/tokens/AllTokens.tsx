@@ -12,8 +12,6 @@ export default function AllTokens({search}) {
 		return pair?.tokens[0].symbol.toLowerCase().includes(search.toLowerCase()) || pair?.tokens[1].symbol.toLowerCase().includes(search.toLowerCase()) || pair?.tokens[0].name.toLowerCase().includes(search.toLowerCase()) || pair?.tokens[1].name.toLowerCase().includes(search.toLowerCase());
 	})
 
-	console.log(pairStats)
-
 	return (
 		<Flex flexDir={'column'} gap={0} mt={-2}>
 			{filteredPairs.map((pair, index) => (

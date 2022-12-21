@@ -5,6 +5,7 @@ import { StepsStyleConfig as Steps } from 'chakra-ui-steps';
 const fonts = { mono: `'Menlo', monospace` }
 
 const breakpoints = createBreakpoints({
+  xs: '100px',
   sm: '425px',
   md: '1100px',
   lg: '1440px',

@@ -60,6 +60,7 @@ import Big from "big.js";
 import { ChainID } from "../../../utils/chains";
 import axios from "axios";
 import { MinusIcon } from "@chakra-ui/icons";
+import { LeverDataContext } from "../../../context/LeverDataProvider";
 
 export default function LendModal({ market, token }) {
 	const { isOpen, onOpen, onClose } = useDisclosure();
@@ -73,13 +74,15 @@ export default function LendModal({ market, token }) {
 	const [confirmed, setConfirmed] = React.useState(false);
 
 	const { chain, explorer } = useContext(DataContext);
+	const { updateBorrowBalance, updateWalletBalance } = useContext(LeverDataContext);
+
 	const { isConnected: isEvmConnected, address: EvmAddress } = useAccount();
 
 	const updateSliderValue = (value: number) => {
 		setSliderValue(value);
 		setInputAmount(
 			(
-				(value * (market?.borrowBalance / 10 ** token?.decimals)) /
+				(value * Math.min(market?.borrowBalance / 10 ** token?.decimals, market?.balance / 10 ** token?.decimals)) /
 				100
 			).toString()
 		);
@@ -99,7 +102,7 @@ export default function LendModal({ market, token }) {
 		return Number(inputAmount) > market?.borrowBalance / 10 ** token?.decimals;
 	};
 
-	const deposit = async () => {
+	const repay = async () => {
 		setLoading(true);
 		setConfirmed(false);
 		setHash(null);
@@ -118,6 +121,8 @@ export default function LendModal({ market, token }) {
 					await res.wait(1);
 					setConfirmed(true);
 					setResponse("Transaction Successful!");
+					updateWalletBalance(market?.id, amount.neg().toString());
+					updateBorrowBalance(market?.id, amount.neg().toString());
 				}
 			})
 			.catch((err: any) => {
@@ -303,7 +308,7 @@ export default function LendModal({ market, token }) {
 									disabled={amountExceedsBalance() || loading}
 									isLoading={loading}
 									loadingText="Sign the transaction in your wallet"
-									onClick={deposit}
+									onClick={repay}
 								>
 									{amountExceedsBalance()
 										? "Insufficient Balance"

@@ -21,7 +21,7 @@ const imageIds = {
 };
 
 export default function lend() {
-	const { markets, availableToBorrow, totalBorrowBalance, totalCollateralBalance } = React.useContext(LeverDataContext);
+	const { markets, availableToBorrow, totalBorrowBalance, totalCollateralBalance, adjustedDebt } = React.useContext(LeverDataContext);
 	const { chain } = React.useContext(DataContext);
 	const {address, isConnected} = useAccount();
 	const [claimLoading, setClaimLoading] = React.useState(false);
@@ -77,7 +77,7 @@ export default function lend() {
 		let apr = 0;
 		let totalCollateral = 0;
 		for(let i in markets){
-			let collateral = markets[i].inputToken.lastPriceUSD * markets[i].collateralBalance;
+			let collateral = markets[i].inputToken.lastPriceUSD * markets[i].collateralBalance / 1e18;
 			apr += (parseFloat(markets[i].rates[1].rate) + parseFloat(markets[i].rewardsAPR[1])) * collateral;
 			totalCollateral += collateral;
 		}
@@ -86,12 +86,12 @@ export default function lend() {
 	
 	return (
 		<>
-			<Box py={10} mt={1} bgColor={"background2"}>
+			{/* <Box py={10} mt={1} bgColor={"background2"}>
 				<Heading mx={4}>Lend your assets</Heading>
 				<Text mt={2} mx={4}>
 					Earn with high APR % 💰
 				</Text>
-			</Box>
+			</Box> */}
 
 			<Flex flexDir={"column"}>
 				<Box width={"100%"}>
@@ -101,7 +101,7 @@ export default function lend() {
 						>
 							<Text fontSize={"md"}>My Balance</Text>
 							<Text mt={1} fontSize="2xl" fontWeight={"bold"}>
-								{isConnected ? dollarFormatter(null).format(
+								{totalCollateralBalance ? dollarFormatter(null).format(
 									parseFloat(totalCollateralBalance)
 								) : '-'}
 							</Text>
@@ -114,7 +114,7 @@ export default function lend() {
 							<Flex gap={5} align='flex-end'>
 
 							<Text mt={1} fontSize="2xl" fontWeight={"bold"}>
-								{isConnected ? tokenFormatter(null).format(
+								{zexeAccrued ? tokenFormatter(null).format(
 									zexeAccrued / 10 ** 18
 									) : '-'} ZEXE
 							</Text>
@@ -127,7 +127,7 @@ export default function lend() {
 						>
 							<Text fontSize={"md"}>Earning APR (%)</Text>
 							<Text mt={1} fontSize="2xl" fontWeight={"bold"}>
-								{isConnected ? tokenFormatter(null).format(
+								{yieldAPR() ? tokenFormatter(null).format(
 									yieldAPR()
 								) : '-'} %
 							</Text>
@@ -143,7 +143,7 @@ export default function lend() {
 						>
 							<Text fontSize={"md"}>Borrow Balance</Text>
 							<Text mt={1} fontSize="2xl" fontWeight={"bold"}>
-								{isConnected ? dollarFormatter(null).format(
+								{totalBorrowBalance ? dollarFormatter(null).format(
 									parseFloat(totalBorrowBalance)
 								) : '-'}
 							</Text>
@@ -152,11 +152,14 @@ export default function lend() {
 						<Box
 						    {...boxStyle}
 						>
-							<Text fontSize={"md"}>Available to borrow</Text>
+							<Text fontSize={"md"}>Health</Text>
 							<Text mt={1} fontSize="2xl" fontWeight={"bold"}>
-								{isConnected ? dollarFormatter(null).format(
-									parseFloat(availableToBorrow)
+								{totalCollateralBalance ? tokenFormatter(null).format(
+									parseFloat(totalCollateralBalance) / parseFloat(adjustedDebt)
 								) : '-'}
+							</Text>
+							<Text mt={1} fontSize="sm" color={'gray'}>
+								Min 1.00
 							</Text>
 						</Box>
 
@@ -165,7 +168,7 @@ export default function lend() {
 						>
 							<Text fontSize={"md"}>Interest APR (%)</Text>
 							<Text mt={1} fontSize="2xl" fontWeight={"bold"}>
-								{isConnected ? tokenFormatter(null).format(
+								{interestAPR() ? tokenFormatter(null).format(
 									interestAPR()
 								) : '-'} %
 							</Text>

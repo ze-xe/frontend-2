@@ -47,20 +47,12 @@ import multicall from "../abis/Multicall2.json";
 function LeverDataProvider({ children }: any) {
 	const [isDataReady, setIsDataReady] = React.useState(false);
 	const [isFetchingData, setIsFetchingData] = React.useState(false);
-	const [dataFetchError, setDataFetchError] = React.useState<string | null>(
-		null
-	);
+	const [dataFetchError, setDataFetchError] = React.useState<string | null>(null);
 	const [markets, setMarkets] = React.useState<any[]>([]);
 	const [totalCollateralBalance, setTotalCollateralBalance] = React.useState('0')
 	const [totalBorrowBalance, setTotalBorrowBalance] = React.useState('0')
 	const [availableToBorrow, setAvailableToBorrow] = React.useState('0')
-
-	React.useEffect(() => {
-		// fetch data if not fetched yet / is not fetching
-		// if (!isDataReady && !isFetchingData) {
-		//     fetchData();
-		// }
-	}, []);
+	const [adjustedDebt, setAdjustedDebt] = React.useState('0')
 
 	const getWalletBalances = async (
 		address: string,
@@ -106,34 +98,67 @@ function LeverDataProvider({ children }: any) {
 			let _totalCollateralBalance = Big(0);
 			let _totalBorrowBalance = Big(0);
 			let _availableToBorrow = Big(0);
+			let _adjustedDebt = Big(0);
 
 			for (let i = 0; i < res[1].length; i += 4) {
 				_markets[i / 4].balance = BigNumber.from(res[1][i]).toString();
 				_markets[i / 4].allowance = BigNumber.from(res[1][i + 1]).toString();
 				_markets[i / 4].collateralBalance = Big(BigNumber.from(res[1][i + 2]).toString())
 					.mul(_markets[i / 4]?.exchangeRate * 10 ** 10)
-					.div(1e18)
 					.toString();
 				_markets[i / 4].borrowBalance = BigNumber.from(res[1][i + 3]).toString();
 				_markets[i / 4].rewardsAPR = [((100 * (_markets[i / 4].rewardTokenEmissionsUSD[0] * 365)) / _markets[i / 4].totalDepositBalanceUSD), ((100 * (_markets[i / 4].rewardTokenEmissionsUSD[1] * 365)) / _markets[i / 4].totalDepositBalanceUSD)];
 
 				_totalCollateralBalance = _totalCollateralBalance.add(
-					Big(_markets[i / 4].collateralBalance).mul(_markets[i / 4].inputTokenPriceUSD)
+					Big(_markets[i / 4].collateralBalance).mul(_markets[i / 4].inputTokenPriceUSD).div(1e18)
 				);
 				_totalBorrowBalance = _totalBorrowBalance.add(
 					Big(_markets[i / 4].borrowBalance).mul(_markets[i / 4].inputTokenPriceUSD).div(1e18)
 				);
-
 				_availableToBorrow = _availableToBorrow.add(
-					Big(_markets[i / 4].collateralBalance).mul(_markets[i / 4].inputTokenPriceUSD).mul(_markets[i / 4].maximumLTV).div(100)
+					Big(_markets[i / 4].collateralBalance).mul(_markets[i / 4].inputTokenPriceUSD).mul(_markets[i / 4].maximumLTV).div(100).div(1e18)
+				);
+				_adjustedDebt = _adjustedDebt.add(
+					Big(_markets[i / 4].borrowBalance).mul(_markets[i / 4].inputTokenPriceUSD).div(1e18).div(_markets[i / 4].maximumLTV).mul(100)
 				);
 			}
 			setTotalCollateralBalance(_totalCollateralBalance.toString());
 			setTotalBorrowBalance(_totalBorrowBalance.toString());
 			setAvailableToBorrow(_availableToBorrow.sub(_totalBorrowBalance).toString());
+			setAdjustedDebt(_adjustedDebt.toString());
 			setMarkets(_markets);
 		});
 	};
+
+	const updateBorrowBalance = (token: string, amount: string) => {
+		let _markets = [...markets];
+		for(let i in _markets) {
+			if(_markets[i].id === token) {
+				_markets[i].borrowBalance = Big(_markets[i].borrowBalance).add(amount).toString()
+			}
+		}
+		setMarkets(_markets);
+	}
+
+	const updateCollateralBalance = (token: string, amount: string) => {
+		let _markets = [...markets];
+		for(let i in _markets) {
+			if(_markets[i].id === token) {
+				_markets[i].collateralBalance = Big(_markets[i].collateralBalance).add(amount).toString()
+			}
+		}
+		setMarkets(_markets);
+	}
+
+	const updateWalletBalance = async (token: string, amount: string) => {
+		let _markets = [...markets];
+		for(let i in _markets) {
+			if(_markets[i].id === token) {
+				_markets[i].balance = Big(_markets[i].balance).add(amount).toString()
+			}
+		}
+		setMarkets(_markets);
+	}
 
 	const incrementAllowance = async (marketId: any, amount: string) => {
 		console.log('incrementing', marketId, amount)
@@ -202,7 +227,11 @@ function LeverDataProvider({ children }: any) {
 		totalCollateralBalance,
 		totalBorrowBalance,
 		availableToBorrow,
-		incrementAllowance
+		incrementAllowance,
+		adjustedDebt,
+		updateBorrowBalance,
+		updateCollateralBalance,
+		updateWalletBalance
 	};
 
 	return (
@@ -222,6 +251,10 @@ interface DataValue {
 	totalBorrowBalance: string;
 	availableToBorrow: string;
 	incrementAllowance: (market: any, amount: string) => void;
+	adjustedDebt: string;
+	updateBorrowBalance: (token: string, amount: string) => void;
+	updateCollateralBalance: (token: string, amount: string) => void;
+	updateWalletBalance: (token: string, amount: string) => void;
 }
 
 export { LeverDataProvider, LeverDataContext };

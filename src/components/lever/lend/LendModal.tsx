@@ -67,7 +67,7 @@ export default function LendModal({ market, token }) {
 	const [confirmed, setConfirmed] = React.useState(false);
 
 	const { chain, explorer } = useContext(DataContext);
-	const { incrementAllowance } = useContext(LeverDataContext);
+	const { incrementAllowance, updateCollateralBalance, updateWalletBalance } = useContext(LeverDataContext);
 
 	const { isConnected: isEvmConnected, address: EvmAddress } = useAccount();
 
@@ -116,6 +116,8 @@ export default function LendModal({ market, token }) {
 					await res.wait(1);
 					setConfirmed(true);
 					setResponse("Transaction Successful!");
+					updateWalletBalance(market?.id, amount.neg().toString());
+					updateCollateralBalance(market?.id, amount.toString());
 				}
 			})
 			.catch((err: any) => {
