@@ -28,7 +28,7 @@ export const ADDRESSES = {
 export const Endpoints = {
 	[ChainID.NILE]: 'https://api.zexe.io/',
 	[ChainID.AURORA]: 'https://aurora.api.zexe.io/',
-	[ChainID.ARB_GOERLI]: 'http://65.20.81.124:8090/',
+	[ChainID.ARB_GOERLI]: 'https://api.zexe.io/',
 };
 
 // list of tokens

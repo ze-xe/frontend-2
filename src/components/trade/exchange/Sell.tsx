@@ -22,7 +22,7 @@ import { useEffect } from "react";
 import axios from "axios";
 import { tokenFormatter } from "../../../utils/formatters";
 import { AppDataContext } from "../../../context/AppData";
-import BuySellModal from "./BuySellModal2";
+import BuySellModal from "./BuySellModal";
 
 const Big = require("big.js");
 

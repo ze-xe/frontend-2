@@ -10,6 +10,7 @@ import PlacedOrders from '../../components/trade/user_orders';
 import { useEffect, useState } from 'react';
 import Exchange from '../../components/trade/exchange';
 import Head from 'next/head';
+import { useAccount } from 'wagmi';
 
 const Trade = () => {
 	const { pairs } = useContext(DataContext);
@@ -17,6 +18,7 @@ const Trade = () => {
 	const router = useRouter();
 	const { pairId } = router.query; 
 	const [pair, setPair] = useState(null);
+	const {isConnected} = useAccount();
 
 	// pairId = USD_ETH
 
@@ -71,9 +73,9 @@ const Trade = () => {
 					</Flex>
 				</Flex>
 				
-				<Box bgColor={'background2'} my={1} width="100%">
+				{isConnected && <Box bgColor={'background2'} my={1} width="100%">
 					<PlacedOrders pair={pair} />
-				</Box>
+				</Box>}
 				
 			</Box>
 		</>

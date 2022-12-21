@@ -122,7 +122,7 @@ const Index = () => {
 							<GiCardExchange {...featuresIcon} />
 							<Text {...featuresTitle}>Option Calls</Text>
 							<Text {...featuresText}>
-								Take advantage of up/down swings in the market
+							CALL and PUT options to achieve risk management
 							</Text>
 						</Box>
 

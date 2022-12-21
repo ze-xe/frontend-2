@@ -24,6 +24,7 @@ import LendModal from "./LendModal";
 import BorrowModal from "./WithdrawModal";
 import { DataContext } from "../../../context/DataProvider";
 import useEffect from "react";
+import { useAccount } from "wagmi";
 
 const imageIds = {
 	ETH: "1027",
@@ -35,6 +36,7 @@ const imageIds = {
 export default function LendingTable() {
 	const { markets } = React.useContext(LeverDataContext);
 	const { tokens } = React.useContext(DataContext);
+	const { isConnected } = useAccount()
 
 	const token = (tokenId: string) => {
 		return tokens.find(
@@ -125,22 +127,22 @@ export default function LendingTable() {
 
 											<Td borderColor={"whiteAlpha.200"}>
 												<Text>
-													{tokenFormatter(
+													{isConnected ? tokenFormatter(
 														null
 													).format(
 														market.collateralBalance
-													)}{" "}
+													) : '-'}{" "}
 													{market.inputToken.symbol}
 												</Text>
 
 												<Text fontSize={"xs"} mt={1}>
-													{dollarFormatter(
+													{isConnected ? dollarFormatter(
 														null
 													).format(
 														market.collateralBalance *
 															market.inputToken
 																.lastPriceUSD
-													)}
+													) : '-'}
 												</Text>
 											</Td>
 

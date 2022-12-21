@@ -146,7 +146,7 @@ function LeverDataProvider({ children }: any) {
 		setMarkets(_markets);
 	}
 
-	const fetchData = async (address: string, chain: ChainID) => {
+	const fetchData = async (address: string|null, chain: ChainID) => {
 		setIsFetchingData(true);
 		setDataFetchError(null);
 		try {
@@ -185,7 +185,7 @@ function LeverDataProvider({ children }: any) {
 					return;
 				}
 				setMarkets(res[0].data.data.markets);
-				getWalletBalances(address, res[0].data.data.markets, chain);
+				if(address) getWalletBalances(address, res[0].data.data.markets, chain);
 			});
 		} catch (error) {
 			setDataFetchError(error.message);

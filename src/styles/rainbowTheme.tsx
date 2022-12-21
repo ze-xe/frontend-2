@@ -65,11 +65,11 @@ var accentColors = {
   blue: { accentColor: "#3898FF", accentColorForeground: "#FFF" },
   green: { accentColor: "#4BD166", accentColorForeground: darkGrey },
   orange: { accentColor: "#FF983D", accentColorForeground: darkGrey },
-  pink: { accentColor: "#FF7AB8", accentColorForeground: darkGrey },
+  pink: { accentColor: "#BC0BA1", accentColorForeground: '#FFF' },
   purple: { accentColor: "#7A70FF", accentColorForeground: "#FFF" },
   red: { accentColor: "#FF6257", accentColorForeground: "#FFF" }
 };
-var defaultAccentColor = accentColors.blue;
+var defaultAccentColor = accentColors.pink;
 
 var rainbowTheme = ({
     accentColor = defaultAccentColor.accentColor,
