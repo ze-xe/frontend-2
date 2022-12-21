@@ -27,6 +27,7 @@ import { GiBank, GiCardExchange } from "react-icons/gi";
 import { useContext } from 'react';
 import { LeverDataContext } from "../context/LeverDataProvider";
 import { dollarFormatter } from '../utils/formatters';
+import { AiOutlineInfoCircle } from "react-icons/ai";
 
 const featuresTitle = {
 	fontSize: "xl",
@@ -56,7 +57,7 @@ const Index = () => {
 				bgColor={"#09001F"}
 				height="100vh"
 				// justify={'center'}
-				pt={"7%"}
+				pt={"6%"}
 				// bgImage="/round.png"
 				// bgRepeat={"no-repeat"}
 				// bgPosition={{ sm: "70vw 40vh", md: "70vw -160px" }}
@@ -85,17 +86,11 @@ const Index = () => {
 
 					<Flex flexDir={"column"} justify={"center"} mb={20} mr={10}>
 						<Text fontSize={"xl"} fontWeight='bold'>
-							Orderbook DEX with onchain spot and derivatives
-							market
+							Orderbook DEX with Spot and Derivatives' Markets
 						</Text>
-						{/* <Text
-							fontSize={'lg'}
-							>
-							Transparent. Secure. Better
-						</Text> */}
 					</Flex>
 
-					<Flex wrap={"wrap"}>
+					<Flex wrap={"wrap"} my={-5}>
 						<Box w={"200px"} my={5}>
 							<BsCurrencyExchange {...featuresIcon} />
 							<Text {...featuresTitle}>Spot Trading</Text>
@@ -153,7 +148,8 @@ const Index = () => {
 						</Box>
 					</Flex>
 
-					<Flex gap={2} mt={20} >
+					
+					<Flex gap={2}  mt={20}>
 						<Link href={"/trade"}>
 							<Button size={"lg"} bgColor="white" color={"black"} _hover={{bgColor: 'gray'}}>
 								Trade Now
@@ -171,7 +167,9 @@ const Index = () => {
 						</Link>
 					</Flex>
 
-					<Flex flexDir={{sm: 'column', md: 'row'}} gap={10} mt={20}>
+					<Divider my={10}/>
+
+					<Flex flexDir={{sm: 'column', md: 'row'}} gap={10}>
 						<Box>
 							<Text color={'gray'}>Margin provided</Text>
 							<Text fontSize={'2xl'} mt={2} fontWeight='bold'>{dollarFormatter(null).format(protocolData.totalDepositBalanceUSD)}</Text>
@@ -181,6 +179,10 @@ const Index = () => {
 							<Text color={'gray'}>Leverage used</Text>
 							<Text fontSize={'2xl'} mt={2} fontWeight='bold'>{dollarFormatter(null).format(protocolData.totalBorrowBalanceUSD)}</Text>
 						</Box>
+					</Flex>
+					<Flex align={'center'} gap={1} color='gray' mt={3}>
+					<AiOutlineInfoCircle/> 
+					<Text fontSize={'sm'}>Testnet figures</Text>
 					</Flex>
 
 					
