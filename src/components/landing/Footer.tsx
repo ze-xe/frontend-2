@@ -29,13 +29,12 @@ export const Footer = () => (
 <Divider mx={5} orientation='vertical' />
 
 <Text
-  my={1}
   fontSize="sm"
   color={"gray.400"}
 >
   Join the revolution
 </Text>
-<Flex gap={5} my={2} flexDir={{xs: 'column', sm: 'column', md: 'row'}}>
+<Flex gap={5} my={5} mx={5} flexDir={{xs: 'column', sm: 'column', md: 'row'}}>
   <ChakraLink
     isExternal
     href="https://github.com/ze-xe"

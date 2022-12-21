@@ -38,6 +38,7 @@ import Link from 'next/link';
 import Head from 'next/head';
 import { useAccount } from 'wagmi';
 import { ChainID } from '../utils/chains';
+import { tokenFormatter } from '../utils/formatters';
 
 function RadioCard(props) {
 	const { getInputProps, getCheckboxProps } = useRadio(props);
@@ -219,7 +220,7 @@ export default function faucets() {
 
 									<Text fontSize={'sm'} my={2} mt={4}>
 										Balance{' '}
-										{token.balance / 10 ** token.decimals}
+										{tokenFormatter(null).format(token.balance / 10 ** token.decimals)}
 									</Text>
 								</Box>
 							</RadioCard>

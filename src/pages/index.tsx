@@ -24,6 +24,9 @@ import {
 } from "react-icons/bs";
 import { RiExchangeFundsFill } from "react-icons/ri";
 import { GiBank, GiCardExchange } from "react-icons/gi";
+import { useContext } from 'react';
+import { LeverDataContext } from "../context/LeverDataProvider";
+import { dollarFormatter } from '../utils/formatters';
 
 const featuresTitle = {
 	fontSize: "xl",
@@ -40,6 +43,7 @@ const featuresIcon = {
 };
 
 const Index = () => {
+	const {protocolData} = useContext(LeverDataContext)
 	return (
 		<>
 			<Head>
@@ -52,13 +56,13 @@ const Index = () => {
 				bgColor={"#09001F"}
 				height="100vh"
 				// justify={'center'}
-				pt={"10%"}
-				bgImage="/round.png"
-				bgRepeat={"no-repeat"}
-				bgPosition={{ sm: "70vw 40vh", md: "70vw -160px" }}
-				bgSize={{ xs: '0', sm: "600px", md: "contain" }}
+				pt={"7%"}
+				// bgImage="/round.png"
+				// bgRepeat={"no-repeat"}
+				// bgPosition={{ sm: "70vw 40vh", md: "70vw -160px" }}
+				// bgSize={{ xs: '0', sm: "600px", md: "contain" }}
 			>
-				<Box maxW={"1200px"} ml={"10%"}>
+				<Box maxW={"1200px"} ml={"10%"} pb={{xs: '200', sm: '200', md: '0'}}>
 					<Box
 						style={{
 							backgroundColor: "#F60DC9",
@@ -78,6 +82,7 @@ const Index = () => {
 							zexe
 						</Text>
 					</Box>
+
 					<Flex flexDir={"column"} justify={"center"} mb={20} mr={10}>
 						<Text fontSize={"xl"} fontWeight='bold'>
 							Orderbook DEX with onchain spot and derivatives
@@ -148,7 +153,7 @@ const Index = () => {
 						</Box>
 					</Flex>
 
-					<Flex gap={2} mt={20} mb={{xs: '200', sm: '200', md: '0'}}>
+					<Flex gap={2} mt={20} >
 						<Link href={"/trade"}>
 							<Button size={"lg"} bgColor="white" color={"black"} _hover={{bgColor: 'gray'}}>
 								Trade Now
@@ -164,6 +169,18 @@ const Index = () => {
 								Learn More
 							</Button>
 						</Link>
+					</Flex>
+
+					<Flex flexDir={{sm: 'column', md: 'row'}} gap={10} mt={20}>
+						<Box>
+							<Text color={'gray'}>Margin provided</Text>
+							<Text fontSize={'2xl'} mt={2} fontWeight='bold'>{dollarFormatter(null).format(protocolData.totalDepositBalanceUSD)}</Text>
+						</Box>
+
+						<Box>
+							<Text color={'gray'}>Leverage used</Text>
+							<Text fontSize={'2xl'} mt={2} fontWeight='bold'>{dollarFormatter(null).format(protocolData.totalBorrowBalanceUSD)}</Text>
+						</Box>
 					</Flex>
 
 					

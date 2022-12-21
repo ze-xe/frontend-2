@@ -52,7 +52,8 @@ function LeverDataProvider({ children }: any) {
 	const [totalCollateralBalance, setTotalCollateralBalance] = React.useState('0')
 	const [totalBorrowBalance, setTotalBorrowBalance] = React.useState('0')
 	const [availableToBorrow, setAvailableToBorrow] = React.useState('0')
-	const [adjustedDebt, setAdjustedDebt] = React.useState('0')
+	const [adjustedDebt, setAdjustedDebt] = React.useState('0');
+	const [protocolData, setProtocolData] = React.useState<any>({});
 
 	const getWalletBalances = async (
 		address: string,
@@ -181,26 +182,30 @@ function LeverDataProvider({ children }: any) {
 					"https://api.thegraph.com/subgraphs/name/ze-xe/lever",
 					{
 						query: `{
-					markets{
-						id
-						inputToken{
-							id
-							name
-							symbol
-							decimals
-							lastPriceUSD
-						}
-						rates {
-							rate
-						}
-						exchangeRate
-						inputTokenPriceUSD
-						totalDepositBalanceUSD
-						totalBorrowBalanceUSD
-						maximumLTV
-						rewardTokenEmissionsUSD
-					}
-				}`,
+									lendingProtocols{
+										totalDepositBalanceUSD
+										totalBorrowBalanceUSD
+									}
+									markets{
+										id
+										inputToken{
+											id
+											name
+											symbol
+											decimals
+											lastPriceUSD
+										}
+										rates {
+											rate
+										}
+										exchangeRate
+										inputTokenPriceUSD
+										totalDepositBalanceUSD
+										totalBorrowBalanceUSD
+										maximumLTV
+										rewardTokenEmissionsUSD
+									}
+								}`,
 					}
 				),
 			];
@@ -210,6 +215,7 @@ function LeverDataProvider({ children }: any) {
 					return;
 				}
 				setMarkets(res[0].data.data.markets);
+				setProtocolData(res[0].data.data.lendingProtocols[0]);
 				if(address) getWalletBalances(address, res[0].data.data.markets, chain);
 			});
 		} catch (error) {
@@ -231,7 +237,8 @@ function LeverDataProvider({ children }: any) {
 		adjustedDebt,
 		updateBorrowBalance,
 		updateCollateralBalance,
-		updateWalletBalance
+		updateWalletBalance,
+		protocolData
 	};
 
 	return (
@@ -255,6 +262,7 @@ interface DataValue {
 	updateBorrowBalance: (token: string, amount: string) => void;
 	updateCollateralBalance: (token: string, amount: string) => void;
 	updateWalletBalance: (token: string, amount: string) => void;
+	protocolData: any;
 }
 
 export { LeverDataProvider, LeverDataContext };

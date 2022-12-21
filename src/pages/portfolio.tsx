@@ -27,16 +27,42 @@ import {
 import { dollarFormatter, tokenFormatter } from "../utils/formatters";
 import Head from "next/head";
 import Image from "next/image";
-import { useAccount } from "wagmi";
+import { useAccount, useEnsAvatar } from "wagmi";
+import {useEffect} from 'react';
+import Big from "big.js";
 
 export default function portfolio() {
-	const { address, isConnected } = useAccount();
+	const { address: _address, isConnected: _isConnected } = useAccount();
+	const [address, setAddress] = React.useState(null);
+	const [isConnected, setIsConnected] = React.useState(false);
+
 
 	const { tokens } = useContext(DataContext);
 	const [balance, setBalance] = React.useState(0);
 	const [tradingBalancesUSD, setTradingBalancesUSD] = React.useState([]);
-	const [totalTradingBalanceUSD, setTotalTradingBalanceUSD] =
-		React.useState(0);
+	const [totalBalance, setTotalBalance] = React.useState(null);
+
+	useEffect(() => {
+		setAddress(_address);
+		setIsConnected(_isConnected);
+		if(tokens.length > 0 && !totalBalance){
+			let total = Big(0);
+			const _tokens = [...tokens]
+			for (let i = 0; i < _tokens.length; i++) {
+				if(_tokens[i].balance) {
+					let amount = Big(_tokens[i].balance).sub(_tokens[i].inOrderBalance).mul(_tokens[i].price ?? 0).div(10**_tokens[i].decimals);
+					total = total.add(amount);
+				} else {
+					return
+				}
+			}
+			setTotalBalance(total.toString());
+		}
+	})
+
+	const { data, error, isError, isLoading } = useEnsAvatar({
+		address: _address
+	})
 
 	return (
 		<>
@@ -73,16 +99,12 @@ export default function portfolio() {
 								<StatLabel>Balance</StatLabel>
 								<StatNumber>
 									{dollarFormatter(null).format(
-										0 // totalTradingBalanceUSD
+										totalBalance
 									)}
 								</StatNumber>
 								<StatHelpText></StatHelpText>
 							</Stat>
 						</Box>
-						{/* <Box textAlign={'right'}>
-						<Text ml={4} fontSize="sm" color={'gray.400'}></Text>
-						<Text ml={4} fontSize="xl" fontWeight={'bold'} ></Text>
-					</Box> */}
 					</Flex>
 
 					<Box bgColor={"background2"} mt={2}>
@@ -170,18 +192,16 @@ export default function portfolio() {
 														"whiteAlpha.200"
 													}
 												>
-													<Progress
+													{token.price && <Progress
 														value={
-															(100 *
-																tradingBalancesUSD[
-																	index
-																]) /
-															totalTradingBalanceUSD
+															(100 * token.balance * token.price / (10**token.decimals)) /
+															totalBalance
 														}
-														height="2"
+														height="1"
 														width={40}
 														colorScheme="gray"
-													/>
+														rounded={10}
+													/>}
 												</Td>
 												<Td
 													borderColor={
@@ -190,12 +210,31 @@ export default function portfolio() {
 													textAlign={"right"}
 													isNumeric
 												>
+													<Link href={"/trade"}>
+														<Button
+
+															size={"sm"}
+															variant="outline"
+														>
+															Trade
+														</Button>
+													</Link>
+													<Link href={"/lend"}>
+														<Button
+
+															size={"sm"}
+															variant="outline"
+														>
+															Lend/Borrow
+														</Button>
+													</Link>
 													<Link href={"/faucet"}>
 														<Button
+
 															size={"sm"}
-															variant="ghost"
+															variant="outline"
 														>
-															💰 Faucet
+															Faucet
 														</Button>
 													</Link>
 												</Td>
