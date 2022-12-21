@@ -44,7 +44,7 @@ import { useAccount, useConnect, chain, Chain } from 'wagmi';
 import { ChainID, chainIndex, chains } from '../utils/chains';
 import { LeverDataContext } from '../context/LeverDataProvider';
 
-export const Header = ({ title }: { title: string }) => {
+export const Header = () => {
 	const router = useRouter();
 	const { isOpen, onToggle } = useDisclosure();
 
@@ -52,7 +52,7 @@ export const Header = ({ title }: { title: string }) => {
 	const [init, setInit] = useState(false);
 	const { fetchData: fetchLeverData } = useContext(LeverDataContext);
 
-	const {address: evmAddress, isConnected: isEvmConnected, isConnecting: isEvmConnecting} = useAccount({
+	const {address, isConnected, isConnecting} = useAccount({
 		onConnect({ address, connector, isReconnected }) {
 			console.log('Connected', address)
 			fetchData(address, connector.chains[0].id);
@@ -66,11 +66,12 @@ export const Header = ({ title }: { title: string }) => {
 		if (localStorage.getItem('chakra-ui-color-mode') === 'light') {
 			localStorage.setItem('chakra-ui-color-mode', 'dark');
 		}
-		if(!isEvmConnected && !isEvmConnecting) {
+		if(!isConnected && !isConnecting) {
 			fetchData(null, ChainID.ARB_GOERLI);
 			fetchLeverData(null, ChainID.ARB_GOERLI);
 		}
-	});
+	}, [isConnected, isConnecting]);
+
 	if (router.pathname === '/') {
 		return <></>;
 	}
@@ -78,7 +79,7 @@ export const Header = ({ title }: { title: string }) => {
 		<>
 			<Flex
 				justifyContent="space-between"
-				align="center"
+				align="center" 
 				// bgClip="text"
 				bgColor={'background2'}
 				// color={"white"}
@@ -129,7 +130,7 @@ export const Header = ({ title }: { title: string }) => {
 						justify={'flex-end'}
 						gap={4} 
 						>
-						{isEvmConnected && <Box>
+						{isConnected && <Box>
 							<Link href={'/portfolio'}>
 								<Button variant={'unstyled'} fontSize="sm">
 									Portfolio
@@ -143,7 +144,7 @@ export const Header = ({ title }: { title: string }) => {
 				</Stack>
 			</Flex>
 			<Collapse in={isOpen} animateOpacity>
-				<MobileNav />
+				<MobileNav isConnected={isConnected} />
 			</Collapse>
 		</>
 	);
@@ -190,8 +191,7 @@ const DesktopNav = () => {
 	);
 };
 
-const MobileNav = () => {
-	const {address, isConnected, isConnecting} = useAccount()
+const MobileNav = ({isConnected}) => {
 	return (
 		<Stack
 			bg='background1'

@@ -58,7 +58,7 @@ export default function PlacedOrders({ pair }) {
 
 	return (
 		<Box bgColor="background2">
-			{placedOrders[pair?.id] && <>{placedOrders[pair?.id].length > 0 ? 
+			{placedOrders[pair?.id]?.length > 0 ? 
 			<>
 			<TableContainer>
 				<Table size="sm" borderColor={'gray.800'}>
@@ -187,7 +187,7 @@ export default function PlacedOrders({ pair }) {
 			: <Box mx={4}>
 				<Text color={'gray'}>No active orders</Text>
 			</Box>
-			} </>}
+			}
 		</Box>
 	);
 }

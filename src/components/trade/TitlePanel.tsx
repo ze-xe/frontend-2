@@ -34,7 +34,7 @@ export default function TitlePanel({ pair }) {
 					</Text>
 				</Box>
 			</Flex>
-			<Box textAlign={'right'} color={pair?.priceDiff < 0 ? 'red2' : 'green2'}>
+			<Box textAlign={'right'} color={pairStats[pair?.id]?.[0].changeInER < 0 ? 'red2' : 'green2'}>
 				{/* <Text fontSize={'xs'} textTransform='uppercase'>Price</Text> */}
 				<Text fontSize={'3xl'} fontWeight='bold'>{tokenFormatter(pair?.exchangeRateDecimals).format(pair?.exchangeRate / (10**18))} </Text>
 				<Text fontSize={'sm'} mt={-1}>{tokenFormatter(null).format(pairStats[pair?.id]?.[0].changeInER)}%</Text>

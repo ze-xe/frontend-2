@@ -16,7 +16,7 @@ import theme from "../styles/theme";
 import { AppProps } from "next/app";
 import { DataProvider } from "../context/DataProvider";
 import { AppDataProvider } from "../context/AppData";
-import { Header } from "../components/Header";
+// import { Header } from "../components/Header";
 import { LeverDataProvider } from "../context/LeverDataProvider";
 import rainbowTheme from "../styles/rainbowTheme";
 
@@ -42,6 +42,15 @@ const wagmiClient = createClient({
 	provider,
 });
 
+import dynamic from 'next/dynamic';
+
+
+const Header = dynamic(
+	() =>
+		import('../components/Header').then(mod => mod.Header),
+	{ ssr: false },
+);
+
 function MyApp({ Component, pageProps }: AppProps) {
 	return (
 		<WagmiConfig client={wagmiClient}>
@@ -50,12 +59,12 @@ function MyApp({ Component, pageProps }: AppProps) {
 					<DataProvider>
 						<LeverDataProvider>
 							<AppDataProvider>
-								<Header />
+								<Header title={""} />
 								<Component {...pageProps} />
 							</AppDataProvider>
 						</LeverDataProvider>
 					</DataProvider>
-				</ChakraProvider>
+				</ChakraProvider> 
 			</RainbowKitProvider>
 		</WagmiConfig>
 	);

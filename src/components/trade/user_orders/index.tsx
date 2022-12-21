@@ -2,8 +2,9 @@ import React from "react";
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react";
 import PlacedOrders from "./PlacedOrders";
 import ExecutedOrders from "./ExecutedOrders";
+import { useAccount } from "wagmi";
 
-export default function index({ pair }) {
+export default function UserOrders({ pair }) {
 	return (
 		<>
 			<Tabs colorScheme={"gray"} size="sm">
@@ -20,9 +21,6 @@ export default function index({ pair }) {
 					<TabPanel mx={-4}>
 						<ExecutedOrders pair={pair} />
 					</TabPanel>
-					{/* <TabPanel mx={-4}>
-						<CancelledOrders pair={pair} />
-					</TabPanel> */}
 				</TabPanels>
 			</Tabs>
 		</>

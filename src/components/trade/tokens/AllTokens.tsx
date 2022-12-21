@@ -12,6 +12,8 @@ export default function AllTokens({search}) {
 		return pair?.tokens[0].symbol.toLowerCase().includes(search.toLowerCase()) || pair?.tokens[1].symbol.toLowerCase().includes(search.toLowerCase()) || pair?.tokens[0].name.toLowerCase().includes(search.toLowerCase()) || pair?.tokens[1].name.toLowerCase().includes(search.toLowerCase());
 	})
 
+	console.log(pairStats)
+
 	return (
 		<Flex flexDir={'column'} gap={0} mt={-2}>
 			{filteredPairs.map((pair, index) => (
@@ -48,7 +50,7 @@ export default function AllTokens({search}) {
 								</Text>
 							</Box>
 						</Flex>
-						<Box textAlign={'right'} color={Number(pairStats[pair.id]?.[1].changeInER) >= 0 ? 'green2' : 'red2'}>
+						<Box textAlign={'right'} color={Number(pairStats[pair?.id]?.[0].changeInER) >= 0 ? 'green2' : 'red2'}>
 							<Text fontWeight={'bold'} color='gray.200'>
 								{tokenFormatter(pair.exchangeRateDecimals).format(pair.exchangeRate /
 									10 ** 18)}

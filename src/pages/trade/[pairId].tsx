@@ -6,11 +6,12 @@ import TitlePanel from '../../components/trade/TitlePanel';
 import { useContext } from 'react';
 import { DataContext } from '../../context/DataProvider';
 import { useRouter } from 'next/router';
-import PlacedOrders from '../../components/trade/user_orders';
+import UserOrders from '../../components/trade/user_orders';
 import { useEffect, useState } from 'react';
 import Exchange from '../../components/trade/exchange';
 import Head from 'next/head';
 import { useAccount } from 'wagmi';
+import dynamic from 'next/dynamic';
 
 const Trade = () => {
 	const { pairs } = useContext(DataContext);
@@ -73,10 +74,9 @@ const Trade = () => {
 					</Flex>
 				</Flex>
 				
-				{isConnected && <Box bgColor={'background2'} my={1} width="100%">
-					<PlacedOrders pair={pair} />
-				</Box>}
-				
+				<Box bgColor={'background2'} my={1} width="100%">
+					<UserOrders pair={pair} />
+				</Box>
 			</Box>
 		</>
 	);

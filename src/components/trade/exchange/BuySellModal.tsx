@@ -296,7 +296,7 @@ export default function BuySellModal2({
 					isLoading={loading}
 				>
 					{!isEvmConnected
-						? "Connect wallet to continue"
+						? "Please connect wallet to continue"
 						: (isNaN(Number(token0Amount)) || !Big(token0Amount).gt(0))
 						? "Enter Amount"
 						: amountExceedsBalance()
