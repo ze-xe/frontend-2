@@ -62,7 +62,7 @@ export default function ExecutedOrders({ pair }) {
 
 	const { currentPage, setCurrentPage, pagesCount, pages } = usePagination({
 		initialState: { currentPage: 1 },
-		pagesCount: Math.ceil(getOrders().length / 3),
+		pagesCount: Math.floor(getOrders().length / 3),
 	});
 
 	return (

@@ -273,7 +273,16 @@ export default function BuySellModal2({
 								status: "error",
 							});
 						});
-				});
+				})
+				.catch((err: any) => {
+					setLoading(false);
+					toast.close(toastIdRef.current);
+					toast({
+						title: "Order failed. Please try again!",
+						description: err.message.slice(0, 100),
+						status: "error",
+					});
+				})
 			} else {
 				setLoading(false);
 				toast.close(toastIdRef.current);
@@ -284,12 +293,11 @@ export default function BuySellModal2({
 				});
 			}
 		} catch (err) {
-			console.log(err);
 			setLoading(false);
 			toast.close(toastIdRef.current);
 			toast({
 				title: "Order failed. Please try again!",
-				description: "Order failed",
+				description: err.message ? (err.message.slice(0, 100)) : JSON.stringify(err).slice(0, 100),
 				status: "error",
 			});
 		}

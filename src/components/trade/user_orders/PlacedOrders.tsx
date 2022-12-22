@@ -53,7 +53,7 @@ export default function PlacedOrders({ pair }) {
 
 	const { currentPage, setCurrentPage, pagesCount, pages } = usePagination({
 		initialState: { currentPage: 1 },
-		pagesCount: Math.ceil((placedOrders[pair?.id] ? placedOrders[pair?.id].length : 0) / 3),
+		pagesCount: Math.floor((placedOrders[pair?.id] ? placedOrders[pair?.id].length : 0) / 3),
 	});
 
 	return (
@@ -71,7 +71,7 @@ export default function PlacedOrders({ pair }) {
 						</Tr>
 					</Thead>
 					<Tbody>
-						{placedOrders[pair?.id]?.slice(0, 3).map(
+						{placedOrders[pair?.id]?.slice(currentPage * 3, currentPage * 3 + 3).map(
 							(order: any, index: number) => {
 								return (
 									<Tr>
