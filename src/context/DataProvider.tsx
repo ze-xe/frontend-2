@@ -135,6 +135,7 @@ function DataProvider({ children }: any) {
 	) => {
 		setIsFetchingData(firstTime);
 		setDataFetchError(null);
+		console.log('Fetching data...');
 		try {
 			// fetch data
 			const requests = [
@@ -149,6 +150,7 @@ function DataProvider({ children }: any) {
 					})
 				);
 			Promise.all(requests).then(async (res) => {
+				console.log(res)
 				_pairs = res[0].data.data;
 				setPairs(_pairs);
 				fetchPairData(_pairs, chain);
@@ -339,14 +341,6 @@ function DataProvider({ children }: any) {
 		let pairRequests = [];
 		for (let i in pairs) {
 			pairRequests.push(
-				axios.get(Endpoints[chain] + `pair/pricetrend/${pairs[i].id}`, {
-					params: {
-						chainId: chain,
-						interval: 300000,
-					},
-				})
-			);
-			pairRequests.push(
 				axios.get(
 					Endpoints[chain] + `pair/trading/status/${pairs[i].id}`,
 					{
@@ -358,13 +352,10 @@ function DataProvider({ children }: any) {
 			);
 		}
 		Promise.all(pairRequests).then((res) => {
-			let newPairs = {};
 			let _pairStatus = {};
 			for (let i = 0; i < pairs.length; i++) {
-				newPairs[pairs[i].id] = res[i * 2].data.data;
-				_pairStatus[pairs[i].id] = res[i * 2 + 1].data.data;
+				_pairStatus[pairs[i].id] = res[i].data.data;
 			}
-			setPairData(newPairs);
 			setPairStats(_pairStatus);
 		});
 	};

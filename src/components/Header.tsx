@@ -70,8 +70,8 @@ export const Header = () => {
 	// const {connectAsync: connectEvm, connectors} = useConnect();
 
 	useEffect(() => {
+		localStorage.setItem('chakra-ui-color-mode', 'dark');
 		if(activeConnector) window.ethereum.on('accountsChanged', function (accounts: any[]) {
-			console.log(activeConnector)
 			// Time to reload your interface with accounts[0]!
 			fetchData(accounts[0], activeConnector?.chains[0].id);
 			fetchLeverData(accounts[0], activeConnector?.chains[0].id);
@@ -80,12 +80,13 @@ export const Header = () => {
 		if (localStorage.getItem('chakra-ui-color-mode') === 'light') {
 			localStorage.setItem('chakra-ui-color-mode', 'dark');
 		}
+
 		if(!isConnected && !isConnecting) {
 			fetchData(null, ChainID.ARB_GOERLI);
 			fetchLeverData(null, ChainID.ARB_GOERLI);
 		}
-	}, [isConnected, isConnecting, activeConnector]);
-
+	}, [isConnected, isConnecting]);
+	
 	if (router.pathname === '/') {
 		return <></>;
 	}

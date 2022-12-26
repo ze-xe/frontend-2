@@ -94,8 +94,9 @@ function LeverDataProvider({ children }: any) {
 			]);
 		}
 
-		return multicallContract.callStatic.aggregate(calls)
+		multicallContract.callStatic.aggregate(calls)
 		.then((res) => {
+			console.log('res', res);
 			let _totalCollateralBalance = Big(0);
 			let _totalBorrowBalance = Big(0);
 			let _availableToBorrow = Big(0);
@@ -104,11 +105,12 @@ function LeverDataProvider({ children }: any) {
 			for (let i = 0; i < res[1].length; i += 4) {
 				_markets[i / 4].balance = BigNumber.from(res[1][i]).toString();
 				_markets[i / 4].allowance = BigNumber.from(res[1][i + 1]).toString();
-				_markets[i / 4].collateralBalance = Big(BigNumber.from(res[1][i + 2]).toString())
-					.mul(_markets[i / 4]?.exchangeRate * 10 ** 10)
-					.toString();
+				_markets[i / 4].collateralBalance = Big(BigNumber.from(res[1][i + 2]).toString()).mul(_markets[i / 4]?.exchangeRate * 10 ** 10).toString();
 				_markets[i / 4].borrowBalance = BigNumber.from(res[1][i + 3]).toString();
-				_markets[i / 4].rewardsAPR = [((100 * (_markets[i / 4].rewardTokenEmissionsUSD[0] * 365)) / _markets[i / 4].totalDepositBalanceUSD), ((100 * (_markets[i / 4].rewardTokenEmissionsUSD[1] * 365)) / _markets[i / 4].totalDepositBalanceUSD)];
+				_markets[i / 4].rewardsAPR = [0, 0];
+				if(_markets[i / 4].rewardTokenEmissionsUSD){
+					_markets[i / 4].rewardsAPR = [((100 * (_markets[i / 4].rewardTokenEmissionsUSD[0] * 365)) / _markets[i / 4].totalDepositBalanceUSD), ((100 * (_markets[i / 4].rewardTokenEmissionsUSD[1] * 365)) / _markets[i / 4].totalDepositBalanceUSD)];
+				}
 
 				_totalCollateralBalance = _totalCollateralBalance.add(
 					Big(_markets[i / 4].collateralBalance).mul(_markets[i / 4].inputTokenPriceUSD).div(1e18)
