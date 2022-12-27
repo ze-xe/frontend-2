@@ -43,7 +43,6 @@ function DataProvider({ children }: any) {
 	const [block, setBlock] = React.useState(null);
 	const [refresh, setRefresh] = React.useState(0);
 
-
 	React.useEffect(() => {}, []);
 
 	const explorer = () => {
@@ -74,7 +73,7 @@ function DataProvider({ children }: any) {
 			}
 		}
 		setTokens(_markets);
-	}
+	};
 
 	const updateInOrderBalance = async (marketId: any, amount: string) => {
 		console.log("updating inorder balance", marketId, amount);
@@ -87,7 +86,7 @@ function DataProvider({ children }: any) {
 			}
 		}
 		setTokens(_markets);
-	}
+	};
 
 	const getWalletBalances = async (
 		address: string,
@@ -112,16 +111,21 @@ function DataProvider({ children }: any) {
 
 	const getPrice = (token: string) => {
 		return new Promise((resolve, reject) => {
-			axios
-				.get(
-					`https://api.coingecko.com/api/v3/simple/price?ids=${coingeckoIds[token]}&vs_currencies=usd`
-				)
-				.then((res) => {
-					resolve(res.data[coingeckoIds[token]].usd);
-				})
-				.catch((e) => {
-					resolve(dummyPrices[token]);
-				});
+			try {
+				axios
+					.get(
+						`https://api.coingecko.com/api/v3/simple/price?ids=${coingeckoIds[token]}&vs_currencies=usd`
+					)
+					.then((res) => {
+						resolve(res.data[coingeckoIds[token]].usd);
+					})
+					.catch((e) => {
+						resolve(dummyPrices[token]);
+					});
+			} catch (err) {
+				console.warn(err);
+				resolve(dummyPrices[token]);
+			}
 		});
 	};
 
@@ -135,7 +139,7 @@ function DataProvider({ children }: any) {
 	) => {
 		setIsFetchingData(firstTime);
 		setDataFetchError(null);
-		console.log('Fetching data...');
+		console.log("Fetching data...");
 		try {
 			// fetch data
 			const requests = [
@@ -150,7 +154,7 @@ function DataProvider({ children }: any) {
 					})
 				);
 			Promise.all(requests).then(async (res) => {
-				console.log(res)
+				console.log(res);
 				_pairs = res[0].data.data;
 				setPairs(_pairs);
 				fetchPairData(_pairs, chain);
@@ -243,7 +247,9 @@ function DataProvider({ children }: any) {
 					} else if (Big(_orders[i].exchangeRate).lt(exchangeRate)) {
 						if (i === 0) {
 							_orders.splice(i, 0, { amount, exchangeRate });
-						} else if (Big(_orders[i - 1].exchangeRate).gt(exchangeRate)) {
+						} else if (
+							Big(_orders[i - 1].exchangeRate).gt(exchangeRate)
+						) {
 							_orders.splice(i, 0, { amount, exchangeRate });
 						}
 						break;
@@ -402,7 +408,7 @@ function DataProvider({ children }: any) {
 		incrementAllowance,
 		addPlacedOrder,
 		updateWalletBalance,
-		updateInOrderBalance
+		updateInOrderBalance,
 	};
 
 	return (
