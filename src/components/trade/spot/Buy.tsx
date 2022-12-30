@@ -6,23 +6,18 @@ import {
 	NumberDecrementStepper,
 } from '@chakra-ui/react';
 
-import {
-	Slider,
-	SliderTrack,
-	SliderFilledTrack,
-	SliderThumb,
-	SliderMark,
-} from '@chakra-ui/react';
-
 import { Box, Button, Flex, Heading, Input, Text } from '@chakra-ui/react';
 import React from 'react';
 import { useContext } from 'react';
 import { DataContext } from '../../../context/DataProvider';
 import { useEffect } from 'react';
-import axios from 'axios';
+
 import BuySellModal from './BuySellModal';
 import { tokenFormatter } from '../../../utils/formatters';
 import { AppDataContext } from '../../../context/AppData';
+import NumberInputWithSlider from '../../main/NumberInputWithSlider';
+import { isValidNumberString } from '../../../utils/number';
+
 const Big = require('big.js');
 
 export default function BuyModule({ pair, limit }) {
@@ -95,56 +90,43 @@ export default function BuyModule({ pair, limit }) {
 		}
 	});
 
-	const setSlider = (e) => {
-		setSliderValue(e);
-		if(!token1 || !price) return;
-		const token1Amount = Big(e)
-			.times((token1.balance ?? 0) - (token1.inOrderBalance ?? 0))
-			.div(100)
-			.div(10 ** token1.decimals);
-		setAmount(token1Amount.toString());
-		if (price != '0' && price != '' && Number(price))
-			if (Number(price) > 0)
-				settoken0Amount(token1Amount.div(price).toString());
+	const max = () => {
+		if(!token1?.balance) return 0;
+		if(!token1?.inOrderBalance) return 0;
+		return Big((token1.balance ?? 0) - (token1.inOrderBalance ?? 0)).div(10 ** token1.decimals).toNumber();
 	};
 
-	const updateToken1Amount = (e) => {
+	const updateToken1Amount = (e: string) => {
 		setAmount(e);
-		if (
-			price != '0' &&
-			price != '' &&
-			Number(price) &&
-			e != '0' &&
-			e != '' &&
-			Number(e)
-		)
-			settoken0Amount(Big(e).div(price).toString());
+		if (isValidNumberString(e)){
+			if(Number(price) > 0){
+				settoken0Amount(Big(Number(e)).div(price).toString())
+			} else {
+				settoken0Amount('0');
+			}
+		};
 	};
 
-	const updateToken0Amount = (e) => {
+	const updateToken0Amount = (e: string) => {
 		settoken0Amount(e);
-		if (
-			price != '0' &&
-			price != '' &&
-			Number(price) &&
-			e != '0' &&
-			e != '' &&
-			Number(e)
-		)
-			setAmount(Big(e).times(price).toString());
+		if (isValidNumberString(e)) {
+			if(Number(price) > 0){
+				setAmount(Big(Number(e)).times(price).toString());
+			} else {
+				setAmount('0');
+			}
+		}
 	};
 
-	const onPriceChange = (e) => {
+	const onPriceChange = (e: string) => {
 		setPrice(e);
-		if (amount != '0' && amount != '' && e != '0' && e != '' && Number(e))
-			settoken0Amount(Big(amount).div(e).toString());
-	};
-
-	const labelStyles = {
-		mt: '2',
-		ml: '-2.5',
-		fontSize: 'xs',
-		color: 'gray.500',
+		if (isValidNumberString(e)) {
+			if(Number(e) > 0){
+				settoken0Amount(Big(Number(amount)).div(Number(e)).toString());
+			} else {
+				settoken0Amount('0');
+			}
+		}
 	};
 
 	return (
@@ -188,7 +170,7 @@ export default function BuyModule({ pair, limit }) {
 				</NumberInput>
 			</Flex>}
 
-			<Flex flexDir={'column'} gap={1}>
+			<Flex flexDir={'column'} gap={1} mb={1}>
 				<Flex justify={'space-between'}>
 					<Text fontSize={'sm'}>Total ({token1?.symbol})</Text>
 					<Text fontSize={'xs'}>
@@ -200,53 +182,7 @@ export default function BuyModule({ pair, limit }) {
 					</Text>
 				</Flex>
 
-				<NumberInput
-					min={0}
-					precision={pair?.tokens[1].decimals}
-					value={amount}
-					onChange={updateToken1Amount}
-					variant="filled"
-					border={'1px'}
-					// borderRadius="6"
-					borderColor={'gray.700'}>
-					<NumberInputField />
-					<NumberInputStepper>
-						<NumberIncrementStepper />
-						<NumberDecrementStepper />
-					</NumberInputStepper>
-				</NumberInput>
-
-				<Slider
-					defaultValue={30}
-					value={sliderValue}
-					onChange={setSlider}
-					mt={8}
-					mb={3}>
-					<SliderMark value={25} {...labelStyles}>
-						25%
-					</SliderMark>
-					<SliderMark value={50} {...labelStyles}>
-						50%
-					</SliderMark>
-					<SliderMark value={75} {...labelStyles}>
-						75%
-					</SliderMark>
-					<SliderMark
-						value={sliderValue}
-						textAlign="center"
-						// bg="blue.500"
-						color="white"
-						mt="-8"
-						ml="-5"
-						w="12"
-						fontSize={'xs'}>
-						{isNaN(sliderValue) ? 0 : sliderValue}%
-					</SliderMark>
-					<SliderTrack>
-						<SliderFilledTrack bgColor="green2" />
-					</SliderTrack>
-					<SliderThumb />
-				</Slider>
+				<NumberInputWithSlider max={max()} asset={token1} onUpdate={updateToken1Amount} value={amount} color='green2'/>
 			</Flex>
 
 			<BuySellModal

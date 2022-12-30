@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 
 const Graph = dynamic(
 	() =>
-		import('../graph/index.jsx').then(mod => mod.Graph),
+		import('./Graph.jsx').then(mod => mod.Graph),
 	{ ssr: false },
 );
 

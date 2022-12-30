@@ -18,7 +18,7 @@ export default function TokensPanel() {
 	const [search, setSearch] = React.useState('');
 
 	return (
-		<Box >
+		<Box fontFamily='Poppins'>
             <Box pt={3} px={4}>
                 <Text fontSize={'md'} fontWeight='bold'>Markets</Text>
             </Box>

@@ -8,7 +8,7 @@ import { DataContext } from '../../context/DataProvider';
 import { useRouter } from 'next/router';
 import UserOrders from '../../components/trade/user_orders';
 import { useEffect, useState } from 'react';
-import Exchange from '../../components/trade/spot';
+import Exchange from '../../components/trade/margin';
 import Head from 'next/head';
 import { useAccount } from 'wagmi';
 

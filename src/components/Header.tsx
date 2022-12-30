@@ -10,17 +10,6 @@ import {
 } from '@chakra-ui/react';
 import Link from 'next/link';
 import { useEffect, useContext, useState } from 'react';
-import {
-	Menu,
-	MenuButton,
-	MenuList,
-	MenuItem,
-	MenuItemOption,
-	MenuGroup,
-	MenuOptionGroup,
-	MenuDivider,
-} from '@chakra-ui/react';
-import { ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons';
 import { useRouter } from 'next/router';
 
 // import ConnectButton from './ConnectButton';
@@ -40,10 +29,10 @@ import {
 	useBreakpointValue,
 } from '@chakra-ui/react';
 import { HamburgerIcon, CloseIcon, ChevronRightIcon } from '@chakra-ui/icons';
-import { useAccount, useConnect, chain, Chain } from 'wagmi';
-import { ChainID, chainIndex, chains } from '../utils/chains';
+import { useAccount, useConnect, chain, Chain, useNetwork } from 'wagmi';
+import { ChainID, chainIndex, chains, supportedChains } from '../utils/chains';
 import { LeverDataContext } from '../context/LeverDataProvider';
-
+import Image from 'next/image';
 
 export const Header = () => {
 	const router = useRouter();
@@ -52,13 +41,20 @@ export const Header = () => {
 	const { isFetchingData, isDataReady, fetchData, setChain } = useContext(DataContext);
 	const [init, setInit] = useState(false);
 	const { fetchData: fetchLeverData } = useContext(LeverDataContext);
+	const {chain} = useNetwork();
 
 	const {address, isConnected, isConnecting, connector: activeConnector} = useAccount({
 		onConnect({ address, connector, isReconnected }) {
-			console.log('Connected', address)
-			fetchData(address, connector.chains[0].id);
-			fetchLeverData(address, connector.chains[0].id);
-			setChain(connector.chains[0].id);
+			console.log('Connected', address, connector.chains[0], supportedChains);
+			console.log(chain);
+			if (!chain.unsupported){
+				fetchData(address, connector.chains[0].id);
+				fetchLeverData(address, connector.chains[0].id);
+				setChain(connector.chains[0].id);
+			} else {
+				fetchData(null, ChainID.ARB_GOERLI);
+				fetchLeverData(null, ChainID.ARB_GOERLI);
+			}
 		},
 		onDisconnect() {
 			console.log('Disconnected');
@@ -95,10 +91,8 @@ export const Header = () => {
 			<Flex
 				justifyContent="space-between"
 				align="center" 
-				// bgClip="text"
 				bgColor={'background2'}
-				// color={"white"}
-				py={1}
+				
 				pl={6}
 				pr={2}>
 				<Flex
@@ -120,12 +114,13 @@ export const Header = () => {
 				</Flex>
 				<Flex
 					flex={{ base: 1 }}
-					justify={{ base: 'center', md: 'start' }}>
+					justify={{ base: 'center', md: 'start' }}
+					align="center"
+					
+					>
 					<Link href={'/'}>
-						<Box>
-							<Text fontSize="3xl" color={'primary'} fontFamily='Zen Dots'>
-								zexe
-							</Text>
+						<Box py={2}>
+						<Image src='/zexe.png' width={'25'} height={'25'} alt={''}/>
 						</Box>
 					</Link>
 
@@ -163,7 +158,7 @@ const MenuOption = ({ href, title, disabled = false, size = 'sm' }) => {
 	const route = useRouter();
 	
 	return (
-		<Box height={'100%'} pt={1} px={2}>
+		<Box height={'100%'} _hover={{bg: 'whiteAlpha.50'}} px={4} mx={-2} py={2} rounded='2'>
 			<Link href={href}>
 				<Tooltip
 					isDisabled={!disabled}
@@ -175,12 +170,13 @@ const MenuOption = ({ href, title, disabled = false, size = 'sm' }) => {
 						variant={'unstyled'}
 						disabled={disabled}
 						color={route.pathname.includes(href) ? 'primary' : 'gray.200'}
-						textDecoration={route.pathname.includes(href) ? 'underline' : 'none'}
-						fontWeight={route.pathname.includes(href) ? 'bold' : 'medium'}
+						// textDecoration={route.pathname.includes(href) ? 'underline' : 'none'}
+						// fontWeight={route.pathname.includes(href) ? 'bold' : 'medium'}
 						textUnderlineOffset="4px"
 						size={size}
-						_hover={{textDecoration:'underline'}}
-						fontSize="sm">
+						fontSize="sm"
+						fontFamily={'Poppins'}
+						>
 						{title}
 					</Button>
 				</Tooltip>
@@ -190,18 +186,14 @@ const MenuOption = ({ href, title, disabled = false, size = 'sm' }) => {
 };
 
 const DesktopNav = () => {
-	const linkColor = useColorModeValue('gray.600', 'gray.200');
-	const linkHoverColor = useColorModeValue('gray.800', 'white');
-	const popoverContentBgColor = useColorModeValue('white', 'gray.800');
-
 	return (
-		<Stack direction={'row'} spacing={2} align="center" mt={1}>
+		<Stack direction={'row'} align="center">
 			{/* <Divider orientation='vertical'/> */}
 			<MenuOption href={'/trade'} title={'Spot'} />
 			{/* <Divider orientation='vertical'/> */}
-			<MenuOption href={'/lend'} title={'Money Market'} />
+			{/* <MenuOption href={'/lend'} title={'Money Market'} /> */}
 			{/* <Divider orientation='vertical'/> */}
-			<MenuOption href={'/margin'} title={'Margin'} disabled={true} />
+			<MenuOption href={'/margin'} title={'Margin'} />
 			{/* <MenuOption href={'/'} title={'Options'} disabled={true} /> */}
 		</Stack>
 	);
@@ -214,10 +206,10 @@ const MobileNav = ({isConnected}) => {
 			p={4}
 			display={{ md: 'none' }}>
 			<MenuOption href={'/trade'} title={'Spot'} />
-			<MenuOption href={'/lend'} title={'Money Market'} />
-			<MenuOption href={'/'} title={'Margin'} disabled={true} />
+			{/* <MenuOption href={'/lend'} title={'Money Market'} /> */}
+			<MenuOption href={'/margin'} title={'Margin'}  />
 			{/* <MenuOption href={'/'} title={'Options'} disabled={true} /> */}
-			{isConnected && <MenuOption href={'/faucet'} title={'💰 Faucet'} />}
+			{/* {isConnected && <MenuOption href={'/faucet'} title={'💰 Faucet'} />} */}
 			{isConnected && <MenuOption href={'/portfolio'} title={'Portfolio'} />}
 			<Box width={'100%'}>
 				<ConnectButton />

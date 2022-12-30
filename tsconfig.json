@@ -23,7 +23,7 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx"
-, "next.config.js", "next.config.js", "src/components/graph/index.jsx"],
+, "next.config.js", "next.config.js", "src/components/trade/graph/index.jsx"],
   "exclude": [
     "node_modules"
   ]

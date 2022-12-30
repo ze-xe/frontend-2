@@ -137,6 +137,12 @@ export const chains: Chain[] = [
 	harmony
 ];
 
+export const supportedChains = [
+	ChainID.AURORA,
+	ChainID.ARB_GOERLI,
+	ChainID.HARMONY,
+]
+
 export const chainMapping = {
 	[ChainID.AURORA]: aurora,
 	[ChainID.ARB_GOERLI]: arbitrumGoerli,

@@ -1,16 +1,16 @@
 import { Box, Button, Flex, Heading, Text } from "@chakra-ui/react";
 import React from "react";
-import LendingTable from "../components/lever/lend/LendTable";
-import BorrowTable from "../components/lever/borrow/BorrowTable";
+import LendingTable from "../../lever/lend/LendTable";
+import BorrowTable from "../../lever/borrow/BorrowTable";
 
-import { LeverDataContext } from "../context/LeverDataProvider";
-import { dollarFormatter, tokenFormatter } from '../utils/formatters';
+import { LeverDataContext } from "../../../context/LeverDataProvider";
+import { dollarFormatter, tokenFormatter } from '../../../utils/formatters';
 import {useEffect} from 'react';
-import { AppDataContext } from "../context/AppData";
-import { DataContext } from "../context/DataProvider";
-import { call, getContract, send } from "../utils/contract";
-import { useAccount } from 'wagmi';
-import { ChainID } from '../utils/chains';
+import { AppDataContext } from "../../../context/AppData";
+import { DataContext } from "../../../context/DataProvider";
+import { call, getContract, send } from "../../../utils/contract";
+import { useAccount, useNetwork } from 'wagmi';
+import { ChainID } from '../../../utils/chains';
 
 // https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png
 const imageIds = {
@@ -20,13 +20,15 @@ const imageIds = {
 	DAI: "4943",
 };
 
-export default function lend() {
+export default function position() {
 	const { markets, availableToBorrow, totalBorrowBalance, totalCollateralBalance, adjustedDebt } = React.useContext(LeverDataContext);
 	const { chain } = React.useContext(DataContext);
 	const {address, isConnected} = useAccount();
 	const [claimLoading, setClaimLoading] = React.useState(false);
 
 	const [zexeAccrued, setZexeAccrued] = React.useState(null);
+	const {chain: activeChain} = useNetwork();
+
 	const boxStyle = {
 		px: 4,
 		py: 10,
@@ -36,7 +38,7 @@ export default function lend() {
 	}
 
 	useEffect(() => {
-		if(!zexeAccrued && isConnected){
+		if(!zexeAccrued && isConnected && !activeChain.unsupported){
 			getContract('Lever', chain)
 			.then(lever => {
 				call(lever, 'compAccrued', [address], chain ?? ChainID.ARB_GOERLI)
@@ -86,14 +88,8 @@ export default function lend() {
 	
 	return (
 		<>
-			{/* <Box py={10} mt={1} bgColor={"background2"}>
-				<Heading mx={4}>Lend your assets</Heading>
-				<Text mt={2} mx={4}>
-					Earn with high APR % 💰
-				</Text>
-			</Box> */}
 
-			<Flex flexDir={"column"}>
+			<Flex flexDir={"column"} fontFamily='Poppins' mt={-1}>
 				<Box width={"100%"}>
 					<Flex justify="space-between" gap={1}>
 						<Box

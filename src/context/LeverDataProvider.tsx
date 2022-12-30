@@ -164,7 +164,6 @@ function LeverDataProvider({ children }: any) {
 	}
 
 	const incrementAllowance = async (marketId: any, amount: string) => {
-		console.log('incrementing', marketId, amount)
 		let _markets = [...markets];
 		for(let i in _markets) {
 			if(_markets[i].id === marketId) {

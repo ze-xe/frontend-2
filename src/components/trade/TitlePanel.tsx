@@ -9,7 +9,7 @@ export default function TitlePanel({ pair }) {
 	const {pairStats} = useContext(DataContext);
 
 	return (
-		<Box bgColor={'background2'} px="4" pb={2} pt={3}>
+		<Box bgColor={'background2'} px="4" pb={2} pt={3} fontFamily='Poppins'>
 			<Flex justify={'space-between'}>
 			<Flex align={'center'} gap={2}>
 				<Image

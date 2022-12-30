@@ -6,14 +6,6 @@ import {
 	NumberDecrementStepper,
 } from "@chakra-ui/react";
 
-import {
-	Slider,
-	SliderTrack,
-	SliderFilledTrack,
-	SliderThumb,
-	SliderMark,
-} from "@chakra-ui/react";
-
 import { Flex, Text } from "@chakra-ui/react";
 import React from "react";
 import { useContext } from "react";
@@ -23,6 +15,8 @@ import axios from "axios";
 import { tokenFormatter } from "../../../utils/formatters";
 import { AppDataContext } from "../../../context/AppData";
 import BuySellModal from "./BuySellModal";
+import NumberInputWithSlider from "../../main/NumberInputWithSlider";
+import { isValidNS } from "../../../utils/number";
 
 const Big = require("big.js");
 
@@ -30,8 +24,6 @@ export default function BuyModule({ pair, limit }) {
 	const [pairNow, setPairNow] = React.useState(null);
 	const [amount, setAmount] = React.useState("0");
 	const [token1Amount, settoken1Amount] = React.useState("0");
-	const [loading, setLoading] = React.useState(false);
-	const [response, setResponse] = React.useState(null);
 
 	const [sliderValue, setSliderValue] = React.useState(NaN);
 
@@ -39,8 +31,7 @@ export default function BuyModule({ pair, limit }) {
 	const [token1, setToken1] = React.useState(null);
 
 	const { tokens } = useContext(DataContext);
-	const { exchangeRate: price, setExchangeRate: setPrice } =
-		useContext(AppDataContext);
+	const { exchangeRate: price, setExchangeRate: setPrice } = useContext(AppDataContext);
 
 	useEffect(() => {
 		const _token0 = tokens.find((t) => t.id === pair?.tokens[0].id);
@@ -91,56 +82,46 @@ export default function BuyModule({ pair, limit }) {
 		}
 	});
 
-	const setSlider = (e) => {
-		setSliderValue(e);
-		if (!token0 || !price) return;
-		const token0Amount = Big(e)
-			.times((token0?.balance ?? 0) - (token0?.inOrderBalance ?? 0))
-			.div(100)
-			.div(10 ** token1?.decimals);
-		setAmount(token0Amount.toNumber().toString());
-		if (price != "0" && price != "" && Number(price))
-			if (Number(price) > 0)
-				settoken1Amount(token0Amount.times(price).toString());
+	const max = () => {
+		if (!token0) return;
+		if(!token0.balance) return;
+		if(!token0.inOrderBalance) return;
+
+		return Big((token0?.balance ?? 0) - (token0?.inOrderBalance ?? 0))
+			.div(10 ** token0?.decimals).toNumber();
 	};
 
-	const updateToken0Amount = (e) => {
+	const updateToken0Amount = (e: string) => {
 		setAmount(e);
-		if (
-			price != "0" &&
-			price != "" &&
-			Number(price) &&
-			e != "0" &&
-			e != "" &&
-			Number(e)
-		)
-			settoken1Amount(Big(e).times(price).toString());
+		if (isValidNS(e)){
+			if(Number(price) > 0){
+				settoken1Amount(Big(e).times(price).toString());
+			} else {
+				settoken1Amount("0");
+			}
+		}
 	};
 
 	const updateToken1Amount = (e) => {
 		settoken1Amount(e);
-		if (
-			price != "0" &&
-			price != "" &&
-			Number(price) &&
-			e != "0" &&
-			e != "" &&
-			Number(e)
-		)
-			setAmount(Big(e).div(price).toString());
+		if (isValidNS(e)){
+			if(Number(price)){
+				setAmount(Big(e).div(price).toString());
+			} else {
+				setAmount("0");
+			}
+		}
 	};
 
 	const onPriceChange = (e) => {
 		setPrice(e);
-		if (amount != "0" && amount != "" && e != "0" && e != "" && Number(e))
-			settoken1Amount(Big(amount).times(e).toString());
-	};
-
-	const labelStyles = {
-		mt: "2",
-		ml: "-2.5",
-		fontSize: "xs",
-		color: "gray.500",
+		if (isValidNS(e)){
+			if(Number(e) > 0){
+				settoken1Amount(Big(amount).times(e).toString());
+			} else {
+				settoken1Amount("0");
+			}
+		}
 	};
 
 	return (
@@ -175,7 +156,6 @@ export default function BuyModule({ pair, limit }) {
 					onChange={updateToken1Amount}
 					variant="filled"
 					border={"1px"}
-					// borderRadius="6"
 					borderColor={"gray.700"}
 				>
 					<NumberInputField />
@@ -186,7 +166,7 @@ export default function BuyModule({ pair, limit }) {
 				</NumberInput>
 			</Flex>}
 
-			<Flex flexDir={"column"} gap={1}>
+			<Flex flexDir={"column"} gap={1} mb={1}>
 				<Flex justify={"space-between"}>
 					<Text fontSize={"sm"}>
 						Total ({pair?.tokens[0].symbol})
@@ -198,56 +178,9 @@ export default function BuyModule({ pair, limit }) {
 						)} {token0?.symbol}
 					</Text>
 				</Flex>
-				<NumberInput
-					min={0}
-					precision={pair?.tokens[1].decimals}
-					value={amount}
-					onChange={updateToken0Amount}
-					variant="filled"
-					border={"1px"}
-					// borderRadius="6"
-					borderColor={"gray.700"}
-				>
-					<NumberInputField />
-					<NumberInputStepper>
-						<NumberIncrementStepper />
-						<NumberDecrementStepper />
-					</NumberInputStepper>
-				</NumberInput>
+				
+				<NumberInputWithSlider max={max()} asset={token0} onUpdate={updateToken0Amount} value={amount} color='red2'/>
 
-				<Slider
-					defaultValue={30}
-					value={sliderValue}
-					onChange={setSlider}
-					mt={8}
-					mb={3}
-				>
-					<SliderMark value={25} {...labelStyles}>
-						25%
-					</SliderMark>
-					<SliderMark value={50} {...labelStyles}>
-						50%
-					</SliderMark>
-					<SliderMark value={75} {...labelStyles}>
-						75%
-					</SliderMark>
-					<SliderMark
-						value={sliderValue}
-						textAlign="center"
-						// bg="blue.500"
-						color="white"
-						mt="-8"
-						ml="-5"
-						w="12"
-						fontSize={"xs"}
-					>
-						{isNaN(sliderValue) ? 0 : sliderValue}%
-					</SliderMark>
-					<SliderTrack>
-						<SliderFilledTrack bgColor="red" />
-					</SliderTrack>
-					<SliderThumb />
-				</Slider>
 			</Flex>
 
 			<BuySellModal

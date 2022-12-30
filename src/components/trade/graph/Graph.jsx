@@ -1,11 +1,9 @@
 import * as React from "react";
-import styles from "./index.module.css";
-import { widget, version } from "../../../public/static/charting_library";
-
+import { widget, version } from "../../../../public/static/charting_library";
 import axios from "axios";
-import { Endpoints } from "../../utils/const";
-import { ChainID } from "../../utils/chains";
-import socket from "../../utils/socket";
+import { Endpoints } from "../../../utils/const";
+import { ChainID } from "../../../utils/chains";
+import socket from "../../../utils/socket";
 import { id } from "ethers/lib/utils.js";
 
 function getLanguageFromURL() {
@@ -18,6 +16,8 @@ function getLanguageFromURL() {
 
 const GREEN = "#18B05F";
 const RED = "#C83232";
+
+const BACKGROUND = "#130B25"
 
 export class Graph extends React.PureComponent {
 	static defaultProps = {
@@ -78,7 +78,7 @@ export class Graph extends React.PureComponent {
 			},
 			client_id: 'zexe.io',
 			overrides: {
-				"paneProperties.background": "#09001F",
+				"paneProperties.background": BACKGROUND,
 				"paneProperties.backgroundType": "solid",
 				"mainSeriesProperties.candleStyle.wickUpColor": GREEN,
 				"mainSeriesProperties.candleStyle.wickDownColor": RED,
@@ -88,6 +88,7 @@ export class Graph extends React.PureComponent {
 				"mainSeriesProperties.candleStyle.borderDownColor": RED,
 				"paneProperties.vertGridProperties.color": "#363c4e",
 				"paneProperties.horzGridProperties.color": "#363c4e",
+				editorFontsList: ['Poppins']
 		   },
 			// enabled_features: ["study_templates"],
 			// charts_storage_url: this.props.chartsStorageUrl,
@@ -146,7 +147,7 @@ export class Graph extends React.PureComponent {
 			},
 			client_id: 'zexe.io',
 			overrides: {
-				"paneProperties.background": "#09001F",
+				"paneProperties.background": BACKGROUND,
 				"paneProperties.backgroundType": "solid",
 				"mainSeriesProperties.candleStyle.wickUpColor": GREEN,
 				"mainSeriesProperties.candleStyle.wickDownColor": RED,
@@ -166,7 +167,7 @@ export class Graph extends React.PureComponent {
 			// autosize: this.props.autosize,
 			// studies_overrides: this.props.studiesOverrides,
 			theme: 'dark',
-			toolbar_bg: '#130B25',
+			toolbar_bg: BACKGROUND,
 
 			width: '100%',
 			height: '600',
@@ -207,7 +208,7 @@ export class Graph extends React.PureComponent {
 	render() {
 		return (
 			<>
-				<div ref={this.ref} className={styles.TVChartContainer} />
+				<div ref={this.ref} />
 			</>
 		);
 	}
