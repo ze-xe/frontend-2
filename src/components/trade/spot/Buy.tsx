@@ -16,7 +16,7 @@ import BuySellModal from './BuySellModal';
 import { tokenFormatter } from '../../../utils/formatters';
 import { AppDataContext } from '../../../context/AppData';
 import NumberInputWithSlider from '../../main/NumberInputWithSlider';
-import { isValidNumberString } from '../../../utils/number';
+import { isValidNS } from '../../../utils/number';
 
 const Big = require('big.js');
 
@@ -98,7 +98,7 @@ export default function BuyModule({ pair, limit }) {
 
 	const updateToken1Amount = (e: string) => {
 		setAmount(e);
-		if (isValidNumberString(e)){
+		if (isValidNS(e)){
 			if(Number(price) > 0){
 				settoken0Amount(Big(Number(e)).div(price).toString())
 			} else {
@@ -109,7 +109,7 @@ export default function BuyModule({ pair, limit }) {
 
 	const updateToken0Amount = (e: string) => {
 		settoken0Amount(e);
-		if (isValidNumberString(e)) {
+		if (isValidNS(e)) {
 			if(Number(price) > 0){
 				setAmount(Big(Number(e)).times(price).toString());
 			} else {
@@ -120,7 +120,7 @@ export default function BuyModule({ pair, limit }) {
 
 	const onPriceChange = (e: string) => {
 		setPrice(e);
-		if (isValidNumberString(e)) {
+		if (isValidNS(e)) {
 			if(Number(e) > 0){
 				settoken0Amount(Big(Number(amount)).div(Number(e)).toString());
 			} else {
