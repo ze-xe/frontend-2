@@ -49,7 +49,6 @@ const Index = () => {
 	const { protocolData } = useContext(LeverDataContext);
 
 	const dividerStyle = {
-		orientation: "vertical",
 		borderColor: "#E50EC0",
 		mx: 4,
 		my: 5,
@@ -133,7 +132,7 @@ const Index = () => {
 								</Text>
 							</Box>
 
-							<Divider {...dividerStyle} />
+							<Divider {...dividerStyle} orientation='vertical'/>
 
 							<Box w={"250px"} my={5}>
 								<RiExchangeFundsFill {...featuresIcon} />
@@ -153,7 +152,7 @@ const Index = () => {
 								</Text>
 							</Box>
 
-							<Divider {...dividerStyle} />
+							<Divider {...dividerStyle} orientation='vertical'/>
 
 							<Box w={"200px"} my={5}>
 								<GiCardExchange {...featuresIcon} />
@@ -171,7 +170,7 @@ const Index = () => {
 								</Text>
 							</Box>
 
-							<Divider {...dividerStyle} />
+							<Divider {...dividerStyle} orientation='vertical'/>
 
 							<Box w={"200px"} my={5}>
 								<GiBank {...featuresIcon} />
