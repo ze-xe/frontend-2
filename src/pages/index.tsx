@@ -196,9 +196,8 @@ const Index = () => {
 									color='white'
 									// color={"black"}
 									_hover={{ opacity: "0.5" }}
-									disabled={true}
 								>
-									Trade Now <sup><Text fontSize={'xs'}>Coming soon</Text></sup>
+									Trade Now
 								</Button>
 							</Link>
 							<Link
