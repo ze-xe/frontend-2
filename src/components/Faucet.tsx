@@ -34,9 +34,10 @@ const Big = require('big.js');
 
 import { Input, InputGroup } from '@chakra-ui/react';
 import Link from 'next/link';
-import { useAccount } from 'wagmi';
+import { useAccount, useBalance } from 'wagmi';
 import { tokenFormatter } from '../utils/formatters';
 import { useEffect } from 'react';
+import { ethers } from 'ethers';
 
 function RadioCard(props) {
 	const { getInputProps, getCheckboxProps } = useRadio(props);
@@ -78,6 +79,10 @@ export default function faucets() {
 
 	const [selectedToken, setSelectedToken] = React.useState(0);
 	const [hydrated, setHydrated] = React.useState(false);
+
+	const { data } = useBalance({
+		address: evmAddress
+	});
 
 	// loading
 	const [loading, setLoading] = React.useState(false);
@@ -243,9 +248,9 @@ export default function faucets() {
 							bgGradient={'linear(to-r, #E11860, #CB1DC3)'}
 							size="lg"
 							isLoading={loading}
-							disabled={!isEvmConnected || loading}>
-							{isEvmConnected
-								? 'Mint'
+							disabled={!isEvmConnected || loading || data.value.lte(ethers.utils.parseEther('0.01'))}>
+							{isEvmConnected ?
+								data.value.lte(ethers.utils.parseEther('0.01')) ? 'Insufficient ETH balance' : 'Mint'
 								: 'Connect Wallet'}
 						</Button>
 						{response && (

@@ -73,9 +73,9 @@ const Trade = () => {
 					</Flex>
 				</Flex>
 				
-				<Box bgColor={'background2'} my={1} width="100%">
+				{/* <Box bgColor={'background2'} my={1} width="100%">
 					<UserOrders pair={pair} />
-				</Box>
+				</Box> */}
 			</Box>
 		</>
 	);
