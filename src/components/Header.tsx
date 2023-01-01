@@ -7,15 +7,15 @@ import {
 	useDisclosure,
 	Tooltip,
 	Divider,
-} from '@chakra-ui/react';
-import Link from 'next/link';
-import { useEffect, useContext, useState } from 'react';
-import { useRouter } from 'next/router';
+} from "@chakra-ui/react";
+import Link from "next/link";
+import { useEffect, useContext, useState } from "react";
+import { useRouter } from "next/router";
 
 // import ConnectButton from './ConnectButton';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
-import { DataContext } from '../context/DataProvider';
+import { DataContext } from "../context/DataProvider";
 
 import {
 	IconButton,
@@ -27,27 +27,38 @@ import {
 	PopoverContent,
 	useColorModeValue,
 	useBreakpointValue,
-} from '@chakra-ui/react';
-import { HamburgerIcon, CloseIcon, ChevronRightIcon } from '@chakra-ui/icons';
-import { useAccount, useConnect, chain, Chain, useNetwork } from 'wagmi';
-import { ChainID, chainIndex, chains, supportedChains } from '../utils/chains';
-import { LeverDataContext } from '../context/LeverDataProvider';
-import Image from 'next/image';
+} from "@chakra-ui/react";
+import { HamburgerIcon, CloseIcon, ChevronRightIcon } from "@chakra-ui/icons";
+import { useAccount, useConnect, chain, Chain, useNetwork } from "wagmi";
+import { ChainID, chainIndex, chains, supportedChains } from "../utils/chains";
+import { LeverDataContext } from "../context/LeverDataProvider";
+import Image from "next/image";
 
 export const Header = () => {
 	const router = useRouter();
 	const { isOpen, onToggle } = useDisclosure();
 
-	const { isFetchingData, isDataReady, fetchData, setChain } = useContext(DataContext);
+	const { isFetchingData, isDataReady, fetchData, setChain } =
+		useContext(DataContext);
 	const [init, setInit] = useState(false);
 	const { fetchData: fetchLeverData } = useContext(LeverDataContext);
-	const {chain} = useNetwork();
+	const { chain } = useNetwork();
 
-	const {address, isConnected, isConnecting, connector: activeConnector} = useAccount({
+	const {
+		address,
+		isConnected,
+		isConnecting,
+		connector: activeConnector,
+	} = useAccount({
 		onConnect({ address, connector, isReconnected }) {
-			console.log('Connected', address, connector.chains[0], supportedChains);
+			console.log(
+				"Connected",
+				address,
+				connector.chains[0],
+				supportedChains
+			);
 			console.log(chain);
-			if (!chain.unsupported){
+			if (!chain.unsupported) {
 				fetchData(address, connector.chains[0].id);
 				fetchLeverData(address, connector.chains[0].id);
 				setChain(connector.chains[0].id);
@@ -57,48 +68,50 @@ export const Header = () => {
 			}
 		},
 		onDisconnect() {
-			console.log('Disconnected');
+			console.log("Disconnected");
 			fetchData(null, ChainID.ARB_GOERLI);
 			fetchLeverData(null, ChainID.ARB_GOERLI);
-		}
+		},
 	});
 
 	// const {connectAsync: connectEvm, connectors} = useConnect();
 
 	useEffect(() => {
-		localStorage.setItem('chakra-ui-color-mode', 'dark');
-		if(activeConnector) window.ethereum.on('accountsChanged', function (accounts: any[]) {
-			// Time to reload your interface with accounts[0]!
-			fetchData(accounts[0], activeConnector?.chains[0].id);
-			fetchLeverData(accounts[0], activeConnector?.chains[0].id);
-			setChain(activeConnector?.chains[0].id);
-		})
-		if (localStorage.getItem('chakra-ui-color-mode') === 'light') {
-			localStorage.setItem('chakra-ui-color-mode', 'dark');
+		localStorage.setItem("chakra-ui-color-mode", "dark");
+		if (activeConnector)
+			window.ethereum.on("accountsChanged", function (accounts: any[]) {
+				// Time to reload your interface with accounts[0]!
+				fetchData(accounts[0], activeConnector?.chains[0].id);
+				fetchLeverData(accounts[0], activeConnector?.chains[0].id);
+				setChain(activeConnector?.chains[0].id);
+			});
+		if (localStorage.getItem("chakra-ui-color-mode") === "light") {
+			localStorage.setItem("chakra-ui-color-mode", "dark");
 		}
 
-		if(!isConnected && !isConnecting) {
+		if (!isConnected && !isConnecting) {
 			fetchData(null, ChainID.ARB_GOERLI);
 			fetchLeverData(null, ChainID.ARB_GOERLI);
 		}
 	}, [isConnected, isConnecting]);
-	
-	if (router.pathname === '/') {
+
+	if (router.pathname === "/") {
 		return <></>;
 	}
 	return (
 		<>
 			<Flex
 				justifyContent="space-between"
-				align="center" 
-				bgColor={'background2'}
-				
+				align="center"
+				bgColor={"background2"}
 				pl={6}
-				pr={2}>
+				pr={2}
+			>
 				<Flex
-					flex={{ base: 1, md: 'auto' }}
+					flex={{ base: 1, md: "auto" }}
 					ml={{ base: -2 }}
-					display={{ base: 'flex', md: 'none' }}>
+					display={{ base: "flex", md: "none" }}
+				>
 					<IconButton
 						onClick={onToggle}
 						icon={
@@ -108,41 +121,51 @@ export const Header = () => {
 								<HamburgerIcon w={5} h={5} />
 							)
 						}
-						variant={'ghost'}
-						aria-label={'Toggle Navigation'}
+						variant={"ghost"}
+						aria-label={"Toggle Navigation"}
 					/>
 				</Flex>
 				<Flex
 					flex={{ base: 1 }}
-					justify={{ base: 'center', md: 'start' }}
+					justify={{ base: "center", md: "start" }}
 					align="center"
-					
-					>
-					<Link href={'/'}>
+				>
+					<Link href={"/"}>
 						<Box py={2}>
-						<Image src='/zexe.png' width={'25'} height={'25'} alt={''}/>
+							<Image
+								src="/zexe.png"
+								width={"25"}
+								height={"25"}
+								alt={""}
+							/>
 						</Box>
 					</Link>
 
-					<Flex display={{ base: 'none', md: 'flex' }} ml={6}>
+					<Flex display={{ base: "none", md: "flex" }} ml={6}>
 						<DesktopNav />
 					</Flex>
 				</Flex>
 
 				<Stack
 					flex={{ base: 1, md: 1 }}
-					justify={'flex-end'}
+					justify={"flex-end"}
 					align="center"
-					direction={'row'}>
+					direction={"row"}
+				>
 					<Flex
-						display={{ sm: 'none', md: 'flex' }}
+						display={{ sm: "none", md: "flex" }}
 						align="center"
-						justify={'flex-end'}
-						gap={4} 
-						>
-						{isConnected && <MenuOption href='/portfolio' title='Portfolio'/>}
+						justify={"flex-end"}
+						gap={4}
+					>
+						{isConnected && (
+							<MenuOption href="/portfolio" title="Portfolio" />
+						)}
 						<Box>
-						<ConnectButton chainStatus={'icon'} showBalance={false}/>
+							<ConnectButton
+								chainStatus={"icon"}
+								showBalance={false}
+							/>
 						</Box>
 					</Flex>
 				</Stack>
@@ -154,64 +177,76 @@ export const Header = () => {
 	);
 };
 
-const MenuOption = ({ href, title, disabled = false, size = 'sm' }) => {
+const MenuOption = ({ href, title, disabled = false, size = "sm" }) => {
 	const route = useRouter();
-	
+
 	return (
-		<Box height={'100%'} _hover={{bg: 'whiteAlpha.50'}} px={4} mx={-2} py={2} rounded='2'>
-			<Link href={href}>
+		<Link href={href}>
+			<Box
+				height={"100%"}
+				_hover={{ bg: "whiteAlpha.50" }}
+				px={4}
+				py={2}
+				mx={-1}
+				rounded="2"
+			>
 				<Tooltip
 					isDisabled={!disabled}
 					hasArrow
 					label="Coming Soon"
 					bg="white"
-					color={'gray.800'}>
+					color={"gray.800"}
+				>
 					<Button
-						variant={'unstyled'}
+						variant={"unstyled"}
 						disabled={disabled}
-						color={route.pathname.includes(href) ? 'primary' : 'gray.200'}
+						color={
+							route.pathname.includes(href)
+								? "primary"
+								: "gray.200"
+						}
 						// textDecoration={route.pathname.includes(href) ? 'underline' : 'none'}
 						// fontWeight={route.pathname.includes(href) ? 'bold' : 'medium'}
 						textUnderlineOffset="4px"
 						size={size}
 						fontSize="sm"
-						fontFamily={'Poppins'}
-						>
+						fontFamily={"Poppins"}
+					>
 						{title}
 					</Button>
 				</Tooltip>
-			</Link>
-		</Box>
+			</Box>
+			{route.pathname.includes(href) && <Box h={"1px"} width="100%" bgColor={"primary"}></Box>}
+		</Link>
 	);
 };
 
 const DesktopNav = () => {
 	return (
-		<Stack direction={'row'} align="center">
+		<Stack direction={"row"} align="center">
 			{/* <Divider orientation='vertical'/> */}
-			<MenuOption href={'/trade'} title={'Spot'} />
+			<MenuOption href={"/trade"} title={"Spot"} />
 			{/* <Divider orientation='vertical'/> */}
 			{/* <MenuOption href={'/lend'} title={'Money Market'} /> */}
 			{/* <Divider orientation='vertical'/> */}
-			<MenuOption href={'/margin'} title={'Margin'} />
+			<MenuOption href={"/margin"} title={"Margin"} />
 			{/* <MenuOption href={'/'} title={'Options'} disabled={true} /> */}
 		</Stack>
 	);
 };
 
-const MobileNav = ({isConnected}) => {
+const MobileNav = ({ isConnected }) => {
 	return (
-		<Stack
-			bg='background1'
-			p={4}
-			display={{ md: 'none' }}>
-			<MenuOption href={'/trade'} title={'Spot'} />
+		<Stack bg="background1" p={4} display={{ md: "none" }}>
+			<MenuOption href={"/trade"} title={"Spot"} />
 			{/* <MenuOption href={'/lend'} title={'Money Market'} /> */}
-			<MenuOption href={'/margin'} title={'Margin'}  />
+			<MenuOption href={"/margin"} title={"Margin"} />
 			{/* <MenuOption href={'/'} title={'Options'} disabled={true} /> */}
 			{/* {isConnected && <MenuOption href={'/faucet'} title={'💰 Faucet'} />} */}
-			{isConnected && <MenuOption href={'/portfolio'} title={'Portfolio'} />}
-			<Box width={'100%'}>
+			{isConnected && (
+				<MenuOption href={"/portfolio"} title={"Portfolio"} />
+			)}
+			<Box width={"100%"}>
 				<ConnectButton />
 			</Box>
 		</Stack>
@@ -219,5 +254,5 @@ const MobileNav = ({isConnected}) => {
 };
 
 Header.defaultProps = {
-	title: 'zexe',
+	title: "zexe",
 };
