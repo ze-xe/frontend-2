@@ -42,6 +42,7 @@ const dummyPrices = {
 
 import erc20 from "../abis/ERC20.json";
 import ctoken from "../abis/CToken.json";
+import lever from "../abis/Lever.json";
 import multicall from "../abis/Multicall2.json";
 
 function LeverDataProvider({ children }: any) {
@@ -67,6 +68,7 @@ function LeverDataProvider({ children }: any) {
 
 		const itf = new Interface(erc20.abi);
 		const ctokenitf = new Interface(ctoken.abi);
+		const leverContract = await getContract('Lever', chain);
 
 		const multicallContract = new ethers.Contract(
 			ADDRESSES[chain].Multicall,
@@ -81,50 +83,56 @@ function LeverDataProvider({ children }: any) {
 				itf.encodeFunctionData("balanceOf", [address]),
 			]);
 			calls.push([
-				_markets[i].inputToken.id,
-				itf.encodeFunctionData("allowance", [address, _markets[i].id]),
-			]);
-			calls.push([
 				_markets[i].id,
 				itf.encodeFunctionData("balanceOf", [address]),
 			]);
 			calls.push([
 				_markets[i].id,
 				ctokenitf.encodeFunctionData("borrowBalanceCurrent", [address]),
-			]);
+			]);	
 		}
-
-		multicallContract.callStatic.aggregate(calls)
-		.then((res) => {
-			console.log('res', res);
+		console.log(leverContract);
+		Promise.all([multicallContract.callStatic.aggregate(calls), call(leverContract, 'getAssetsIn', [address], chain)])
+		.then(([res, assetsIn]) => {
 			let _totalCollateralBalance = Big(0);
 			let _totalBorrowBalance = Big(0);
 			let _availableToBorrow = Big(0);
 			let _adjustedDebt = Big(0);
 
-			for (let i = 0; i < res[1].length; i += 4) {
-				_markets[i / 4].balance = BigNumber.from(res[1][i]).toString();
-				_markets[i / 4].allowance = BigNumber.from(res[1][i + 1]).toString();
-				_markets[i / 4].collateralBalance = Big(BigNumber.from(res[1][i + 2]).toString()).mul(_markets[i / 4]?.exchangeRate * 10 ** 10).toString();
-				_markets[i / 4].borrowBalance = BigNumber.from(res[1][i + 3]).toString();
-				_markets[i / 4].rewardsAPR = [0, 0];
-				if(_markets[i / 4].rewardTokenEmissionsUSD){
-					_markets[i / 4].rewardsAPR = [((100 * (_markets[i / 4].rewardTokenEmissionsUSD[0] * 365)) / _markets[i / 4].totalDepositBalanceUSD), ((100 * (_markets[i / 4].rewardTokenEmissionsUSD[1] * 365)) / _markets[i / 4].totalDepositBalanceUSD)];
+			for (let i = 0; i < res[1].length - 1; i += 3) {
+				const marketIndex = i / 3;
+				_markets[marketIndex].balance = BigNumber.from(res[1][i]).toString();
+				_markets[marketIndex].collateralBalance = Big(BigNumber.from(res[1][i + 1]).toString()).mul(_markets[marketIndex]?.exchangeRate * 10 ** 10).toString();
+				_markets[marketIndex].borrowBalance = BigNumber.from(res[1][i + 2]).toString();
+				_markets[marketIndex].rewardsAPR = [0, 0];
+				if(_markets[marketIndex].rewardTokenEmissionsUSD){
+					_markets[marketIndex].rewardsAPR = [((100 * (_markets[marketIndex].rewardTokenEmissionsUSD[0] * 365)) / _markets[marketIndex].totalDepositBalanceUSD), ((100 * (_markets[marketIndex].rewardTokenEmissionsUSD[1] * 365)) / _markets[marketIndex].totalDepositBalanceUSD)];
 				}
 
 				_totalCollateralBalance = _totalCollateralBalance.add(
-					Big(_markets[i / 4].collateralBalance).mul(_markets[i / 4].inputTokenPriceUSD).div(1e18)
+					Big(_markets[marketIndex].collateralBalance).mul(_markets[marketIndex].inputTokenPriceUSD).div(1e18)
 				);
 				_totalBorrowBalance = _totalBorrowBalance.add(
-					Big(_markets[i / 4].borrowBalance).mul(_markets[i / 4].inputTokenPriceUSD).div(1e18)
+					Big(_markets[marketIndex].borrowBalance).mul(_markets[marketIndex].inputTokenPriceUSD).div(1e18)
 				);
 				_availableToBorrow = _availableToBorrow.add(
-					Big(_markets[i / 4].collateralBalance).mul(_markets[i / 4].inputTokenPriceUSD).mul(_markets[i / 4].maximumLTV).div(100).div(1e18)
+					Big(_markets[marketIndex].collateralBalance).mul(_markets[marketIndex].inputTokenPriceUSD).mul(_markets[marketIndex].maximumLTV).div(100).div(1e18)
 				);
 				_adjustedDebt = _adjustedDebt.add(
-					Big(_markets[i / 4].borrowBalance).mul(_markets[i / 4].inputTokenPriceUSD).div(1e18).div(_markets[i / 4].maximumLTV).mul(100)
+					Big(_markets[marketIndex].borrowBalance).mul(_markets[marketIndex].inputTokenPriceUSD).div(1e18).div(_markets[marketIndex].maximumLTV).mul(100)
 				);
 			}
+			// set all assets to lowercase
+			assetsIn = assetsIn.map((asset: string) => asset.toLowerCase());
+			console.log(assetsIn)
+			for(let i in _markets){
+				if(assetsIn.includes(_markets[i].id)){
+					_markets[i].isCollateral = true;
+				} else {
+					_markets[i].isCollateral = false;
+				}
+			}
+
 			setTotalCollateralBalance(_totalCollateralBalance.toString());
 			setTotalBorrowBalance(_totalBorrowBalance.toString());
 			setAvailableToBorrow(_availableToBorrow.sub(_totalBorrowBalance).toString());
@@ -132,6 +140,16 @@ function LeverDataProvider({ children }: any) {
 			setMarkets(_markets);
 		});
 	};
+
+	const enableCollateral = (market: string) => {
+		let _markets = [...markets];
+		for(let i in _markets) {
+			if(_markets[i].id === market) {
+				_markets[i].isCollateral = true;
+			}
+		}
+		setMarkets(_markets);
+	}
 
 	const updateBorrowBalance = (token: string, amount: string) => {
 		let _markets = [...markets];
@@ -239,7 +257,8 @@ function LeverDataProvider({ children }: any) {
 		updateBorrowBalance,
 		updateCollateralBalance,
 		updateWalletBalance,
-		protocolData
+		protocolData,
+		enableCollateral
 	};
 
 	return (
@@ -264,6 +283,7 @@ interface DataValue {
 	updateCollateralBalance: (token: string, amount: string) => void;
 	updateWalletBalance: (token: string, amount: string) => void;
 	protocolData: any;
+	enableCollateral: (market: any) => void;
 }
 
 export { LeverDataProvider, LeverDataContext };

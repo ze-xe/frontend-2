@@ -39,6 +39,7 @@ import Head from 'next/head';
 import { useAccount } from 'wagmi';
 import { ChainID } from '../utils/chains';
 import { tokenFormatter } from '../utils/formatters';
+import { useEffect } from 'react';
 
 function RadioCard(props) {
 	const { getInputProps, getCheckboxProps } = useRadio(props);
@@ -48,10 +49,6 @@ function RadioCard(props) {
 
 	return (
 		<>
-			<Head>
-				<title>Testnet Faucet | ZEXE | Buy & Sell Crypto on TRON</title>
-				<link rel="icon" type="image/x-icon" href="/favicon.png"></link>
-			</Head>
 			<Box as="label">
 				<input {...input} />
 				<Box
@@ -81,9 +78,9 @@ function RadioCard(props) {
 export default function faucets() {
 	const { tokens, chain, explorer } = useContext(DataContext);
 	const { address: evmAddress, isConnected: isEvmConnected } = useAccount();
-	const [hydrated, setHydrated] = React.useState(false);
 
 	const [selectedToken, setSelectedToken] = React.useState(0);
+	const [hydrated, setHydrated] = React.useState(false);
 
 	// loading
 	const [loading, setLoading] = React.useState(false);
@@ -98,6 +95,8 @@ export default function faucets() {
 			setSelectedToken(Number(nextValue));
 		},
 	});
+
+	const {updateWalletBalance} = useContext(DataContext);
 
 	const group = getRootProps();
 
@@ -122,15 +121,11 @@ export default function faucets() {
 		.then(async (res: any) => {
 			setLoading(false);
 			setResponse('Transaction sent! Waiting for confirmation...');
-			if (chain == ChainID.NILE) {
-				setHash(res);
-				checkResponse(res);
-			} else {
-				setHash(res.hash);
-				await res.wait(1);
-				setConfirmed(true);
-				setResponse('Transaction Successful!');
-			}
+			setHash(res.hash);
+			await res.wait(1);
+			setConfirmed(true);
+			setResponse('Transaction Successful!');
+			updateWalletBalance(token.id, Big(mintAmount[token.symbol]).times(1e18).toFixed(0));
 		})
 		.catch((err: any) => {
 			setLoading(false);
@@ -139,42 +134,18 @@ export default function faucets() {
 		});
 	};
 
-	const checkResponse = (tx_id: string) => {
-		axios
-			.get(
-				'https://nile.trongrid.io/wallet/gettransactionbyid?value=' +
-					tx_id
-			)
-			.then((res) => {
-				if (!res.data.ret) {
-					setTimeout(() => {
-						checkResponse(tx_id);
-					}, 2000);
-				} else {
-					setConfirmed(true);
-					if (res.data.ret[0].contractRet == 'SUCCESS') {
-						setResponse('Transaction Successful!');
-					} else {
-						setResponse('Transaction Failed. Please try again.');
-					}
-				}
-			});
-	};
+	useEffect(() => {setHydrated(true)});
 
-	React.useEffect(() => {
-		setHydrated(true);
-	}, []);
+	if(!hydrated) return (<></>)
 
-	if (!hydrated) return <></>;
 	return (
 		<Flex justify={'center'}>
 			<Box
-				my={2}
+				// my={2}
 				px={4}
 				py={4}
 				bgColor="background2"
 				// width={'70%'}
-				// maxW="1400px"
 			>
 				<Text fontSize={'3xl'} fontWeight="bold">
 					Faucet

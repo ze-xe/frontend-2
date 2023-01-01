@@ -15,7 +15,7 @@ import { useEffect } from 'react';
 import BuySellModal from './BuySellModal';
 import { tokenFormatter } from '../../../utils/formatters';
 import { AppDataContext } from '../../../context/AppData';
-import NumberInputWithSlider from '../../main/NumberInputWithSlider';
+import NumberInputWithSlider from '../../app/NumberInputWithSlider';
 import { isValidNS } from '../../../utils/number';
 
 const Big = require('big.js');

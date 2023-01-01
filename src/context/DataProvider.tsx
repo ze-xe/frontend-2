@@ -50,7 +50,6 @@ function DataProvider({ children }: any) {
 	};
 
 	const incrementAllowance = async (marketId: any, amount: string) => {
-		console.log("incrementing allowance", marketId, amount);
 		let _markets = [...tokens];
 		for (let i in _markets) {
 			if (_markets[i].id === marketId) {
@@ -63,7 +62,6 @@ function DataProvider({ children }: any) {
 	};
 
 	const updateWalletBalance = async (marketId: any, amount: string) => {
-		console.log("updating wallet balance", marketId, amount);
 		let _markets = [...tokens];
 		for (let i in _markets) {
 			if (_markets[i].id === marketId) {
@@ -76,7 +74,6 @@ function DataProvider({ children }: any) {
 	};
 
 	const updateInOrderBalance = async (marketId: any, amount: string) => {
-		console.log("updating inorder balance", marketId, amount);
 		let _markets = [...tokens];
 		for (let i in _markets) {
 			if (_markets[i].id === marketId) {
@@ -209,7 +206,6 @@ function DataProvider({ children }: any) {
 						.minus(_pairs[i].exchangeRate)
 						.toString();
 					_pairs[i].exchangeRate = exchangeRate;
-					console.log("found pair", _pairs[i]);
 				}
 			}
 			setPairs(_pairs);
@@ -232,8 +228,9 @@ function DataProvider({ children }: any) {
 					order.data.data);
 			});
 			setOrders(newOrders);
-			socket.on("PAIR_ORDER", ({ amount, buy, exchangeRate, pair }) => {
-				let _orders = buy
+			socket.on("PAIR_ORDER", ({ amount, orderType, exchangeRate, pair }) => {
+				console.log(orderType, exchangeRate, amount, pair);
+				let _orders = (orderType == 0 || orderType == 2)
 					? newOrders[pair.toLowerCase()].buyOrders
 					: newOrders[pair.toLowerCase()].sellOrders.reverse();
 				console.log(_orders);
@@ -266,7 +263,7 @@ function DataProvider({ children }: any) {
 						_orders.splice(i, 1);
 					}
 				}
-				if (buy) {
+				if (orderType == 0 || orderType == 2) {
 					newOrders[pair.toLowerCase()].buyOrders = _orders;
 				} else {
 					newOrders[pair.toLowerCase()].sellOrders =

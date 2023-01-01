@@ -15,7 +15,7 @@ import axios from "axios";
 import { tokenFormatter } from "../../../utils/formatters";
 import { AppDataContext } from "../../../context/AppData";
 import BuySellModal from "./BuySellModal";
-import NumberInputWithSlider from "../../main/NumberInputWithSlider";
+import NumberInputWithSlider from "../../app/NumberInputWithSlider";
 import { isValidNS } from "../../../utils/number";
 
 const Big = require("big.js");

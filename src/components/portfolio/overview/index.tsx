@@ -78,7 +78,7 @@ export default function Overview() {
 							</Stat>
 						</Box>
 
-                        <Box>
+                        {/* <Box>
 							<Stat textAlign={"left"}>
 								<StatLabel>Margin</StatLabel>
 								<StatNumber>
@@ -86,7 +86,7 @@ export default function Overview() {
 								</StatNumber>
 								<StatHelpText></StatHelpText>
 							</Stat>
-						</Box>
+						</Box> */}
 					</Flex>
 
 					<Box bgColor={"background2"} mt={1}>
@@ -204,14 +204,6 @@ export default function Overview() {
 															variant="outline"
 														>
 															Trade
-														</Button>
-													</Link>
-													<Link href={"/lend"}>
-														<Button
-															size={"sm"}
-															variant="outline"
-														>
-															Lend/Borrow
 														</Button>
 													</Link>
 													<Link href={"/faucet"}>

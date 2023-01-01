@@ -42,11 +42,14 @@ export default function NumberInputWithSlider({
 		ml: "-1.5",
 	};
 
-	const boxStyle = {
+	const boxStyle = (limit: number) => {return{
 		h: 2,
 		w: 2,
 		borderRadius: 100,
-	};
+		bgColor: (value * 100) / max > limit ? color : "background1",
+		border: '1px solid',
+    	borderColor: (value * 100) / max > limit ? color : "gray.800"
+	}};
 
 	return (
 		<Box>
@@ -83,41 +86,27 @@ export default function NumberInputWithSlider({
 			>
 				<SliderMark value={0} {...labelStyles}>
 					<Box
-						{...boxStyle}
-						bgColor={(value * 100) / max < 0 ? "background1" : color}
-						borderColor={(value * 100) / max < 0 ? 'gray.800' : color}
+						{...boxStyle(0)}
 					></Box>
 				</SliderMark>
 				<SliderMark value={25} {...labelStyles}>
 					<Box
-						{...boxStyle}
-						bgColor={(value * 100) / max < 25 ? "background1" : color}
-						border='1px solid'
-						borderColor={(value * 100) / max < 25 ? 'gray.800' : color}
+						{...boxStyle(25)}
 					></Box>
 				</SliderMark>
 				<SliderMark value={50} {...labelStyles}>
 					<Box
-						{...boxStyle}
-						bgColor={(value * 100) / max < 50 ? "background1" : color}
-						border='1px solid'
-						borderColor={(value * 100) / max < 50 ? 'gray.800' : color}
+						{...boxStyle(50)}
 					></Box>
 				</SliderMark>
 				<SliderMark value={75} {...labelStyles}>
 					<Box
-						{...boxStyle}
-						bgColor={(value * 100) / max < 75 ? "background1" : color}
-						border='1px solid'
-						borderColor={(value * 100) / max < 75 ? 'gray.800' : color}
+						{...boxStyle(75)}
 					></Box>
 				</SliderMark>
 				<SliderMark value={100} {...labelStyles} opacity='1'>
 					<Box
-						{...boxStyle}
-						bgColor={(value * 100) / max < 100 ? "background1" : color}
-						border='1px solid'
-						borderColor={(value * 100) / max < 100 ? 'gray.800' : color}
+						{...boxStyle(100)}
 					></Box>
 				</SliderMark>
 

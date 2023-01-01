@@ -21,12 +21,12 @@ import axios from "axios";
 import { tokenFormatter } from "../../../utils/formatters";
 import { AppDataContext } from "../../../context/AppData";
 import BuySellModal from "./BuySellModal";
-import NumberInputWithSlider from "../../main/NumberInputWithSlider";
+import NumberInputWithSlider from "../../app/NumberInputWithSlider";
 import { isValidNS, isValidAndPositiveNS } from "../../../utils/number";
 
 const Big = require("big.js");
 const MIN_TOKEN1 = 10;
-const MAX_BORROW_LIMIT = 0.92;
+const MAX_BORROW_LIMIT = 0.75;
 
 export default function BuyModule({ pair, limit }) {
 	const [pairNow, setPairNow] = React.useState(null);
@@ -43,7 +43,8 @@ export default function BuyModule({ pair, limit }) {
 	const [token1, setToken1] = React.useState(null);
 
 	const { tokens } = useContext(DataContext);
-	const { exchangeRate: price, setExchangeRate: setPrice } = useContext(AppDataContext);
+	const { exchangeRate: price, setExchangeRate: setPrice } =
+		useContext(AppDataContext);
 
 	useEffect(() => {
 		const _token0 = tokens.find((t) => t.id === pair?.tokens[0].id);
@@ -98,22 +99,31 @@ export default function BuyModule({ pair, limit }) {
 			isValidNS(leverage) &&
 			parseFloat(token1Amount) > MIN_TOKEN1
 		) {
-			const _borrowLimit = (MIN_TOKEN1 / parseFloat(token1Amount) - 1) / leverage + 1;
+			const _borrowLimit =
+				(MIN_TOKEN1 / parseFloat(token1Amount) - 1) / leverage + 1;
 			if (!isValidAndPositiveNS(_borrowLimit)) return;
 			setBorrowLimit(_borrowLimit);
-			console.log("borrowLimit", _borrowLimit);
 			if (isValidAndPositiveNS(token1Amount)) {
 				const _nLoops = Math.floor(
 					Math.log(MIN_TOKEN1 / parseFloat(token1Amount)) /
 						Math.log(_borrowLimit)
 				);
-				console.log("nLoops", _nLoops)
 				if (!isValidAndPositiveNS(_nLoops)) return;
 				setNLoops(_nLoops);
 				if (isValidAndPositiveNS(price)) {
-					const _token0Amount = (parseFloat(token1Amount) * _borrowLimit * (1 - _borrowLimit ** _nLoops) / (price * (1 - _borrowLimit))).toString();
+					const _token0Amount = (
+						(parseFloat(token1Amount) *
+							_borrowLimit *
+							(1 - _borrowLimit ** _nLoops)) /
+						(price * (1 - _borrowLimit))
+					).toString();
 					setToken0Amount(_token0Amount);
-					setLiquidationPrice((leverage * parseFloat(token1Amount) * MAX_BORROW_LIMIT)/ (Number(_token0Amount)));
+					setLiquidationPrice(
+						(leverage *
+							parseFloat(token1Amount) *
+							MAX_BORROW_LIMIT) /
+							Number(_token0Amount)
+					);
 				}
 			}
 		}
@@ -121,8 +131,8 @@ export default function BuyModule({ pair, limit }) {
 
 	const updateToken0Amount = (e: string) => {
 		setToken0Amount(e);
-		if (isValidNS(e)){
-			if(Number(price) > 0){
+		if (isValidNS(e)) {
+			if (Number(price) > 0) {
 				setToken1Amount(Big(e).times(price).toString());
 			} else {
 				setToken1Amount("0");
@@ -132,8 +142,8 @@ export default function BuyModule({ pair, limit }) {
 
 	const updateToken1Amount = (e) => {
 		setToken1Amount(e);
-		if (isValidNS(e)){
-			if(Number(price)){
+		if (isValidNS(e)) {
+			if (Number(price)) {
 				setToken0Amount(Big(e).div(price).toString());
 			} else {
 				setToken0Amount("0");
@@ -143,8 +153,8 @@ export default function BuyModule({ pair, limit }) {
 
 	const onPriceChange = (e) => {
 		setPrice(e);
-		if (isValidNS(e)){
-			if(Number(e) > 0){
+		if (isValidNS(e)) {
+			if (Number(e) > 0) {
 				setToken1Amount(Big(token0Amount).times(e).toString());
 			} else {
 				setToken1Amount("0");
@@ -152,17 +162,19 @@ export default function BuyModule({ pair, limit }) {
 		}
 	};
 
-	const max = () => ((token1?.balance ?? 0) - (token1?.inOrderBalance ?? 0)) / 10 ** token1?.decimals;
+	const max = () =>
+		((token1?.balance ?? 0) - (token1?.inOrderBalance ?? 0)) /
+		10 ** token1?.decimals;
 
 	return (
 		<Flex flexDir={"column"} gap={4} width={"50%"}>
 			<Flex flexDir={"column"} gap={1}>
 				<Text fontSize={"sm"}>Price ({pair?.tokens[1].symbol})</Text>
 				<NumberInput
-				isDisabled={!limit}
+					isDisabled={!limit}
 					min={0}
 					precision={pair?.exchangeRateDecimals}
-					value={limit ? price : 'Place order at market price'}
+					value={limit ? price : "Place order at market price"}
 					onChange={onPriceChange}
 					variant="filled"
 					border={"1px"}
@@ -177,20 +189,23 @@ export default function BuyModule({ pair, limit }) {
 				</NumberInput>
 			</Flex>
 
-			
-
 			<Flex flexDir={"column"} gap={1}>
 				<Flex justify={"space-between"}>
-					<Text fontSize={"sm"}>
-						Total ({token1?.symbol})
-					</Text>
+					<Text fontSize={"sm"}>Total ({token1?.symbol})</Text>
 					<Text fontSize={"xs"}>
-						Balance{" "}
-						{tokenFormatter(null).format(max())} {token1?.symbol}
+						Balance {tokenFormatter(null).format(max())}{" "}
+						{token1?.symbol}
 					</Text>
 				</Flex>
-				
-				<NumberInputWithSlider max={max()} min={MIN_TOKEN1} asset={token1} onUpdate={updateToken1Amount} value={token1Amount} color='red2'/>
+
+				<NumberInputWithSlider
+					max={max()}
+					min={MIN_TOKEN1}
+					asset={token1}
+					onUpdate={updateToken1Amount}
+					value={token1Amount}
+					color="red2"
+				/>
 			</Flex>
 
 			<Flex
@@ -198,29 +213,24 @@ export default function BuyModule({ pair, limit }) {
 				borderColor={"gray.700"}
 				bgColor={"whiteAlpha.100"}
 				align={"center"}
+				flexDir='column'
+				py={2}
+				px={4}
 			>
-				<Box w={"17%"} pl={4} py={1.5}>
+				<Flex width={'100%'} justify='space-between'>
 					<Text fontSize={"xs"}>Leverage</Text>
-					<Box height="6">
+					<Text fontSize={"xs"}>
+						Liq Price:{" "}
+						{tokenFormatter(null).format(liquidationPrice)}
+					</Text>
+				</Flex>
+				<Flex width={'100%'} pt={1} justify='space-between' align='center'>
+					<Box height="6" width={'20%'}>
 						{tokenFormatter(null).format(leverage)} x
 					</Box>
-				</Box>
-
-				<Box w={"83%"} pr={4}>
-					<Flex justify={"flex-end"} align="center">
-						<Text fontSize={"xs"}>
-							Liq Price:{" "}
-							{tokenFormatter(null).format(liquidationPrice)}
-						</Text>
-					</Flex>
-
 					<Slider
-						ml={1.5}
-						width="96%"
-						mt={2}
-						mb={-1}
-						min={1}
-						max={12.5}
+						min={1.1}
+						max={3}
 						step={0.1}
 						defaultValue={3}
 						value={leverage}
@@ -231,27 +241,29 @@ export default function BuyModule({ pair, limit }) {
 						</SliderTrack>
 						<SliderThumb />
 					</Slider>
-				</Box>
+				</Flex>
 			</Flex>
 
-			{limit && <Flex flexDir={"column"} gap={1}>
-				<Text fontSize={"sm"}>Amount ({token0?.symbol})</Text>
-				<NumberInput
-					min={0}
-					precision={pair?.exchangeRateDecimals}
-					value={parseFloat(token1Amount) * leverage / price}
-					onChange={updateToken1Amount}
-					variant="filled"
-					border={"1px"}
-					borderColor={"gray.700"}
-				>
-					<NumberInputField />
-					<NumberInputStepper>
-						<NumberIncrementStepper />
-						<NumberDecrementStepper />
-					</NumberInputStepper>
-				</NumberInput>
-			</Flex>}
+			{limit && (
+				<Flex flexDir={"column"} gap={1}>
+					<Text fontSize={"sm"}>Amount ({token0?.symbol})</Text>
+					<NumberInput
+						min={0}
+						precision={pair?.exchangeRateDecimals}
+						value={(parseFloat(token1Amount) * leverage) / price}
+						onChange={updateToken1Amount}
+						variant="filled"
+						border={"1px"}
+						borderColor={"gray.700"}
+					>
+						<NumberInputField />
+						<NumberInputStepper>
+							<NumberIncrementStepper />
+							<NumberDecrementStepper />
+						</NumberInputStepper>
+					</NumberInput>
+				</Flex>
+			)}
 
 			<BuySellModal
 				limit={limit}
@@ -262,7 +274,8 @@ export default function BuyModule({ pair, limit }) {
 				pair={pair}
 				price={price}
 				buy={false}
-				leverage={1}
+				loops={nLoops}
+				borrowLimit={borrowLimit}
 			/>
 		</Flex>
 	);

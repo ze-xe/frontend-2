@@ -5,10 +5,12 @@ import Position from "../components/portfolio/position";
 
 import Head from "next/head";
 import { useAccount, useBalance, useEnsAvatar } from "wagmi";
-import { useEffect } from "react";
+import { useEffect, useContext } from 'react';
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react";
 import { tokenFormatter } from "../utils/formatters";
 import { ethers } from 'ethers';
+import Faucet from "../components/faucet";
+import { DataContext } from "../context/DataProvider";
 
 export default function portfolio() {
 	const { address: _address } = useAccount();
@@ -38,10 +40,6 @@ export default function portfolio() {
 	
 	return (
 		<>
-			<Head>
-				<title>Portfolio | ZEXE | Buy & Sell Crypto on TRON</title>
-				<link rel="icon" type="image/x-icon" href="/favicon.png"></link>
-			</Head>
 
 			<Box mt={1} fontFamily="Poppins">
 				<Tabs orientation="vertical" colorScheme={"purple"} outline='none' >
@@ -78,8 +76,6 @@ export default function portfolio() {
 						<Divider borderColor='background1'/>
 						<Tab {...tabStyle}>Margin Position</Tab>
 						<Divider borderColor='background1'/>
-						<Tab {...tabStyle}>Orders</Tab>
-						<Divider borderColor='background1'/>
 						</Box>
 
 						<Box>
@@ -99,10 +95,14 @@ export default function portfolio() {
 						<TabPanel p={0} px={1}>
 							<Position />
 						</TabPanel>
-						<TabPanel>
-							<p>Coming soon...</p>
+
+						<TabPanel p={0} px={1}>
+							<Faucet/>
 						</TabPanel>
-					</TabPanels>
+						<TabPanel p={0} px={1}>
+							{/* <Faucet/> */}
+						</TabPanel>
+						</TabPanels>
 				</Tabs>
 			</Box>
 		</>
