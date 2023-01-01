@@ -33,11 +33,8 @@ const mintAmount = {
 const Big = require('big.js');
 
 import { Input, InputGroup } from '@chakra-ui/react';
-import axios from 'axios';
 import Link from 'next/link';
-import Head from 'next/head';
 import { useAccount } from 'wagmi';
-import { ChainID } from '../utils/chains';
 import { tokenFormatter } from '../utils/formatters';
 import { useEffect } from 'react';
 

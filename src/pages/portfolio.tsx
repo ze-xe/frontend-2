@@ -9,8 +9,7 @@ import { useEffect, useContext } from 'react';
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react";
 import { tokenFormatter } from "../utils/formatters";
 import { ethers } from 'ethers';
-import Faucet from "../components/faucet";
-import { DataContext } from "../context/DataProvider";
+import Faucet from "../components/Faucet";
 
 export default function portfolio() {
 	const { address: _address } = useAccount();
