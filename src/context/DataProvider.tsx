@@ -1,9 +1,6 @@
 import * as React from "react";
 import {
-	DUMMY_ADDRESS,
-	HELPER,
 	Endpoints,
-	ADDRESSES,
 	coingeckoIds,
 	dummyPrices,
 } from "../utils/const";
@@ -95,6 +92,7 @@ function DataProvider({ children }: any) {
 			address,
 			chain
 		).then((res) => {
+			console.log('wallet balance', res);
 			setBlock(res[0].toString());
 			for (let i = 0; i < res[1].length; i += 2) {
 				_tokens[i / 2].balance = BigNumber.from(res[1][i]).toString();

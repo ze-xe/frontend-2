@@ -23,6 +23,7 @@
     "dotenv": "^16.0.3",
     "ethers": "^5.7.2",
     "framer-motion": "^6.3.0",
+    "fs": "^0.0.1-security",
     "lightweight-charts": "^3.8.0",
     "next": "latest",
     "next-transpile-modules": "^10.0.0",

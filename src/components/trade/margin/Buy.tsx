@@ -122,6 +122,7 @@ export default function BuyModule({ pair, limit }) {
 				setNLoops(_nLoops);
 				if (isValidAndPositiveNS(price)) {
 					const _token1Amount = (price * parseFloat(token0Amount) * _borrowLimit * (1 - _borrowLimit ** _nLoops)) / (1 - _borrowLimit)
+					console.log('token1amount', _token1Amount, _borrowLimit, _nLoops);
 					setToken1Amount(_token1Amount.toString());
 					setLiquidationPrice(Number(_token1Amount) / (leverage * parseFloat(token0Amount) * MAX_BORROW_LIMIT));
 					console.log(Number(_token1Amount) / (price * parseFloat(token0Amount) * MAX_BORROW_LIMIT));

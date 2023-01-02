@@ -1,5 +1,5 @@
 import * as React from "react";
-import { DUMMY_ADDRESS, HELPER, Endpoints, ADDRESSES } from "../utils/const";
+import { Endpoints } from "../utils/const";
 const { Big } = require("big.js");
 import axios from "axios";
 import { call, getABI, getAddress, getContract } from "../utils/contract";
@@ -40,11 +40,6 @@ const dummyPrices = {
 	ZEXE: "0.01"
 };
 
-import erc20 from "../abis/ERC20.json";
-import ctoken from "../abis/CToken.json";
-import lever from "../abis/Lever.json";
-import multicall from "../abis/Multicall2.json";
-
 function LeverDataProvider({ children }: any) {
 	const [isDataReady, setIsDataReady] = React.useState(false);
 	const [isFetchingData, setIsFetchingData] = React.useState(false);
@@ -66,15 +61,11 @@ function LeverDataProvider({ children }: any) {
 			"any"
 		);
 
-		const itf = new Interface(erc20.abi);
-		const ctokenitf = new Interface(ctoken.abi);
+		const itf = new Interface(getABI('BTC'));
+		const ctokenitf = new Interface(getABI('lBTC_Market'));
 		const leverContract = await getContract('Lever', chain);
 
-		const multicallContract = new ethers.Contract(
-			ADDRESSES[chain].Multicall,
-			multicall.abi,
-			provider.getSigner()
-		);
+		const multicallContract = await getContract('Multicall2', chain);
 
 		let calls = [];
 		for (let i = 0; i < _markets.length; i++) {
@@ -91,7 +82,7 @@ function LeverDataProvider({ children }: any) {
 				ctokenitf.encodeFunctionData("borrowBalanceCurrent", [address]),
 			]);	
 		}
-		console.log(leverContract);
+
 		Promise.all([multicallContract.callStatic.aggregate(calls), call(leverContract, 'getAssetsIn', [address], chain)])
 		.then(([res, assetsIn]) => {
 			let _totalCollateralBalance = Big(0);

@@ -1,20 +1,12 @@
 import { ethers } from 'ethers';
 import { Interface } from 'ethers/lib/utils.js';
-import erc20 from '../abis/ERC20.json'
-import multicall from '../abis/Multicall2.json'
+import { getABI, getContract, getAddress } from './contract';
 
-import { ADDRESSES } from './const';
-
-
-export function getBalancesAndApprovals(tokens: string[], account: string, chain: any, allowanceFor: string = ADDRESSES[chain].Exchange): Promise<any[]> {
+export async function getBalancesAndApprovals(tokens: string[], account: string, chain: any, allowanceFor: string = getAddress('Exchange')): Promise<any[]> {
     const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
 
-    const itf = new Interface(erc20.abi);
-    const multicallContract = new ethers.Contract(
-        ADDRESSES[chain].Multicall,
-        multicall.abi,
-        provider.getSigner()
-    );
+    const itf = new Interface(getABI('BTC'));
+    const multicallContract = await getContract('Multicall2', chain);
 
     let calls = []
     for (let i = 0; i<tokens.length; i++) {
