@@ -51,6 +51,8 @@ const Header = dynamic(
 	{ ssr: false },
 );
 
+import { Analytics } from '@vercel/analytics/react';
+
 function MyApp({ Component, pageProps }: AppProps) {
 	return (
 		<WagmiConfig client={wagmiClient}>
@@ -61,6 +63,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 							<AppDataProvider>
 								<Header title={""} />
 								<Component {...pageProps} />
+								<Analytics />
 							</AppDataProvider>
 						</LeverDataProvider>
 					</DataProvider>
