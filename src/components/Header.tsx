@@ -21,12 +21,6 @@ import {
 	IconButton,
 	Stack,
 	Collapse,
-	Icon,
-	Popover,
-	PopoverTrigger,
-	PopoverContent,
-	useColorModeValue,
-	useBreakpointValue,
 } from "@chakra-ui/react";
 import { HamburgerIcon, CloseIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import { useAccount, useConnect, chain, Chain, useNetwork } from "wagmi";
@@ -95,6 +89,8 @@ export const Header = () => {
 		}
 	}, [isConnected, isConnecting]);
 
+	const { chain: activeChain } = useNetwork();
+
 	if (router.pathname === "/") {
 		return <></>;
 	}
@@ -158,15 +154,16 @@ export const Header = () => {
 						justify={"flex-end"}
 						gap={4}
 					>
-						{isConnected && (
+						{(isConnected && !activeChain.unsupported) ? (
 							<MenuOption href="/portfolio" title="Portfolio" />
-						)}
+						): 
 						<Box>
 							<ConnectButton
 								chainStatus={"icon"}
 								showBalance={false}
-							/>
+								/>
 						</Box>
+							}
 					</Flex>
 				</Stack>
 			</Flex>
@@ -179,6 +176,7 @@ export const Header = () => {
 
 const MenuOption = ({ href, title, disabled = false, size = "sm" }) => {
 	const route = useRouter();
+
 
 	return (
 		<Link href={href}>
@@ -205,8 +203,6 @@ const MenuOption = ({ href, title, disabled = false, size = "sm" }) => {
 								? "primary"
 								: "gray.200"
 						}
-						// textDecoration={route.pathname.includes(href) ? 'underline' : 'none'}
-						// fontWeight={route.pathname.includes(href) ? 'bold' : 'medium'}
 						textUnderlineOffset="4px"
 						size={size}
 						fontSize="sm"

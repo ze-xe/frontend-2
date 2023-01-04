@@ -1,8 +1,13 @@
 {
-  "private": true,
+  "name": "ze-xe",
+  "version": "0.0.1",
+  "description": "zexe frontend",
   "scripts": {
     "dev": "next",
     "build": "next build",
+    "config:prod": "curl https://raw.githubusercontent.com/ze-xe/contracts-0.1/main/deployments/arbitrumGoerli/deployments.json -o ./src/deployments/deployments.json && curl https://raw.githubusercontent.com/ze-xe/contracts-0.1/main/deployments/arbitrumGoerli/config.json -o ./src/deployments/config.json",
+    "config:dev": "curl https://raw.githubusercontent.com/ze-xe/contracts-0.1/dev/deployments/arbitrumGoerli/deployments.json -o ./src/deployments/deployments.json && curl https://raw.githubusercontent.com/ze-xe/contracts-0.1/dev/deployments/arbitrumGoerli/config.json -o ./src/deployments/config.json",
+    "config:staging": "curl https://raw.githubusercontent.com/ze-xe/contracts-0.1/staging/deployments/arbitrumGoerli/deployments.json -o ./src/deployments/deployments.json && curl https://raw.githubusercontent.com/ze-xe/contracts-0.1/staging/deployments/arbitrumGoerli/config.json -o ./src/deployments/config.json",
     "start": "next start"
   },
   "dependencies": {
@@ -12,7 +17,6 @@
     "@chakra-ui/theme-tools": "^2.0.2",
     "@emotion/react": "^11.9.0",
     "@emotion/styled": "^11.9.0",
-    "@fontsource/zen-dots": "^4.5.8",
     "@rainbow-me/rainbowkit": "^0.8.0",
     "@react-icons/all-files": "^4.1.0",
     "@sentry/nextjs": "^7.28.1",
@@ -24,8 +28,8 @@
     "ethers": "^5.7.2",
     "framer-motion": "^6.3.0",
     "fs": "^0.0.1-security",
-    "lightweight-charts": "^3.8.0",
     "next": "latest",
+    "next-seo": "^5.15.0",
     "next-transpile-modules": "^10.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

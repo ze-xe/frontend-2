@@ -1,5 +1,5 @@
-import { Box, Text, IconButton, Flex, Tag } from '@chakra-ui/react';
-import React from 'react';
+import { Box, Text, IconButton, Flex, Tag } from "@chakra-ui/react";
+import React from "react";
 import {
 	Table,
 	Thead,
@@ -10,15 +10,15 @@ import {
 	Td,
 	TableCaption,
 	TableContainer,
-} from '@chakra-ui/react';
-import { EditIcon } from '@chakra-ui/icons';
-import { MdOutlineCancel } from 'react-icons/md';
-import CancelOrder from './CancelOrder';
-import { useEffect } from 'react';
-import { useContext } from 'react';
-import { DataContext } from '../../../context/DataProvider';
-import UpdateOrder from './UpdateOrder';
-import { tokenFormatter } from '../../../utils/formatters';
+} from "@chakra-ui/react";
+import { EditIcon } from "@chakra-ui/icons";
+import { MdOutlineCancel } from "react-icons/md";
+import CancelOrder from "./CancelOrder";
+import { useEffect } from "react";
+import { useContext } from "react";
+import { DataContext } from "../../../context/DataProvider";
+import UpdateOrder from "./UpdateOrder";
+import { tokenFormatter } from "../../../utils/formatters";
 
 import {
 	Pagination,
@@ -29,7 +29,7 @@ import {
 	PaginationContainer,
 	PaginationPageGroup,
 } from "@ajna/pagination";
-import { AiOutlineArrowLeft, AiOutlineArrowRight } from 'react-icons/ai';
+import { AiOutlineArrowLeft, AiOutlineArrowRight } from "react-icons/ai";
 
 export default function PlacedOrders({ pair }) {
 	const { tokens, placedOrders } = useContext(DataContext);
@@ -38,119 +38,156 @@ export default function PlacedOrders({ pair }) {
 	const [pairNow, setPairNow] = React.useState(null);
 
 	useEffect(() => {
-		if(pair){
-		if (pairNow !== pair.id || (!token0)) {
-			setToken0(
-				tokens.find((token) => token.symbol === pair.tokens[0].symbol)
-			);
-			setToken1(
-				tokens.find((token) => token.symbol === pair.tokens[1].symbol)
-			);
-			setPairNow(pair.id)
+		if (pair) {
+			if (pairNow !== pair.id || !token0) {
+				setToken0(
+					tokens.find(
+						(token) => token.symbol === pair.tokens[0].symbol
+					)
+				);
+				setToken1(
+					tokens.find(
+						(token) => token.symbol === pair.tokens[1].symbol
+					)
+				);
+				setPairNow(pair.id);
+			}
 		}
-	}
 	});
 
 	const { currentPage, setCurrentPage, pagesCount, pages } = usePagination({
 		initialState: { currentPage: 1 },
-		pagesCount: Math.floor((placedOrders[pair?.id] ? placedOrders[pair?.id].length : 0) / 3),
+		pagesCount: Math.ceil(
+			(placedOrders[pair?.id] ? placedOrders[pair?.id].length : 0) / 3 
+		),
 	});
 
 	return (
 		<Box bgColor="background2">
-			{placedOrders[pair?.id]?.length > 0 ? 
-			<>
-			<TableContainer>
-				<Table size="sm" borderColor={'gray.800'}>
-					<Thead>
-						<Tr>
-							<Th borderColor='gray.800'>Order</Th>
-							<Th borderColor='gray.800'>Amount</Th>
-							<Th borderColor='gray.800'>Exchange Rate</Th>
-							<Th isNumeric borderColor='gray.800'></Th>
-						</Tr>
-					</Thead>
-					<Tbody>
-						{placedOrders[pair?.id]?.slice(currentPage * 3, currentPage * 3 + 3).map(
-							(order: any, index: number) => {
-								return (
-									<Tr>
-										<Td
-										color={
-												!order.value.buy
-													? 'red2'
-													: 'green2'
-											}
-											borderColor='gray.900'
-											>
-											<Tag
-													size={"sm"}
-													bgColor={
-														order.value.buy
+			{placedOrders[pair?.id]?.length > 0 ? (
+				<>
+					<TableContainer>
+						<Table size="sm" borderColor={"gray.800"}>
+							<Thead>
+								<Tr>
+									<Th borderColor="gray.800">Order</Th>
+									<Th borderColor="gray.800">Amount</Th>
+									<Th borderColor="gray.800">
+										Exchange Rate
+									</Th>
+									<Th isNumeric borderColor="gray.800"></Th>
+								</Tr>
+							</Thead>
+							<Tbody>
+								{placedOrders[pair?.id]
+									?.slice(
+										(currentPage - 1) * 3,
+										(currentPage - 1) * 3 + 3
+									)
+									.map((order: any, index: number) => {
+										return (
+											<Tr>
+												<Td
+													color={
+														!order.value.buy
+															? "red2"
+															: "green2"
+													}
+													borderColor="gray.900"
+												>
+													<Tag
+														size={"sm"}
+														bgColor={
+															order.value
+															.orderType == 0
+															? "green.700"
+															: order.value
+																	.orderType ==
+															  1
+															? "red.700"
+															: order.value
+																	.orderType ==
+															  2
 															? "green.700"
 															: "red.700"
-													}
-													variant="solid"
-													rounded={2}
+														}
+														variant="solid"
+														rounded={2}
+													>
+														{order.value
+															.orderType == 0
+															? "BUY"
+															: order.value
+																	.orderType ==
+															  1
+															? "SELL"
+															: order.value
+																	.orderType ==
+															  2
+															? "LONG"
+															: "SHORT"}
+													</Tag>
+												</Td>
+												<Td borderColor="gray.900">
+													{tokenFormatter(
+														null
+													).format(
+														order.value.amount /
+															10 **
+																token0?.decimals
+													)}{" "}
+													{token0?.symbol}
+												</Td>
+												<Td borderColor="gray.900">
+													{tokenFormatter(
+														pair?.exchangeRateDecimals
+													).format(
+														order.value
+															.exchangeRate /
+															10 ** 18
+													)}{" "}
+													{token1?.symbol}/
+													{token0?.symbol}
+												</Td>
+												<Td
+													isNumeric
+													borderColor="gray.900"
+													maxW={"100px"}
 												>
-													{order.value.buy ?
-													"BUY"
-													: "SELL"}
-												</Tag>
-										</Td>
-										<Td
-										borderColor='gray.900'>
-											{tokenFormatter(null).format(
-												order.value.amount /
-													10 ** token0?.decimals
-											)}{' '}
-											{token0?.symbol}
-										</Td>
-										<Td
-										borderColor='gray.900'>
-											{tokenFormatter(pair?.exchangeRateDecimals).format(
-												order.value.exchangeRate /
-													10 ** 18
-											)}{' '}
-											{token1?.symbol}/{token0?.symbol}
-										</Td>
-										<Td isNumeric
-										borderColor='gray.900' maxW={'100px'}>
-											<Flex justify={'end'}>
-												{/* <UpdateOrder
+													<Flex justify={"end"}>
+														{/* <UpdateOrder
 													pair={pair}
 													token0={token0}
 													token1={token1}
 													price={0}
 													order={order}
 												/> */}
-												<CancelOrder
-													pair={pair}
-													token0={token0}
-													token1={token1}
-													price={0}
-													order={order}
-												/>
-											</Flex>
-										</Td>
-									</Tr>
-								);
-							}
-						)}
-					</Tbody>
-				</Table>
-			</TableContainer>
-			
-			<Pagination
+														<CancelOrder
+															pair={pair}
+															token0={token0}
+															token1={token1}
+															price={0}
+															order={order}
+														/>
+													</Flex>
+												</Td>
+											</Tr>
+										);
+									})}
+							</Tbody>
+						</Table>
+					</TableContainer>
+
+					<Pagination
 						pagesCount={pagesCount}
 						currentPage={currentPage}
 						onPageChange={setCurrentPage}
 					>
-						<PaginationContainer justify={"space-between"} mt={2}>
+						<PaginationContainer justify={"space-between"} mt={2} mx={4}>
 							<PaginationPrevious
 								fontSize={"sm"}
 								height={"35px"}
-								bgColor="background1"
+								bgColor="whiteAlpha.50"
 								color={"gray.400"}
 								_hover={{ bgColor: "whiteAlpha.200" }}
 								minW="100px"
@@ -162,7 +199,7 @@ export default function PlacedOrders({ pair }) {
 								{pages.map((page: number) => (
 									<PaginationPage
 										height={"35px"}
-										bgColor="background1"
+										bgColor="whiteAlpha.50"
 										color={"gray.400"}
 										_hover={{ bgColor: "whiteAlpha.200" }}
 										minW="40px"
@@ -174,7 +211,7 @@ export default function PlacedOrders({ pair }) {
 							<PaginationNext
 								fontSize={"sm"}
 								height={"35px"}
-								bgColor="background1"
+								bgColor="whiteAlpha.50"
 								color={"gray.400"}
 								_hover={{ bgColor: "whiteAlpha.200" }}
 								minW="100px"
@@ -183,11 +220,12 @@ export default function PlacedOrders({ pair }) {
 							</PaginationNext>
 						</PaginationContainer>
 					</Pagination>
-			</>
-			: <Box mx={4}>
-				<Text color={'gray'}>No active orders</Text>
-			</Box>
-			}
+				</>
+			) : (
+				<Box mx={4}>
+					<Text color={"gray"}>No active orders</Text>
+				</Box>
+			)}
 		</Box>
 	);
 }

@@ -18,6 +18,7 @@ import {
 import { ethers } from "ethers";
 import { tokenFormatter } from "../../../utils/formatters";
 import { LeverDataContext } from "../../../context/LeverDataProvider";
+import { isValidNS } from '../../../utils/number';
 
 export default function BuySellModal({
 	pair,
@@ -117,6 +118,9 @@ export default function BuySellModal({
 		});
 	}
 
+	// a function to add two numbers
+
+
 	const execute = async () => {
 		setLoading(true);
 		let _amount = Big(token0Amount)
@@ -164,8 +168,8 @@ export default function BuySellModal({
 				const res = await send(
 					exchange,
 					buy && !limit
-						? "executeMarketOrders"
-						: "executeLimitOrders",
+						? "executeT1LimitOrders"
+						: "executeT0LimitOrders",
 					[
 						_orders.map((order: any) => order.signature),
 						_orders.map((order: any) => order.value),
@@ -325,7 +329,7 @@ export default function BuySellModal({
 
 	return (
 		<>
-			{Big(token0Amount).lt(token0?.allowance ?? 1e50) ? (
+			{isValidNS(token0Amount) && Big(token0Amount).lt(token0?.allowance ?? 1e50) ? (
 				Big(token1Amount).lt(token1?.allowance ?? 1e50) ? (
 					market && market.isCollateral ? (
 						<Button

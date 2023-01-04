@@ -6,11 +6,12 @@ import { DataContext } from '../../../context/DataProvider';
 import {useEffect, useState} from 'react';
 import { tokenFormatter } from '../../../utils/formatters';
 import { AppDataContext } from '../../../context/AppData';
+import Big from 'big.js';
 
 const Order = ({ order, index, total, pair, orderType }) => {
 	const {setExchangeRate} = useContext(AppDataContext);
 	return (
-		<Box onClick={() => setExchangeRate(order.exchangeRate/(10**18))} _hover={{ cursor: 'pointer' }}
+		<Box onClick={() => setExchangeRate(Big(order.exchangeRate).div(10**18).toString())} _hover={{ cursor: 'pointer' }}
 		// bgGradient={'linear(to-r,' + (orderType == 'BUY' ? 'rgba(24, 176, 95, 100%), rgba(24, 176, 95, 100%))' : 'rgba(200, 50, 50, 100%), rgba(200, 50, 50, 100%))')}
 		// bgSize={'1%'}
 		// bgRepeat='no-repeat'
@@ -63,7 +64,7 @@ export default function OrderBook({ pair }) {
 
 	return (
 		<Flex flexDir={'column'}>
-			<Flex justify={'space-between'} px={2} py={2} mb={1} mt={{sm: -2, md: -2, lg: -2, xl: 0}} gap={2}>
+			<Flex justify={'space-between'} px={4} py={2} mb={1} mt={{sm: -2, md: -2, lg: -2, xl: 0}} gap={2}>
 				<Text fontSize={'xs'} fontWeight='bold' color={'gray.300'}>{pair?.tokens[0].symbol} </Text>
 				<Text fontSize={'xs'} fontWeight='bold' color={'gray.300'}>{pair?.tokens[1].symbol}</Text>
 				<Text fontSize={'xs'} fontWeight='bold' color={'gray.300'}>{pair?.tokens[1].symbol}/{pair?.tokens[0].symbol}</Text>

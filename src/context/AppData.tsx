@@ -1,6 +1,4 @@
 import * as React from 'react';
-import { DUMMY_ADDRESS } from '../utils/const';
-const { Big } = require('big.js');
 
 const AppDataContext = React.createContext<AppDataValue>({} as AppDataValue);
 

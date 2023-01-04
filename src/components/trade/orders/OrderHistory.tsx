@@ -8,11 +8,11 @@ const Order = ({ order, pair, index }) => {
 
 	return (
 		<Flex justify={'space-between'} width="100%"
-            color={order.buy ? 'green2' : 'red2'}
-            bgColor={order.buy ? "rgba(24, 176, 95, 10%)" : "rgba(200, 50, 50, 10%)"}
+            color={order.orderType == 0 || order.orderType == 2 ? 'green2' : 'red2'}
+            bgColor={order.orderType == 0 || order.orderType == 2 ? "rgba(24, 176, 95, 5%)" : "rgba(200, 50, 50, 5%)"}
 			py={'3px'}
 			px={4}
-			mb={0.5}
+			// mb={0.5}
         >
 			<Text fontSize={'xs'}>
 				{tokenFormatter(null).format(order.fillAmount/(10**pair?.tokens[0].decimals))} 
@@ -32,7 +32,7 @@ export default function OrderHistory({pair}) {
 
 	return (
 		<Box >
-			<Flex justify={'space-between'} px={2} py={2} mb={1} mt={{sm: -2, md: -2, lg: -2, xl: 0}} gap={2} bgColor='background2'>
+			<Flex justify={'space-between'} px={4} py={2} mb={1} mt={{sm: -2, md: -2, lg: -2, xl: 0}} gap={2} bgColor='background2'>
 			<Text fontSize={'xs'} fontWeight='bold' color={'gray.300'}>{pair?.tokens[0].symbol} </Text>
 				<Text fontSize={'xs'} fontWeight='bold' color={'gray.300'}>{pair?.tokens[1].symbol}</Text>
 				<Text fontSize={'xs'} fontWeight='bold' color={'gray.300'}>{pair?.tokens[1].symbol}/{pair?.tokens[0].symbol}</Text>

@@ -37,8 +37,6 @@ import {
 	PaginationContainer,
 	PaginationPageGroup,
 } from "@ajna/pagination";
-import { GiPreviousButton } from "react-icons/gi";
-import { BsFillArrowLeftCircleFill } from "react-icons/bs";
 import { AiOutlineArrowLeft, AiOutlineArrowRight } from "react-icons/ai";
 
 export default function ExecutedOrders({ pair }) {
@@ -62,9 +60,9 @@ export default function ExecutedOrders({ pair }) {
 
 	const { currentPage, setCurrentPage, pagesCount, pages } = usePagination({
 		initialState: { currentPage: 1 },
-		pagesCount: Math.floor(getOrders().length / 3),
+		pagesCount: Math.ceil(getOrders().length / 3),
 	});
-
+	
 	return (
 		<Box bgColor="background2">
 			{getOrders().length > 0 ? (
@@ -84,7 +82,7 @@ export default function ExecutedOrders({ pair }) {
 
 							<Tbody>
 								{getOrders()
-									.slice(currentPage * 3, currentPage * 3 + 3)
+									.slice((currentPage - 1) * 3, (currentPage - 1) * 3 + 3)
 									.map((order: any, index: number) => {
 										return (
 											<Tr>
@@ -94,19 +92,37 @@ export default function ExecutedOrders({ pair }) {
 														fontWeight="bold"
 													>
 														<Tag
-															size={"sm"}
-															bgColor={
-																order.buy
-																	? "green.700"
-																	: "red.700"
-															}
-															variant="solid"
-															rounded={2}
-														>
-															{order.buy
-																? "BUY"
-																: "SELL"}
-														</Tag>
+														size={"sm"}
+														bgColor={
+															order
+															.orderType == 0
+															? "green.700"
+															: order
+																	.orderType ==
+															  1
+															? "red.700"
+															: order
+																	.orderType ==
+															  2
+															? "green.700"
+															: "red.700"
+														}
+														variant="solid"
+														rounded={2}
+													>
+														{order
+															.orderType == 0
+															? "BUY"
+															: order
+																	.orderType ==
+															  1
+															? "SELL"
+															: order
+																	.orderType ==
+															  2
+															? "LONG"
+															: "SHORT"}
+													</Tag>
 													</Text>
 												</Td>
 												<Td borderColor="gray.900">

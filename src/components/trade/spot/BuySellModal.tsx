@@ -1,13 +1,4 @@
-import {
-	Alert,
-	AlertIcon,
-	Box,
-	Button,
-	Flex,
-	Skeleton,
-	Text,
-	useDisclosure,
-} from "@chakra-ui/react";
+import { Button } from "@chakra-ui/react";
 import React, { useContext } from "react";
 const Big = require("big.js");
 
@@ -16,10 +7,6 @@ import axios from "axios";
 import { DataContext } from "../../../context/DataProvider";
 import { useAccount, useSignTypedData } from "wagmi";
 import { Endpoints } from "../../../utils/const";
-import OrdersToExecute from "./OrdersToExecute";
-
-import { Step, Steps, useSteps } from "chakra-ui-steps";
-import PlaceOrder from "./PlaceOrder";
 import { useEffect } from "react";
 import { useToast } from "@chakra-ui/react";
 import {
@@ -151,8 +138,8 @@ export default function BuySellModal2({
 				const res = await send(
 					exchange,
 					buy && !limit
-						? "executeMarketOrders"
-						: "executeLimitOrders",
+						? "executeT1LimitOrders"
+						: "executeT0LimitOrders",
 					[
 						_orders.map((order: any) => order.signature),
 						_orders.map((order: any) => order.value),

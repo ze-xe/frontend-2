@@ -1373,11 +1373,6 @@
     "@ethersproject/properties" "^5.7.0"
     "@ethersproject/strings" "^5.7.0"
 
-"@fontsource/zen-dots@^4.5.8":
-  version "4.5.8"
-  resolved "https://registry.npmjs.org/@fontsource/zen-dots/-/zen-dots-4.5.8.tgz"
-  integrity sha512-Fo1njHtPHUQk0Yr7dk4F8l/mNNJZVA4NJfwe7OayAGQWuZswEh5pCPGUDpblE/VBwno4fimFcX6sZCGx9sGK3A==
-
 "@json-rpc-tools/provider@^1.5.5":
   version "1.7.6"
   resolved "https://registry.yarnpkg.com/@json-rpc-tools/provider/-/provider-1.7.6.tgz#8a17c34c493fa892632e278fd9331104e8491ec6"
@@ -3089,11 +3084,6 @@ eyes@^0.1.8:
   resolved "https://registry.yarnpkg.com/eyes/-/eyes-0.1.8.tgz#62cf120234c683785d902348a800ef3e0cc20bc0"
   integrity sha512-GipyPsXO1anza0AOZdy69Im7hGFCNB7Y/NGjDlZGJ3GJJLtwNSb2vrzYrTYJRrRloVx7pl+bhUaTB8yiccPvFQ==
 
-fancy-canvas@0.2.2:
-  version "0.2.2"
-  resolved "https://registry.npmjs.org/fancy-canvas/-/fancy-canvas-0.2.2.tgz"
-  integrity sha512-50qi8xA0QkHbjmb8h7XQ6k2fvD7y/yMfiUw9YTarJ7rWrq6o5/3CCXPouYk+XSLASvvxtjyiQLRBFt3qkE3oyA==
-
 fast-safe-stringify@^2.0.6:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/fast-safe-stringify/-/fast-safe-stringify-2.1.1.tgz#c406a83b6e70d9e35ce3b30a81141df30aeba884"
@@ -3568,13 +3558,6 @@ lie@3.1.1:
   dependencies:
     immediate "~3.0.5"
 
-lightweight-charts@^3.8.0:
-  version "3.8.0"
-  resolved "https://registry.npmjs.org/lightweight-charts/-/lightweight-charts-3.8.0.tgz"
-  integrity sha512-7yFGnYuE1RjRJG9RwUTBz5wvF1QtjBOSW4FFlikr8Dh+/TDNt4ci+HsWSYmStgQUpawpvkCJ3j5/W25GppGj9Q==
-  dependencies:
-    fancy-canvas "0.2.2"
-
 lines-and-columns@^1.1.6:
   version "1.2.4"
   resolved "https://registry.npmjs.org/lines-and-columns/-/lines-and-columns-1.2.4.tgz"
@@ -3709,6 +3692,11 @@ nanoid@^3.3.4:
   version "3.3.4"
   resolved "https://registry.npmjs.org/nanoid/-/nanoid-3.3.4.tgz"
   integrity sha512-MqBkQh/OHTS2egovRtLk45wEyNXwF+cokD+1YPf9u5VfJiRdAiRwB2froX5Co9Rh20xs4siNPm8naNotSD6RBw==
+
+next-seo@^5.15.0:
+  version "5.15.0"
+  resolved "https://registry.yarnpkg.com/next-seo/-/next-seo-5.15.0.tgz#b1a90508599774982909ea44803323c6fb7b50f4"
+  integrity sha512-LGbcY91yDKGMb7YI+28n3g+RuChUkt6pXNpa8FkfKkEmNiJkeRDEXTnnjVtwT9FmMhG6NH8qwHTelGrlYm9rgg==
 
 next-transpile-modules@^10.0.0:
   version "10.0.0"

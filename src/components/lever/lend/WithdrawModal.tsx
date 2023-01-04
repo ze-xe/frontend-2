@@ -27,8 +27,6 @@ import {
 	ModalCloseButton,
 } from "@chakra-ui/react";
 
-import { Input } from "@chakra-ui/react";
-
 import {
 	Slider,
 	SliderTrack,
@@ -58,7 +56,6 @@ import { ethers } from "ethers";
 import Big from "big.js";
 import { ChainID } from "../../../utils/chains";
 import axios from "axios";
-import { AiFillMinusSquare } from "react-icons/ai";
 import { MinusIcon } from "@chakra-ui/icons";
 import { LeverDataContext } from "../../../context/LeverDataProvider";
 

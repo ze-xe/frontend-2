@@ -197,7 +197,7 @@ function DataProvider({ children }: any) {
 
 	const subscribePairHistory = (__pairs: any[]) => {
 		const _pairs = __pairs;
-		socket.on("PAIR_HISTORY", ({ pair, amount, buy, exchangeRate }) => {
+		socket.on("PAIR_HISTORY", ({ pair, amount, orderType, exchangeRate }) => {
 			for (let i in _pairs) {
 				if (_pairs[i].id === pair) {
 					_pairs[i].priceDiff = Big(exchangeRate)
@@ -404,6 +404,7 @@ function DataProvider({ children }: any) {
 		addPlacedOrder,
 		updateWalletBalance,
 		updateInOrderBalance,
+		block
 	};
 
 	return (
@@ -432,6 +433,7 @@ interface DataValue {
 	addPlacedOrder: (order: any) => void;
 	updateWalletBalance: (token: string, amount: string) => void;
 	updateInOrderBalance: (token: string, amount: string) => void;
+	block: number;
 }
 
 export { DataProvider, DataContext };

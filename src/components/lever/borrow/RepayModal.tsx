@@ -2,8 +2,6 @@ import {
 	Box,
 	Button,
 	InputGroup,
-	InputLeftElement,
-	InputRightElement,
 	useDisclosure,
 	Text,
 	Tooltip,
@@ -27,8 +25,6 @@ import {
 	ModalCloseButton,
 } from "@chakra-ui/react";
 
-import { Input } from "@chakra-ui/react";
-
 import {
 	Slider,
 	SliderTrack,
@@ -36,13 +32,6 @@ import {
 	SliderThumb,
 	SliderMark,
 } from "@chakra-ui/react";
-
-const imageIds = {
-	ETH: "1027",
-	BTC: "1",
-	USDC: "3408",
-	DAI: "4943",
-};
 
 import {
 	NumberInput,
@@ -54,11 +43,7 @@ import {
 import { getContract, send } from "../../../utils/contract";
 import { DataContext } from "../../../context/DataProvider";
 import { useAccount } from "wagmi";
-import { ethers } from "ethers";
-import { ADDRESSES } from "../../../utils/const";
 import Big from "big.js";
-import { ChainID } from "../../../utils/chains";
-import axios from "axios";
 import { MinusIcon } from "@chakra-ui/icons";
 import { LeverDataContext } from "../../../context/LeverDataProvider";
 
@@ -113,48 +98,17 @@ export default function LendModal({ market, token }) {
 			.then(async (res: any) => {
 				setLoading(false);
 				setResponse("Transaction sent! Waiting for confirmation...");
-				if (chain == ChainID.NILE) {
-					setHash(res);
-					checkResponse(res);
-				} else {
-					setHash(res.hash);
-					await res.wait(1);
-					setConfirmed(true);
-					setResponse("Transaction Successful!");
-					updateWalletBalance(market?.id, amount.neg().toString());
-					updateBorrowBalance(market?.id, amount.neg().toString());
-				}
+				setHash(res.hash);
+				await res.wait(1);
+				setConfirmed(true);
+				setResponse("Transaction Successful!");
+				updateWalletBalance(market?.id, amount.neg().toString());
+				updateBorrowBalance(market?.id, amount.neg().toString());
 			})
 			.catch((err: any) => {
 				setLoading(false);
 				setConfirmed(true);
 				setResponse("Transaction failed. Please try again!");
-			});
-	};
-
-	// check response in intervals
-	const checkResponse = (tx_id: string) => {
-		axios
-			.get(
-				"https://nile.trongrid.io/wallet/gettransactionbyid?value=" +
-					tx_id
-			)
-			.then((res) => {
-				if (!res.data.ret) {
-					setTimeout(() => {
-						checkResponse(tx_id);
-					}, 2000);
-				} else {
-					setConfirmed(true);
-					if (res.data.ret[0].contractRet == "SUCCESS") {
-						setResponse("Transaction Successful!");
-					} else {
-						setResponse("Transaction Failed. Please try again.");
-					}
-				}
-			})
-			.catch((err: any) => {
-				setLoading(false);
 			});
 	};
 

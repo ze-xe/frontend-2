@@ -15,12 +15,6 @@ export default function trade() {
         }
     })
     return (
-        <>
-        <Flex align={'center'} justify='center' height={'90vh'}>
-            {/* {(!isConnecting && !isConnecting) && <Box border='1px #E11860' borderColor={'#E11860'}>
-                <Text>Please connect your wallet to continue</Text>
-            </Box>} */}
-        </Flex>
-        </>
+        <></>
     )
 }

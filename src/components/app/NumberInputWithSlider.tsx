@@ -113,7 +113,7 @@ export default function NumberInputWithSlider({
 				<SliderTrack >
 					<SliderFilledTrack bgColor={color} />
 				</SliderTrack>
-				<Tooltip fontSize={'xs'} label={(isNaN((value * 100) / max) ? 0 : (value * 100) / max) + '%'} >
+				<Tooltip fontSize={'xs'} label={(isNaN((value * 100) / max) ? 0 : (value * 100) / max).toFixed(1) + '%'} >
 				<SliderThumb bgColor={color} />
 				</Tooltip>
 			</Slider>

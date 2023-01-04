@@ -31,7 +31,7 @@ import {
 
 const Big = require("big.js");
 
-const MIN_TOKEN0 = 0.01;
+const MIN_TOKEN0 = 0.001;
 const MAX_BORROW_LIMIT = 0.75;
 
 export default function BuyModule({ pair, limit }) {
@@ -170,6 +170,8 @@ export default function BuyModule({ pair, limit }) {
 			}
 		}
 	};
+
+	console.log(nLoops, borrowLimit, token1Amount)
 
 	return (
 		<Flex flexDir={"column"} gap={4} width={"50%"}>

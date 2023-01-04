@@ -9,7 +9,8 @@ import { useEffect, useContext } from 'react';
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react";
 import { tokenFormatter } from "../utils/formatters";
 import { ethers } from 'ethers';
-import Faucet from "../components/Faucet";
+import Faucet from "../components/portfolio/faucet";
+import Disconnect from "../components/portfolio/disconnect";
 
 export default function portfolio() {
 	const { address: _address } = useAccount();
@@ -39,9 +40,15 @@ export default function portfolio() {
 	
 	return (
 		<>
-
+			<Head>
+				<title>
+					Portfolio | ZEXE |
+					Buy & Sell Crypto on ZEXE
+				</title>
+				<link rel="icon" type="image/x-icon" href="/favicon.png"></link>
+			</Head>
 			<Box mt={1} fontFamily="Poppins">
-				<Tabs orientation="vertical" colorScheme={"purple"} outline='none' >
+				<Tabs orientation="vertical" colorScheme={"purple"} outline='none'>
 					<TabList bgColor="background2" borderColor={'black'}>
 						<Flex minH={'95vh'} justify={'space-between'} flexDir='column'>
 						<Box>
@@ -99,7 +106,7 @@ export default function portfolio() {
 							<Faucet/>
 						</TabPanel>
 						<TabPanel p={0} px={1}>
-							{/* <Faucet/> */}
+							<Disconnect/>
 						</TabPanel>
 						</TabPanels>
 				</Tabs>

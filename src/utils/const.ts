@@ -21,6 +21,7 @@ export const coingeckoIds = {
 	'NEAR': 'near',
 	'AURORA': 'aurora-near',
 	'USDC': 'usd-coin',
+	'LINK': 'chainlink',
 };
 
 export const dummyPrices = {
@@ -33,6 +34,8 @@ export const dummyPrices = {
 	'NEAR': '3.2',
 	'AURORA': '0.8',
 	'USDC': '1',
+	'ZEXE': '0.001',
+	'LINK': '4.5'
 };
 
 export const imageIds = {

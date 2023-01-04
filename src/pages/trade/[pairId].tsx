@@ -40,7 +40,7 @@ const Trade = () => {
 				<title>
 					{pair?.exchangeRate / 10 ** 18}{' '}
 					{pair?.tokens[1].symbol}/{pair?.tokens[0].symbol} | ZEXE |
-					Buy & Sell Crypto on TRON
+					Buy & Sell Crypto on ZEXE
 				</title>
 				<link rel="icon" type="image/x-icon" href="/favicon.png"></link>
 			</Head>
@@ -64,6 +64,9 @@ const Trade = () => {
 						<TitlePanel pair={pair} />
 						<GraphPanel pair={pair} />
 						<Exchange pair={pair} />
+						<Box bgColor={'background2'} my={1} width="100%">
+							<UserOrders pair={pair} />
+						</Box>
 					</Box>
 					<Flex
 						order={{ sm: 1, md: 2 }}
@@ -73,9 +76,7 @@ const Trade = () => {
 					</Flex>
 				</Flex>
 				
-				<Box bgColor={'background2'} my={1} width="100%">
-					<UserOrders pair={pair} />
-				</Box>
+				
 			</Box>
 		</>
 	);

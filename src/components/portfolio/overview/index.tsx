@@ -132,9 +132,15 @@ export default function Overview() {
 																	"50%",
 															}}
 														/>
+														<Box>
+
 														<Text>
-															{token.name}
+															{token.name} ({token.symbol})
 														</Text>
+														<Text fontSize={'xs'}>
+															{dollarFormatter(null).format(token.price)}
+														</Text>
+														</Box>
 													</Flex>
 												</Td>
 

@@ -16,7 +16,6 @@ return <>
     bgClip="text"
     >
   <Image src="/zexe.png" width={{sm: 300, md: 500}}  alt="none" style={{borderRadius: 0}} />
-  {/* <Heading fontFamily={'zen-dots'} fontSize="200px" mt={-10} textShadow={"6px 3px " + (color.colorMode == 'light' ? '#222222' : '#fff')}>{title}</Heading> */}
 
   </Flex>
     </>
