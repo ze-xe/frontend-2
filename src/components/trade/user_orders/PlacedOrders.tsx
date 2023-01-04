@@ -11,13 +11,10 @@ import {
 	TableCaption,
 	TableContainer,
 } from "@chakra-ui/react";
-import { EditIcon } from "@chakra-ui/icons";
-import { MdOutlineCancel } from "react-icons/md";
 import CancelOrder from "./CancelOrder";
 import { useEffect } from "react";
 import { useContext } from "react";
 import { DataContext } from "../../../context/DataProvider";
-import UpdateOrder from "./UpdateOrder";
 import { tokenFormatter } from "../../../utils/formatters";
 
 import {
