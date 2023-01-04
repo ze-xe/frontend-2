@@ -2,6 +2,8 @@ import {
 	Box,
 	Button,
 	InputGroup,
+	InputLeftElement,
+	InputRightElement,
 	useDisclosure,
 	Text,
 	Tooltip,
@@ -11,7 +13,6 @@ import {
 	Alert,
 	AlertIcon,
 	Link,
-	IconButton,
 } from "@chakra-ui/react";
 import React, { useContext, useState } from "react";
 import Image from "next/image";
@@ -40,12 +41,12 @@ import {
 	NumberIncrementStepper,
 	NumberDecrementStepper,
 } from "@chakra-ui/react";
-import { getContract, send } from "../../../utils/contract";
-import { DataContext } from "../../../context/DataProvider";
-import { useAccount } from "wagmi";
+import { getContract, send, getAddress } from '../../../../utils/contract';
+import { DataContext } from "../../../../context/DataProvider";
+import { ethers } from "ethers";
 import Big from "big.js";
-import { MinusIcon } from "@chakra-ui/icons";
-import { LeverDataContext } from "../../../context/LeverDataProvider";
+import { PlusSquareIcon } from "@chakra-ui/icons";
+import { LeverDataContext } from "../../../../context/LeverDataProvider";
 
 export default function LendModal({ market, token }) {
 	const { isOpen, onOpen, onClose } = useDisclosure();
@@ -58,23 +59,22 @@ export default function LendModal({ market, token }) {
 	const [hash, setHash] = React.useState(null);
 	const [confirmed, setConfirmed] = React.useState(false);
 
-	const { chain, explorer } = useContext(DataContext);
-	const { updateBorrowBalance, updateWalletBalance } = useContext(LeverDataContext);
-
-	const { isConnected: isEvmConnected, address: EvmAddress } = useAccount();
+	const { chain, explorer, incrementAllowance, updateWalletBalance } = useContext(DataContext);
+	const { updateCollateralBalance } = useContext(LeverDataContext);
 
 	const updateSliderValue = (value: number) => {
 		setSliderValue(value);
+		if(!token?.balance) return
 		setInputAmount(
 			(
-				(value * Math.min(market?.borrowBalance / 10 ** token?.decimals, market?.balance / 10 ** token?.decimals)) /
+				(value * (token?.balance / 10 ** token?.decimals)) /
 				100
 			).toString()
 		);
 	};
 
 	const updateMax = () => {
-		setInputAmount((market?.borrowBalance / 10 ** token?.decimals).toString());
+		setInputAmount((token?.balance / 10 ** token?.decimals).toString());
 		setSliderValue(100);
 	};
 
@@ -84,17 +84,18 @@ export default function LendModal({ market, token }) {
 	};
 
 	const amountExceedsBalance = () => {
-		return Number(inputAmount) > market?.borrowBalance / 10 ** token?.decimals;
+		if(!token?.balance) return true
+		return Number(inputAmount) > token?.balance / 10 ** token?.decimals;
 	};
 
-	const repay = async () => {
+	const deposit = async () => {
 		setLoading(true);
 		setConfirmed(false);
 		setHash(null);
 		setResponse("");
 		let amount = Big(inputAmount).times(10 ** token?.decimals);
-		const ctoken = await getContract("CToken", chain, market?.id);
-		send(ctoken, "repayBorrow", [amount.toFixed(0)], chain)
+		const exchange = await getContract("Exchange", chain);
+		send(exchange, "repay", [token.id, amount.toFixed(0)], chain)
 			.then(async (res: any) => {
 				setLoading(false);
 				setResponse("Transaction sent! Waiting for confirmation...");
@@ -102,14 +103,35 @@ export default function LendModal({ market, token }) {
 				await res.wait(1);
 				setConfirmed(true);
 				setResponse("Transaction Successful!");
-				updateWalletBalance(market?.id, amount.neg().toString());
-				updateBorrowBalance(market?.id, amount.neg().toString());
+				updateWalletBalance(token.id, amount.neg().toString());
+				updateCollateralBalance(market?.id, amount.toString());
 			})
 			.catch((err: any) => {
+				console.log(err);
 				setLoading(false);
 				setConfirmed(true);
 				setResponse("Transaction failed. Please try again!");
 			});
+	};
+
+	const approve = async () => {
+		setLoading(true);
+		const tokenContract = await getContract(token.symbol, chain, token.id);
+		const exchange = getAddress("Exchange", chain);
+		send(
+			tokenContract,
+			"approve",
+			[exchange, ethers.constants.MaxUint256],
+			chain
+		).then(async (res: any) => {
+			await res.wait();
+			setLoading(false);
+			incrementAllowance(token.id, ethers.constants.MaxUint256.toString());
+		})
+		.catch((err: any) => {
+			console.log(err);
+			setLoading(false);
+		})
 	};
 
 	const _onClose = () => {
@@ -123,23 +145,20 @@ export default function LendModal({ market, token }) {
 	return (
 		<>
 			<Box>
-				<Button
-					size={"md"}
-					
-					variant={"outline"}
-					onClick={onOpen}
-					aria-label={""}
-				><MinusIcon boxSize={"20px"} /></Button>
+				<Button size={'sm'} variant={'outline'} onClick={onOpen} aria-label={""}>
+				Deposit <PlusSquareIcon boxSize={'20px'} ml={2} />
+				</Button>
 			</Box>
 
 			<Modal isOpen={isOpen} onClose={_onClose} isCentered>
 				<ModalOverlay />
 				<ModalContent bgColor={"#1D1334"} borderRadius={0}>
 					<ModalHeader>
-						Repaying {market?.inputToken.name}
+						Depositing {market?.inputToken.name}
 					</ModalHeader>
 					<ModalCloseButton />
 					<ModalBody mb={2}>
+						{Number(inputAmount +1) < Number(token?.allowance) ? (
 							<Box>
 								<Text
 									textAlign={"right"}
@@ -148,7 +167,7 @@ export default function LendModal({ market, token }) {
 									mt={-2}
 								>
 									Balance{" "}
-									{market?.borrowBalance / 10 ** token?.decimals}
+									{token?.balance ? token?.balance / 10 ** token?.decimals : 0}
 								</Text>
 
 								<InputGroup>
@@ -158,14 +177,14 @@ export default function LendModal({ market, token }) {
 										borderRadius={0}
 									>
 										<Image
-														src={`/assets/crypto_logos/${market.inputToken.symbol.toLowerCase()}.png`}
-
+											src={`/assets/crypto_logos/${market.inputToken.symbol.toLowerCase()}.png`}
 											alt={""}
 											width={30}
 											height={30}
 											style={{
 												maxWidth: "25px",
 												maxHeight: "25px",
+												borderRadius: "50%",
 											}}
 										/>
 									</InputLeftAddon>
@@ -173,7 +192,7 @@ export default function LendModal({ market, token }) {
 										w={"100%"}
 										defaultValue={0}
 										max={
-											market?.borrowBalance /
+											token?.balance /
 											10 ** token?.decimals
 										}
 										clampValueOnBlur={false}
@@ -259,14 +278,14 @@ export default function LendModal({ market, token }) {
 								<Button
 									width={"100%"}
 									bgColor="primary"
-									disabled={amountExceedsBalance() || loading}
+									disabled={inputAmount == '0' || amountExceedsBalance() || loading}
 									isLoading={loading}
 									loadingText="Sign the transaction in your wallet"
-									onClick={repay}
+									onClick={deposit}
 								>
-									{amountExceedsBalance()
+									{inputAmount == '0' ? 'Enter Amount' : amountExceedsBalance()
 										? "Insufficient Balance"
-										: "Repay"}
+										: "Deposit"}
 								</Button>
 
 								{response && (
@@ -311,6 +330,39 @@ export default function LendModal({ market, token }) {
 									</Box>
 								)}
 							</Box>
+						) : (
+							<Box>
+								<Flex gap={3} mb={5}>
+									<Image
+														src={`/assets/crypto_logos/${market.inputToken.symbol.toLowerCase()}.png`}
+
+										alt={""}
+										width={40}
+										height={40}
+										style={{
+											minWidth: "50px",
+											minHeight: "45px",
+											borderRadius: "50%",
+										}}
+									/>
+									<Box>
+										<Text>
+											To Deposit {token?.name} tokens to
+											zexe, you need to enable it first{" "}
+										</Text>
+									</Box>
+								</Flex>
+
+								<Button
+									width={"100%"}
+									onClick={approve}
+									isLoading={loading}
+									loadingText="Approving..."
+								>
+									Approve {token?.name}
+								</Button>
+							</Box>
+						)}
 					</ModalBody>
 				</ModalContent>
 			</Modal>

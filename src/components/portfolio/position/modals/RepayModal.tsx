@@ -7,9 +7,11 @@ import {
 	Tooltip,
 	InputLeftAddon,
 	InputRightAddon,
+	Flex,
 	Alert,
 	AlertIcon,
 	Link,
+	IconButton,
 } from "@chakra-ui/react";
 import React, { useContext, useState } from "react";
 import Image from "next/image";
@@ -38,14 +40,12 @@ import {
 	NumberIncrementStepper,
 	NumberDecrementStepper,
 } from "@chakra-ui/react";
-
-import { getContract, send } from "../../../utils/contract";
-import { DataContext } from "../../../context/DataProvider";
+import { getContract, send } from "../../../../utils/contract";
+import { DataContext } from "../../../../context/DataProvider";
 import { useAccount } from "wagmi";
 import Big from "big.js";
-import { PlusSquareIcon } from "@chakra-ui/icons";
-import { LeverDataContext } from "../../../context/LeverDataProvider";
-import { tokenFormatter } from '../../../utils/formatters';
+import { MinusIcon } from "@chakra-ui/icons";
+import { LeverDataContext } from "../../../../context/LeverDataProvider";
 
 export default function LendModal({ market, token }) {
 	const { isOpen, onOpen, onClose } = useDisclosure();
@@ -58,21 +58,23 @@ export default function LendModal({ market, token }) {
 	const [hash, setHash] = React.useState(null);
 	const [confirmed, setConfirmed] = React.useState(false);
 
-	const { chain, explorer } = useContext(DataContext);
-	const { availableToBorrow, updateBorrowBalance, updateWalletBalance } = useContext(LeverDataContext);
+	const { chain, explorer, updateWalletBalance } = useContext(DataContext);
+	const { updateBorrowBalance } = useContext(LeverDataContext);
+
+	const { isConnected: isEvmConnected, address: EvmAddress } = useAccount();
 
 	const updateSliderValue = (value: number) => {
 		setSliderValue(value);
 		setInputAmount(
 			(
-				(value * maxBorrow/market.inputTokenPriceUSD) /
+				(value * Math.min(market?.borrowBalance / 10 ** token?.decimals, market?.balance / 10 ** token?.decimals)) /
 				100
 			).toString()
 		);
 	};
 
 	const updateMax = () => {
-		setInputAmount((maxBorrow/market.inputTokenPriceUSD).toString());
+		setInputAmount((market?.borrowBalance / 10 ** token?.decimals).toString());
 		setSliderValue(100);
 	};
 
@@ -82,17 +84,17 @@ export default function LendModal({ market, token }) {
 	};
 
 	const amountExceedsBalance = () => {
-		return Number(inputAmount) > maxBorrow/market.inputTokenPriceUSD
+		return Number(inputAmount) > market?.borrowBalance / 10 ** token?.decimals;
 	};
 
-	const borrow = async () => {
+	const repay = async () => {
 		setLoading(true);
 		setConfirmed(false);
 		setHash(null);
 		setResponse("");
 		let amount = Big(inputAmount).times(10 ** token?.decimals);
-		const ctoken = await getContract("CToken", chain, market?.id);
-		send(ctoken, "borrow", [amount.toFixed(0)], chain)
+		const exchange = await getContract("Exchange", chain);
+		send(exchange, "repay", [token.id, amount.toFixed(0)], chain)
 			.then(async (res: any) => {
 				setLoading(false);
 				setResponse("Transaction sent! Waiting for confirmation...");
@@ -100,8 +102,8 @@ export default function LendModal({ market, token }) {
 				await res.wait(1);
 				setConfirmed(true);
 				setResponse("Transaction Successful!");
-				updateWalletBalance(market?.id, amount.toString());
-				updateBorrowBalance(market?.id, amount.toString());
+				updateWalletBalance(token?.id, amount.neg().toString());
+				updateBorrowBalance(market?.id, amount.neg().toString());
 			})
 			.catch((err: any) => {
 				setLoading(false);
@@ -118,25 +120,25 @@ export default function LendModal({ market, token }) {
 		onClose();
 	};
 
-	const maxBorrow = Math.min(parseFloat(availableToBorrow), market?.totalDepositBalanceUSD - market?.totalBorrowBalanceUSD)
-
 	return (
 		<>
 			<Box>
-				<Button size={'md'}  variant={'outline'} onClick={onOpen} aria-label={""}>
-				Borrow <PlusSquareIcon boxSize={'20px'} ml={2} />
-				</Button>
+				<Button
+					size={"sm"}
+					variant={"outline"}
+					onClick={onOpen}
+					aria-label={""}
+				><MinusIcon boxSize={"20px"} /></Button>
 			</Box>
 
 			<Modal isOpen={isOpen} onClose={_onClose} isCentered>
 				<ModalOverlay />
 				<ModalContent bgColor={"#1D1334"} borderRadius={0}>
 					<ModalHeader>
-						Borrowing {market?.inputToken.name}
+						Repaying {market?.inputToken.name}
 					</ModalHeader>
 					<ModalCloseButton />
 					<ModalBody mb={2}>
-						
 							<Box>
 								<Text
 									textAlign={"right"}
@@ -144,8 +146,8 @@ export default function LendModal({ market, token }) {
 									mb={1}
 									mt={-2}
 								>
-									Max{" "}
-									{tokenFormatter(null).format(maxBorrow/market.inputTokenPriceUSD)} {market.inputToken.symbol}
+									Balance{" "}
+									{market?.borrowBalance / 10 ** token?.decimals}
 								</Text>
 
 								<InputGroup>
@@ -170,7 +172,8 @@ export default function LendModal({ market, token }) {
 										w={"100%"}
 										defaultValue={0}
 										max={
-											parseFloat(availableToBorrow)/market.inputTokenPriceUSD
+											market?.borrowBalance /
+											10 ** token?.decimals
 										}
 										clampValueOnBlur={false}
 										min={0}
@@ -258,11 +261,11 @@ export default function LendModal({ market, token }) {
 									disabled={amountExceedsBalance() || loading}
 									isLoading={loading}
 									loadingText="Sign the transaction in your wallet"
-									onClick={borrow}
+									onClick={repay}
 								>
 									{amountExceedsBalance()
 										? "Insufficient Balance"
-										: "Borrow"}
+										: "Repay"}
 								</Button>
 
 								{response && (
@@ -307,7 +310,6 @@ export default function LendModal({ market, token }) {
 									</Box>
 								)}
 							</Box>
-						
 					</ModalBody>
 				</ModalContent>
 			</Modal>

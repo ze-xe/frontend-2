@@ -38,6 +38,20 @@ export const dummyPrices = {
 	'LINK': '4.5'
 };
 
+export const mintAmount = {
+	USDT: 10000,
+	USDD: 10000,
+	BTC: 1,
+	ETH: 10,
+	WTRX: 100000,
+	BTT: 10000000,
+	AURORA: 1000,
+	NEAR: 100,
+	USDC: 10000,
+	ZEXE: 1000000,
+	LINK: 100,
+};
+
 export const imageIds = {
 	ETH: "1027",
 	BTC: "1",

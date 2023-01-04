@@ -171,8 +171,6 @@ export default function BuyModule({ pair, limit }) {
 		}
 	};
 
-	console.log(nLoops, borrowLimit, token1Amount)
-
 	return (
 		<Flex flexDir={"column"} gap={4} width={"50%"}>
 			<Flex flexDir={"column"} gap={1}>

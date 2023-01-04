@@ -15,20 +15,7 @@ import Image from 'next/image';
 import React from 'react';
 import { useContext } from 'react';
 import { DataContext } from '../../../context/DataProvider';
-import { getABI, getContract, send } from '../../../utils/contract';
-
-const mintAmount = {
-	USDT: 10000,
-	USDD: 10000,
-	BTC: 1,
-	ETH: 10,
-	WTRX: 100000,
-	BTT: 10000000,
-	AURORA: 1000,
-	NEAR: 100,
-	USDC: 10000,
-	ZEXE: 1000000
-};
+import { getContract, send } from '../../../utils/contract';
 
 const Big = require('big.js');
 
@@ -38,6 +25,7 @@ import { useAccount, useBalance } from 'wagmi';
 import { tokenFormatter } from '../../../utils/formatters';
 import { useEffect } from 'react';
 import { ethers } from 'ethers';
+import { mintAmount } from '../../../utils/const';
 
 function RadioCard(props) {
 	const { getInputProps, getCheckboxProps } = useRadio(props);

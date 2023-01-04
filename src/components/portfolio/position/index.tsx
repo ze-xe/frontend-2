@@ -1,24 +1,15 @@
 import { Box, Button, Flex, Heading, Text } from "@chakra-ui/react";
 import React from "react";
-import LendingTable from "../../lever/lend/LendTable";
-import BorrowTable from "../../lever/borrow/BorrowTable";
+import LendingTable from "./tables/LendTable";
+import BorrowTable from "./tables/BorrowTable";
 
 import { LeverDataContext } from "../../../context/LeverDataProvider";
 import { dollarFormatter, tokenFormatter } from '../../../utils/formatters';
 import {useEffect} from 'react';
-import { AppDataContext } from "../../../context/AppData";
 import { DataContext } from "../../../context/DataProvider";
 import { call, getContract, send } from "../../../utils/contract";
 import { useAccount, useNetwork } from 'wagmi';
 import { ChainID } from '../../../utils/chains';
-
-// https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png
-const imageIds = {
-	ETH: "1027",
-	BTC: "1",
-	USDC: "3408",
-	DAI: "4943",
-};
 
 export default function position() {
 	const { markets, availableToBorrow, totalBorrowBalance, totalCollateralBalance, adjustedDebt } = React.useContext(LeverDataContext);
@@ -88,7 +79,6 @@ export default function position() {
 	
 	return (
 		<>
-
 			<Flex flexDir={"column"} fontFamily='Poppins' mt={-1}>
 				<Box width={"100%"}>
 					<Flex justify="space-between" gap={1}>

@@ -10,36 +10,6 @@ import { Interface } from "ethers/lib/utils.js";
 
 const LeverDataContext = React.createContext<DataValue>({} as DataValue);
 
-// http://localhost:3010/allpairs
-// http://localhost:3010/orders/1a7f0acc09e078a414a7d74d2d00434427ef2c021a09d075996d2441f0d4ab9c
-
-// list of tokens
-const coingeckoIds = {
-	BTC: "bitcoin",
-	ETH: "ethereum",
-	USDT: "tether",
-	USDD: "usdd",
-	WTRX: "tron",
-	BTT: "bittorrent",
-	NEAR: "near",
-	AURORA: "aurora-near",
-	USDC: "usd-coin",
-	ZEXE: "zexe"
-};
-
-const dummyPrices = {
-	BTC: "18000",
-	ETH: "1200",
-	USDT: "1",
-	USDD: "1",
-	WTRX: "0.006",
-	BTT: "0.0000008",
-	NEAR: "3.2",
-	AURORA: "0.8",
-	USDC: "1",
-	ZEXE: "0.01"
-};
-
 function LeverDataProvider({ children }: any) {
 	const [isDataReady, setIsDataReady] = React.useState(false);
 	const [isFetchingData, setIsFetchingData] = React.useState(false);
@@ -99,7 +69,6 @@ function LeverDataProvider({ children }: any) {
 				if(_markets[marketIndex].rewardTokenEmissionsUSD){
 					_markets[marketIndex].rewardsAPR = [((100 * (_markets[marketIndex].rewardTokenEmissionsUSD[0] * 365)) / _markets[marketIndex].totalDepositBalanceUSD), ((100 * (_markets[marketIndex].rewardTokenEmissionsUSD[1] * 365)) / _markets[marketIndex].totalDepositBalanceUSD)];
 				}
-
 				_totalCollateralBalance = _totalCollateralBalance.add(
 					Big(_markets[marketIndex].collateralBalance).mul(_markets[marketIndex].inputTokenPriceUSD).div(1e18)
 				);
@@ -115,7 +84,6 @@ function LeverDataProvider({ children }: any) {
 			}
 			// set all assets to lowercase
 			assetsIn = assetsIn.map((asset: string) => asset.toLowerCase());
-			console.log(assetsIn)
 			for(let i in _markets){
 				if(assetsIn.includes(_markets[i].id)){
 					_markets[i].isCollateral = true;
@@ -136,7 +104,7 @@ function LeverDataProvider({ children }: any) {
 		let _markets = [...markets];
 		for(let i in _markets) {
 			if(_markets[i].id === market) {
-				_markets[i].isCollateral = true;
+				_markets[i].isCollateral = !_markets[i].isCollateral;
 			}
 		}
 		setMarkets(_markets);
@@ -167,16 +135,6 @@ function LeverDataProvider({ children }: any) {
 		for(let i in _markets) {
 			if(_markets[i].id === token) {
 				_markets[i].balance = Big(_markets[i].balance).add(amount).toString()
-			}
-		}
-		setMarkets(_markets);
-	}
-
-	const incrementAllowance = async (marketId: any, amount: string) => {
-		let _markets = [...markets];
-		for(let i in _markets) {
-			if(_markets[i].id === marketId) {
-				_markets[i].allowance = Big(_markets[i].allowance).add(amount).toString()
 			}
 		}
 		setMarkets(_markets);
@@ -243,7 +201,6 @@ function LeverDataProvider({ children }: any) {
 		totalCollateralBalance,
 		totalBorrowBalance,
 		availableToBorrow,
-		incrementAllowance,
 		adjustedDebt,
 		updateBorrowBalance,
 		updateCollateralBalance,
@@ -268,7 +225,6 @@ interface DataValue {
 	totalCollateralBalance: string;
 	totalBorrowBalance: string;
 	availableToBorrow: string;
-	incrementAllowance: (market: any, amount: string) => void;
 	adjustedDebt: string;
 	updateBorrowBalance: (token: string, amount: string) => void;
 	updateCollateralBalance: (token: string, amount: string) => void;

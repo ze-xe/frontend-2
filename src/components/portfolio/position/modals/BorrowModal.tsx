@@ -2,18 +2,14 @@ import {
 	Box,
 	Button,
 	InputGroup,
-	InputLeftElement,
-	InputRightElement,
 	useDisclosure,
 	Text,
 	Tooltip,
 	InputLeftAddon,
 	InputRightAddon,
-	Flex,
 	Alert,
 	AlertIcon,
 	Link,
-	IconButton,
 } from "@chakra-ui/react";
 import React, { useContext, useState } from "react";
 import Image from "next/image";
@@ -35,13 +31,6 @@ import {
 	SliderMark,
 } from "@chakra-ui/react";
 
-const imageIds = {
-	ETH: "1027",
-	BTC: "1",
-	USDC: "3408",
-	DAI: "4943",
-};
-
 import {
 	NumberInput,
 	NumberInputField,
@@ -49,17 +38,15 @@ import {
 	NumberIncrementStepper,
 	NumberDecrementStepper,
 } from "@chakra-ui/react";
-import { getContract, send } from "../../../utils/contract";
-import { DataContext } from "../../../context/DataProvider";
-import { useAccount } from "wagmi";
-import { ethers } from "ethers";
-import Big from "big.js";
-import { ChainID } from "../../../utils/chains";
-import axios from "axios";
-import { MinusIcon } from "@chakra-ui/icons";
-import { LeverDataContext } from "../../../context/LeverDataProvider";
 
-export default function WithdrawModal({ market, token }) {
+import { getContract, send } from "../../../../utils/contract";
+import { DataContext } from "../../../../context/DataProvider";
+import Big from "big.js";
+import { PlusSquareIcon } from "@chakra-ui/icons";
+import { LeverDataContext } from "../../../../context/LeverDataProvider";
+import { tokenFormatter } from '../../../../utils/formatters';
+
+export default function LendModal({ market, token }) {
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const [sliderValue, setSliderValue] = React.useState(0);
 	const [showTooltip, setShowTooltip] = React.useState(false);
@@ -70,20 +57,21 @@ export default function WithdrawModal({ market, token }) {
 	const [hash, setHash] = React.useState(null);
 	const [confirmed, setConfirmed] = React.useState(false);
 
-	const { chain, explorer } = useContext(DataContext);
-	const { isConnected: isEvmConnected, address: EvmAddress } = useAccount();
-	const { incrementAllowance, updateCollateralBalance, updateWalletBalance } = useContext(LeverDataContext);
+	const { chain, explorer, updateWalletBalance } = useContext(DataContext);
+	const { availableToBorrow, updateBorrowBalance } = useContext(LeverDataContext);
 
 	const updateSliderValue = (value: number) => {
 		setSliderValue(value);
 		setInputAmount(
 			(
-				(value * depositBalance() / 100).toString()
-		));
+				(value * maxBorrow/market.inputTokenPriceUSD) /
+				100
+			).toString()
+		);
 	};
 
 	const updateMax = () => {
-		setInputAmount(depositBalance().toString());
+		setInputAmount((maxBorrow/market.inputTokenPriceUSD).toString());
 		setSliderValue(100);
 	};
 
@@ -93,78 +81,32 @@ export default function WithdrawModal({ market, token }) {
 	};
 
 	const amountExceedsBalance = () => {
-		return Number(inputAmount) > depositBalance();
+		return Number(inputAmount) > maxBorrow/market.inputTokenPriceUSD
 	};
 
-	const withdraw = async () => {
+	const borrow = async () => {
 		setLoading(true);
 		setConfirmed(false);
 		setHash(null);
 		setResponse("");
-		let amount = Big(inputAmount).div(market?.exchangeRate).times(10 ** (token?.decimals-10));
-		console.log(amount.toString());
-		const ctoken = await getContract("CToken", chain, market?.id);
-		send(ctoken, "redeem", [amount.toFixed(0)], chain)
+		let amount = Big(inputAmount).times(10 ** token?.decimals);
+		const exchange = await getContract("Exchange", chain);
+		send(exchange, "borrow", [token.id, amount.toFixed(0)], chain)
 			.then(async (res: any) => {
 				setLoading(false);
 				setResponse("Transaction sent! Waiting for confirmation...");
-				if (chain == ChainID.NILE) {
-					setHash(res);
-					checkResponse(res);
-				} else {
-					setHash(res.hash);
-					await res.wait(1);
-					setConfirmed(true);
-					setResponse("Transaction Successful!");
-					updateWalletBalance(market?.id, Big(inputAmount).times(10**token?.decimals).toString());
-					updateCollateralBalance(market?.id, Big(inputAmount).times(10**token?.decimals).neg().toString());
-				}
+				setHash(res.hash);
+				await res.wait(1);
+				setConfirmed(true);
+				setResponse("Transaction Successful!");
+				updateWalletBalance(token?.id, amount.toString());
+				updateBorrowBalance(market?.id, amount.toString());
 			})
 			.catch((err: any) => {
 				setLoading(false);
 				setConfirmed(true);
 				setResponse("Transaction failed. Please try again!");
 			});
-	};
-
-	// check response in intervals
-	const checkResponse = (tx_id: string) => {
-		axios
-			.get(
-				"https://nile.trongrid.io/wallet/gettransactionbyid?value=" +
-					tx_id
-			)
-			.then((res) => {
-				if (!res.data.ret) {
-					setTimeout(() => {
-						checkResponse(tx_id);
-					}, 2000);
-				} else {
-					setConfirmed(true);
-					if (res.data.ret[0].contractRet == "SUCCESS") {
-						setResponse("Transaction Successful!");
-					} else {
-						setResponse("Transaction Failed. Please try again.");
-					}
-				}
-			})
-			.catch((err: any) => {
-				setLoading(false);
-			});
-	};
-
-	const approve = async () => {
-		setLoading(true);
-		const cToken = await getContract("ERC20", chain, market?.inputToken.id);
-		send(
-			cToken,
-			"approve",
-			[market?.id, ethers.constants.MaxUint256],
-			chain
-		).then((res: any) => {
-			console.log(res);
-			setLoading(false);
-		});
 	};
 
 	const _onClose = () => {
@@ -175,29 +117,25 @@ export default function WithdrawModal({ market, token }) {
 		onClose();
 	};
 
-	const depositBalance = () => market?.collateralBalance / 10 ** token?.decimals;
+	const maxBorrow = Math.min(parseFloat(availableToBorrow), market?.totalDepositBalanceUSD - market?.totalBorrowBalanceUSD)
 
 	return (
 		<>
 			<Box>
-				<Button
-					size={"md"}
-					
-					variant={"outline"}
-					onClick={onOpen}
-					aria-label={""}
-				><MinusIcon boxSize={"20px"} /></Button>
+				<Button size={'sm'}  variant={'outline'} onClick={onOpen} aria-label={""}>
+				Borrow <PlusSquareIcon boxSize={'20px'} ml={2} />
+				</Button>
 			</Box>
 
 			<Modal isOpen={isOpen} onClose={_onClose} isCentered>
 				<ModalOverlay />
 				<ModalContent bgColor={"#1D1334"} borderRadius={0}>
 					<ModalHeader>
-						Withdrawing {market?.inputToken.name}
+						Borrowing {market?.inputToken.name}
 					</ModalHeader>
 					<ModalCloseButton />
 					<ModalBody mb={2}>
-						{Number(inputAmount) < Number(market?.allowance) ? (
+						
 							<Box>
 								<Text
 									textAlign={"right"}
@@ -205,8 +143,8 @@ export default function WithdrawModal({ market, token }) {
 									mb={1}
 									mt={-2}
 								>
-									Balance{" "}
-									{depositBalance()}
+									Max{" "}
+									{tokenFormatter(null).format(maxBorrow/market.inputTokenPriceUSD)} {market.inputToken.symbol}
 								</Text>
 
 								<InputGroup>
@@ -217,6 +155,7 @@ export default function WithdrawModal({ market, token }) {
 									>
 										<Image
 														src={`/assets/crypto_logos/${market.inputToken.symbol.toLowerCase()}.png`}
+
 											alt={""}
 											width={30}
 											height={30}
@@ -230,8 +169,7 @@ export default function WithdrawModal({ market, token }) {
 										w={"100%"}
 										defaultValue={0}
 										max={
-											token?.balance /
-											10 ** token?.decimals
+											parseFloat(availableToBorrow)/market.inputTokenPriceUSD
 										}
 										clampValueOnBlur={false}
 										min={0}
@@ -316,14 +254,14 @@ export default function WithdrawModal({ market, token }) {
 								<Button
 									width={"100%"}
 									bgColor="primary"
-									disabled={inputAmount == '0' || amountExceedsBalance() || loading}
+									disabled={amountExceedsBalance() || loading}
 									isLoading={loading}
 									loadingText="Sign the transaction in your wallet"
-									onClick={withdraw}
+									onClick={borrow}
 								>
 									{amountExceedsBalance()
 										? "Insufficient Balance"
-										: inputAmount == '0' ? 'Enter Amount' : "Withdraw"}
+										: "Borrow"}
 								</Button>
 
 								{response && (
@@ -368,39 +306,7 @@ export default function WithdrawModal({ market, token }) {
 									</Box>
 								)}
 							</Box>
-						) : (
-							<Box>
-								<Flex gap={3} mb={5}>
-									<Image
-										src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${
-											imageIds[market.inputToken.symbol]
-										}.png`}
-										alt={""}
-										width={40}
-										height={40}
-										style={{
-											minWidth: "50px",
-											minHeight: "45px",
-										}}
-									/>
-									<Box>
-										<Text>
-											To Deposit {token?.name} tokens to
-											zexe, you need to enable it first{" "}
-										</Text>
-									</Box>
-								</Flex>
-
-								<Button
-									width={"100%"}
-									onClick={approve}
-									isLoading={loading}
-									loadingText="Approving..."
-								>
-									Approve {token?.name}
-								</Button>
-							</Box>
-						)}
+						
 					</ModalBody>
 				</ModalContent>
 			</Modal>
