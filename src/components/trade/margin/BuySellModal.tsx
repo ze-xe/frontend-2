@@ -6,7 +6,7 @@ import axios from "axios";
 
 import { DataContext } from "../../../context/DataProvider";
 import { useAccount, useSignTypedData } from "wagmi";
-import { Endpoints } from "../../../utils/const";
+import { config, Endpoints } from "../../../utils/const";
 import { useEffect } from "react";
 import { useToast } from "@chakra-ui/react";
 import {
@@ -224,8 +224,8 @@ export default function BuySellModal({
 					duration: null,
 				});
 				const domain: any = {
-					name: "zexe",
-					version: "1",
+					name: config.name,
+					version: config.version,
 					chainId: chain.toString(),
 					verifyingContract: getAddress("Exchange", chain),
 				};
