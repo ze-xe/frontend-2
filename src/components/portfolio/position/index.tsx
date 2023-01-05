@@ -32,7 +32,7 @@ export default function position() {
 		if(!zexeAccrued && isConnected && !activeChain.unsupported){
 			getContract('Lever', chain)
 			.then(lever => {
-				call(lever, 'compAccrued', [address], chain ?? ChainID.ARB_GOERLI)
+				lever.callStatic.getRewardBalance([address], true, true)
 				.then((res: any) => {
 					setZexeAccrued(res.toString());
 				})
