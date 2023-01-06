@@ -83,7 +83,7 @@ export default function PlacedOrders({ pair }) {
 									)
 									.map((order: any, index: number) => {
 										return (
-											<Tr>
+											<Tr key={index}>
 												<Td
 													color={
 														!order.value.buy

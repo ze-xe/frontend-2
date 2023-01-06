@@ -6,7 +6,7 @@ import axios from "axios";
 
 import { DataContext } from "../../../context/DataProvider";
 import { useAccount, useSignTypedData } from "wagmi";
-import { Endpoints } from "../../../utils/const";
+import { config, domain, Endpoints, types } from "../../../utils/const";
 import { useEffect } from "react";
 import { useToast } from "@chakra-ui/react";
 import {
@@ -223,27 +223,6 @@ export default function BuySellModal({
 					status: "loading",
 					duration: null,
 				});
-				const domain: any = {
-					name: "zexe",
-					version: "1",
-					chainId: chain.toString(),
-					verifyingContract: getAddress("Exchange", chain),
-				};
-
-				// The named list of all type definitions
-				const types = {
-					Order: [
-						{ name: "maker", type: "address" },
-						{ name: "token0", type: "address" },
-						{ name: "token1", type: "address" },
-						{ name: "amount", type: "uint256" },
-						{ name: "orderType", type: "uint8" },
-						{ name: "salt", type: "uint32" },
-						{ name: "exchangeRate", type: "uint176" },
-						{ name: "borrowLimit", type: "uint32" },
-						{ name: "loops", type: "uint8" },
-					],
-				};
 
 				const value = {
 					maker: address,
@@ -260,8 +239,8 @@ export default function BuySellModal({
 				};
 
 				signTypedDataAsync({
-					domain,
-					types,
+					domain: domain(chain),
+					types: types,
 					value,
 				})
 					.then((signature) => {

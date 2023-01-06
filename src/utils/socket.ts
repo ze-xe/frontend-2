@@ -6,7 +6,7 @@ class ClientSocket {
   private socket: Socket;
 
   constructor() {
-    this.socket = io(Endpoints[ChainID.ARB_GOERLI]);
+    this.socket = io('https://api.zexe.io/');
   }
 
   public on(eventName: string, callback: Function) {

@@ -17,11 +17,7 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 import { DataContext } from "../context/DataProvider";
 
-import {
-	IconButton,
-	Stack,
-	Collapse,
-} from "@chakra-ui/react";
+import { IconButton, Stack, Collapse } from "@chakra-ui/react";
 import { HamburgerIcon, CloseIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import { useAccount, useConnect, chain, Chain, useNetwork } from "wagmi";
 import { ChainID, chainIndex, chains, supportedChains } from "../utils/chains";
@@ -71,21 +67,36 @@ export const Header = () => {
 	// const {connectAsync: connectEvm, connectors} = useConnect();
 
 	useEffect(() => {
-		localStorage.setItem("chakra-ui-color-mode", "dark");
-		if (activeConnector)
-			window.ethereum.on("accountsChanged", function (accounts: any[]) {
-				// Time to reload your interface with accounts[0]!
-				fetchData(accounts[0], activeConnector?.chains[0].id);
-				fetchLeverData(accounts[0], activeConnector?.chains[0].id);
-				setChain(activeConnector?.chains[0].id);
-			});
 		if (localStorage.getItem("chakra-ui-color-mode") === "light") {
 			localStorage.setItem("chakra-ui-color-mode", "dark");
+			// reload
+			window.location.reload();
 		}
-
-		if (!isConnected && !isConnecting) {
+		if (!window.ethereum) {
 			fetchData(null, ChainID.ARB_GOERLI);
 			fetchLeverData(null, ChainID.ARB_GOERLI);
+		} else {
+			if (activeConnector)
+				window.ethereum.on(
+					"accountsChanged",
+					function (accounts: any[]) {
+						// Time to reload your interface with accounts[0]!
+						fetchData(accounts[0], activeConnector?.chains[0].id);
+						fetchLeverData(
+							accounts[0],
+							activeConnector?.chains[0].id
+						);
+						setChain(activeConnector?.chains[0].id);
+					}
+				);
+			if (localStorage.getItem("chakra-ui-color-mode") === "light") {
+				localStorage.setItem("chakra-ui-color-mode", "dark");
+			}
+
+			if (!isConnected && !isConnecting) {
+				fetchData(null, ChainID.ARB_GOERLI);
+				fetchLeverData(null, ChainID.ARB_GOERLI);
+			}
 		}
 	}, [isConnected, isConnecting]);
 
@@ -154,16 +165,16 @@ export const Header = () => {
 						justify={"flex-end"}
 						gap={4}
 					>
-						{(isConnected && !activeChain.unsupported) ? (
+						{isConnected && !activeChain.unsupported ? (
 							<MenuOption href="/portfolio" title="Portfolio" />
-						): 
-						<Box>
-							<ConnectButton
-								chainStatus={"icon"}
-								showBalance={false}
+						) : (
+							<Box>
+								<ConnectButton
+									chainStatus={"icon"}
+									showBalance={false}
 								/>
-						</Box>
-							}
+							</Box>
+						)}
 					</Flex>
 				</Stack>
 			</Flex>
@@ -176,7 +187,6 @@ export const Header = () => {
 
 const MenuOption = ({ href, title, disabled = false, size = "sm" }) => {
 	const route = useRouter();
-
 
 	return (
 		<Link href={href}>
@@ -212,7 +222,9 @@ const MenuOption = ({ href, title, disabled = false, size = "sm" }) => {
 					</Button>
 				</Tooltip>
 			</Box>
-			{route.pathname.includes(href) && <Box h={"1px"} width="100%" bgColor={"primary"}></Box>}
+			{route.pathname.includes(href) && (
+				<Box h={"1px"} width="100%" bgColor={"primary"}></Box>
+			)}
 		</Link>
 	);
 };

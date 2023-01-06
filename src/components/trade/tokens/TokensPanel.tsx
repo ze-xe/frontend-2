@@ -14,7 +14,7 @@ import TrendingTokens from './TrendingTokens';
 import NewTokens from './NewTokens';
 import { Divider } from '@chakra-ui/react';
 
-export default function TokensPanel() {
+export default function TokensPanel({margin = false}) {
 	const [search, setSearch] = React.useState('');
 
 	return (
@@ -39,7 +39,7 @@ export default function TokensPanel() {
 				</TabList>
 				<TabPanels>
 					<TabPanel px={0}>
-						<AllTokens search={search} />
+						<AllTokens search={search} margin={margin} />
 					</TabPanel>
 					<TabPanel>
 						<TrendingTokens />

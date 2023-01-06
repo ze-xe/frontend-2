@@ -55,7 +55,7 @@ const Trade = () => {
 						bgColor={'background2'}
 						width={{ sm: '100%', md: '20%', lg: '20%', xl: '15%' }}
 						mb={{ sm: '2', md: 2, lg: 0 }}>
-						<TokensPanel />
+						<TokensPanel margin={true} />
 					</Box>
 					<Box
 						order={{ sm: 0, md: 1 }}

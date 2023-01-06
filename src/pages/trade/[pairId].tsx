@@ -38,7 +38,7 @@ const Trade = () => {
 		<>
 			<Head>
 				<title>
-					{pair?.exchangeRate / 10 ** 18}{' '}
+					{(pair?.exchangeRate / 10 ** 18).toFixed(2)}{' '}
 					{pair?.tokens[1].symbol}/{pair?.tokens[0].symbol} | ZEXE |
 					Buy & Sell Crypto on ZEXE
 				</title>

@@ -10,6 +10,7 @@ import {
 	SliderFilledTrack,
 	SliderTrack,
 	SliderThumb,
+	Button,
 } from "@chakra-ui/react";
 
 import { Flex, Text } from "@chakra-ui/react";
@@ -162,6 +163,19 @@ export default function BuyModule({ pair, limit }) {
 		}
 	};
 
+	const buttonStyle = {
+		h: "42px",
+		variant: "solid",
+		border: "1px",
+		borderColor: "gray.700",
+	};
+
+	const _setLeverage = (e: string) => {
+		if (isValidAndPositiveNS(e)) {
+			setLeverage(Number(e));
+		}
+	};
+
 	const max = () =>
 		((token1?.balance ?? 0) - (token1?.inOrderBalance ?? 0)) /
 		10 ** token1?.decimals;
@@ -172,13 +186,12 @@ export default function BuyModule({ pair, limit }) {
 				<Text fontSize={"sm"}>Price ({pair?.tokens[1].symbol})</Text>
 				<NumberInput
 					isDisabled={!limit}
-					min={0}
+					min={pair?.minToken0Order/(10**token0?.decimals) ?? 0}
 					precision={pair?.exchangeRateDecimals}
 					value={limit ? price : "Place order at market price"}
 					onChange={onPriceChange}
 					variant="filled"
 					border={"1px"}
-					// borderRadius="6"
 					borderColor={"gray.700"}
 				>
 					<NumberInputField />
@@ -209,38 +222,65 @@ export default function BuyModule({ pair, limit }) {
 			</Flex>
 
 			<Flex
-				border="1px"
-				borderColor={"gray.700"}
-				bgColor={"whiteAlpha.100"}
 				align={"center"}
 				flexDir='column'
-				py={2}
-				px={4}
+				mb={2}
 			>
 				<Flex width={'100%'} justify='space-between'>
-					<Text fontSize={"xs"}>Leverage</Text>
+					<Text fontSize={"sm"}>Leverage</Text>
 					<Text fontSize={"xs"}>
 						Liq Price:{" "}
 						{tokenFormatter(null).format(liquidationPrice)}
 					</Text>
 				</Flex>
-				<Flex width={'100%'} pt={1} justify='space-between' align='center'>
-					<Box height="6" width={'20%'}>
-						{tokenFormatter(null).format(leverage)} x
+				<Flex
+					width={"100%"}
+					pt={1}
+					justify="space-between"
+					align="center"
+				>
+					<Box >
+						<NumberInput
+							step={0.1}
+							min={1.1}
+							max={3}
+							variant="filled"
+							border={"1px"}
+							borderColor={"gray.700"}
+							onChange={(e) => _setLeverage(e)}
+							value={leverage}
+						>
+							<NumberInputField rounded={0} />
+							<NumberInputStepper>
+								<NumberIncrementStepper />
+								<NumberDecrementStepper />
+							</NumberInputStepper>
+						</NumberInput>
 					</Box>
-					<Slider
-						min={1.1}
-						max={3}
-						step={0.1}
-						defaultValue={3}
-						value={leverage}
-						onChange={(e) => setLeverage(e)}
-					>
-						<SliderTrack>
-							<SliderFilledTrack bgColor={"white"} />
-						</SliderTrack>
-						<SliderThumb />
-					</Slider>
+						<Button
+							{...buttonStyle}
+							onClick={(e) => _setLeverage("1.5")}
+						>
+							1.5
+						</Button>
+						<Button
+							{...buttonStyle}
+							onClick={(e) => _setLeverage("2")}
+						>
+							2
+						</Button>
+						<Button
+							{...buttonStyle}
+							onClick={(e) => _setLeverage("2.5")}
+						>
+							2.5
+						</Button>
+						<Button
+							{...buttonStyle}
+							onClick={(e) => _setLeverage("3")}
+						>
+							Max
+						</Button>
 				</Flex>
 			</Flex>
 

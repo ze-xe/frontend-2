@@ -95,7 +95,7 @@ export default function LendModal({ market, token }) {
 		setResponse("");
 		let amount = Big(inputAmount).times(10 ** token?.decimals);
 		const exchange = await getContract("Exchange", chain);
-		send(exchange, "repay", [token.id, amount.toFixed(0)], chain)
+		send(exchange, "mint", [token.id, amount.toFixed(0)], chain)
 			.then(async (res: any) => {
 				setLoading(false);
 				setResponse("Transaction sent! Waiting for confirmation...");

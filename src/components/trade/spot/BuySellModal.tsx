@@ -6,7 +6,7 @@ import axios from "axios";
 
 import { DataContext } from "../../../context/DataProvider";
 import { useAccount, useSignTypedData } from "wagmi";
-import { Endpoints } from "../../../utils/const";
+import { Endpoints, config, domain, types } from '../../../utils/const';
 import { useEffect } from "react";
 import { useToast } from "@chakra-ui/react";
 import {
@@ -18,7 +18,7 @@ import {
 import { ethers } from "ethers";
 import { tokenFormatter } from "../../../utils/formatters";
 
-export default function BuySellModal2({
+export default function BuySellModal({
 	pair,
 	token1,
 	token0,
@@ -183,27 +183,6 @@ export default function BuySellModal2({
 					status: "loading",
 					duration: null,
 				});
-				const domain: any = {
-					name: "zexe",
-					version: "1",
-					chainId: chain.toString(),
-					verifyingContract: getAddress("Exchange", chain),
-				};
-
-				// The named list of all type definitions
-				const types = {
-					Order: [
-						{ name: 'maker', type: 'address' },
-						{ name: 'token0', type: 'address' },
-						{ name: 'token1', type: 'address' },
-						{ name: 'amount', type: 'uint256' },
-						{ name: 'orderType', type: 'uint8' },
-						{ name: 'salt', type: 'uint32' },
-						{ name: 'exchangeRate', type: 'uint176' },
-						{ name: 'borrowLimit', type: 'uint32' },
-						{ name: 'loops', type: 'uint8' }
-					],
-				};
 
 				const value = {
 					maker: address,
@@ -218,8 +197,8 @@ export default function BuySellModal2({
 				};
 
 				signTypedDataAsync({
-					domain,
-					types,
+					domain: domain(chain),
+					types: types,
 					value,
 				}).then((signature) => {
 					console.log(signature);
@@ -284,6 +263,7 @@ export default function BuySellModal2({
 
 	const tokenAmountToSpend = buy ? token1Amount : token0Amount;
 	const tokenToSpend = buy ? token1 : token0;
+	const minTokenAmount = buy ? (pair?.minToken0Order / (10**token0?.decimals)) * price : pair?.minToken0Order/(10**token0?.decimals);
 
 	return (
 		<>
@@ -294,6 +274,7 @@ export default function BuySellModal2({
 					bgColor={buy ? "green2" : "red2"}
 					onClick={execute}
 					disabled={
+						tokenAmountToSpend < minTokenAmount ||
 						loading ||
 						isNaN(Number(token0Amount)) ||
 						!Big(token0Amount).gt(0) ||
@@ -307,11 +288,10 @@ export default function BuySellModal2({
 				>
 					{!isEvmConnected
 						? "Please connect wallet to continue"
-						: isNaN(Number(token0Amount)) ||
-						  !Big(token0Amount).gt(0)
-						? "Enter Amount"
-						: amountExceedsBalance()
-						? "Insufficient Trading Balance"
+						: isNaN(Number(token0Amount)) 
+						|| !Big(token0Amount).gt(0) ? "Enter Amount"
+						: tokenAmountToSpend < minTokenAmount ? "Amount too low"
+						: amountExceedsBalance() ? "Insufficient Trading Balance"
 						: (limit ? "Limit " : "Market ") +
 						  (buy ? "Buy" : "Sell")}
 				</Button>
