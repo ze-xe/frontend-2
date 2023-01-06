@@ -80,7 +80,7 @@ export default function portfolio() {
 						<Divider borderColor='background1'/>
 						<Tab {...tabStyle}>Overview</Tab>
 						<Divider borderColor='background1'/>
-						<Tab {...tabStyle}>Margin Position</Tab>
+						<Tab {...tabStyle}>Position</Tab>
 						<Divider borderColor='background1'/>
 						</Box>
 

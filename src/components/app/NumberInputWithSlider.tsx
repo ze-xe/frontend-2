@@ -19,9 +19,8 @@ import {
 	Button,
 	Tooltip,
 } from "@chakra-ui/react";
-
-import Image from "next/image";
-import { isValidNS } from '../../utils/number';
+import { useEffect } from 'react';
+import { isValidAndPositiveNS } from '../../utils/number';
 
 export default function NumberInputWithSlider({
 	onUpdate,
@@ -42,6 +41,12 @@ export default function NumberInputWithSlider({
 		ml: "-1.5",
 	};
 
+	useEffect(() => {
+		if(isValidAndPositiveNS(_value)){
+			setValue(_value)
+		}
+	})
+
 	const boxStyle = (limit: number) => {return{
 		h: 2,
 		w: 2,
@@ -59,8 +64,8 @@ export default function NumberInputWithSlider({
 					value={value}
 					onChange={handleChange}
 					precision={asset?.decimals ? asset.decimals - 10 : 8}
-					max={max}
-					min={0}
+					// max={max}
+					// min={min}
 					variant="filled"
 					border={"1px"}
 					borderColor={"gray.700"}

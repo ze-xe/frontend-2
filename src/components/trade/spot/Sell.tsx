@@ -129,14 +129,13 @@ export default function BuyModule({ pair, limit }) {
 			<Flex flexDir={"column"} gap={1}>
 				<Text fontSize={"sm"}>Price ({pair?.tokens[1].symbol})</Text>
 				<NumberInput
-				isDisabled={!limit}
-					min={0}
+					isDisabled={!limit}
+					min={pair?.minToken0Order/(10**token0?.decimals) ?? 0}
 					precision={pair?.exchangeRateDecimals}
 					value={limit ? price : 'Place order at market price'}
 					onChange={onPriceChange}
 					variant="filled"
 					border={"1px"}
-					// borderRadius="6"
 					borderColor={"gray.700"}
 				>
 					<NumberInputField />
@@ -150,7 +149,7 @@ export default function BuyModule({ pair, limit }) {
 			{limit && <Flex flexDir={"column"} gap={1}>
 				<Text fontSize={"sm"}>Amount ({pair?.tokens[1].symbol})</Text>
 				<NumberInput
-					min={0}
+					min={((pair?.minToken0Order ?? 0) * price) / 10 ** token0?.decimals}
 					precision={pair?.exchangeRateDecimals}
 					value={token1Amount}
 					onChange={updateToken1Amount}
@@ -172,14 +171,14 @@ export default function BuyModule({ pair, limit }) {
 						Total ({pair?.tokens[0].symbol})
 					</Text>
 					<Text fontSize={"xs"}>
-						Balance{" "}
+						Min:{" "}
 						{tokenFormatter(null).format(
-							((token0?.balance ?? 0) - (token0?.inOrderBalance ?? 0)) / 10 ** token0?.decimals
+							((pair?.minToken0Order ?? 0)) / 10 ** token0?.decimals
 						)} {token0?.symbol}
 					</Text>
 				</Flex>
 				
-				<NumberInputWithSlider max={max()} asset={token0} onUpdate={updateToken0Amount} value={amount} color='red2'/>
+				<NumberInputWithSlider max={max()} min={((pair?.minToken0Order ?? 0)) / 10 ** token0?.decimals} asset={token0} onUpdate={updateToken0Amount} value={amount} color='red2'/>
 
 			</Flex>
 

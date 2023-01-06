@@ -18,7 +18,7 @@ import {
 import { ethers } from "ethers";
 import { tokenFormatter } from "../../../utils/formatters";
 
-export default function BuySellModal2({
+export default function BuySellModal({
 	pair,
 	token1,
 	token0,
@@ -263,6 +263,7 @@ export default function BuySellModal2({
 
 	const tokenAmountToSpend = buy ? token1Amount : token0Amount;
 	const tokenToSpend = buy ? token1 : token0;
+	const minTokenAmount = buy ? (pair?.minToken0Order / (10**token0?.decimals)) * price : pair?.minToken0Order/(10**token0?.decimals);
 
 	return (
 		<>
@@ -273,6 +274,7 @@ export default function BuySellModal2({
 					bgColor={buy ? "green2" : "red2"}
 					onClick={execute}
 					disabled={
+						tokenAmountToSpend < minTokenAmount ||
 						loading ||
 						isNaN(Number(token0Amount)) ||
 						!Big(token0Amount).gt(0) ||
@@ -286,11 +288,10 @@ export default function BuySellModal2({
 				>
 					{!isEvmConnected
 						? "Please connect wallet to continue"
-						: isNaN(Number(token0Amount)) ||
-						  !Big(token0Amount).gt(0)
-						? "Enter Amount"
-						: amountExceedsBalance()
-						? "Insufficient Trading Balance"
+						: isNaN(Number(token0Amount)) 
+						|| !Big(token0Amount).gt(0) ? "Enter Amount"
+						: tokenAmountToSpend < minTokenAmount ? "Amount too low"
+						: amountExceedsBalance() ? "Insufficient Trading Balance"
 						: (limit ? "Limit " : "Market ") +
 						  (buy ? "Buy" : "Sell")}
 				</Button>
