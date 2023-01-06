@@ -17,6 +17,7 @@ import {
 } from "../../../utils/contract";
 import { ethers } from "ethers";
 import { tokenFormatter } from "../../../utils/formatters";
+import { isValidNS } from '../../../utils/number';
 
 export default function BuySellModal({
 	pair,
@@ -265,9 +266,10 @@ export default function BuySellModal({
 	const tokenToSpend = buy ? token1 : token0;
 	const minTokenAmount = buy ? (pair?.minToken0Order / (10**token0?.decimals)) * price : pair?.minToken0Order/(10**token0?.decimals);
 
+
 	return (
 		<>
-			{Big(tokenAmountToSpend).lt(tokenToSpend?.allowance ?? 1e50) ? (
+			{Big(isValidNS(tokenAmountToSpend) ? tokenAmountToSpend : 0).lt(tokenToSpend?.allowance ?? 1e50) ? (
 				<Button
 					width={"100%"}
 					mt="2"

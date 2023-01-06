@@ -95,6 +95,7 @@ export default function BuyModule({ pair, limit }) {
 		setAmount(e);
 		if (isValidNS(e)){
 			if(Number(price) > 0){
+				console.log(e);
 				settoken1Amount(Big(e).times(price).toString());
 			} else {
 				settoken1Amount("0");
