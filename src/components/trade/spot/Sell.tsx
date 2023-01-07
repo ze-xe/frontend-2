@@ -17,13 +17,14 @@ import { AppDataContext } from "../../../context/AppData";
 import BuySellModal from "./BuySellModal";
 import NumberInputWithSlider from "../../app/NumberInputWithSlider";
 import { isValidNS } from "../../../utils/number";
+import { useAccount } from "wagmi";
 
 const Big = require("big.js");
 
 export default function BuyModule({ pair, limit }) {
 	const [pairNow, setPairNow] = React.useState(null);
-	const [amount, setAmount] = React.useState("0");
-	const [token1Amount, settoken1Amount] = React.useState("0");
+	const [token0Amount, setToken0Amount] = React.useState("0");
+	const [token1Amount, setToken1Amount] = React.useState("0");
 
 	const [sliderValue, setSliderValue] = React.useState(NaN);
 
@@ -31,13 +32,17 @@ export default function BuyModule({ pair, limit }) {
 	const [token1, setToken1] = React.useState(null);
 
 	const { tokens } = useContext(DataContext);
-	const { exchangeRate: price, setExchangeRate: setPrice } = useContext(AppDataContext);
+	const { exchangeRate: price, setExchangeRate: setPrice } =
+		useContext(AppDataContext);
+	const { isConnected } = useAccount();
 
 	useEffect(() => {
 		const _token0 = tokens.find((t) => t.id === pair?.tokens[0].id);
 		const _token1 = tokens.find((t) => t.id === pair?.tokens[1].id);
+
 		setToken0(_token0);
 		setToken1(_token1);
+
 		// if there is change in pair
 		if (pair && pairNow !== pair?.id) {
 			const _token0 = tokens.find((t) => t.id === pair?.tokens[0].id);
@@ -46,8 +51,8 @@ export default function BuyModule({ pair, limit }) {
 			setToken1(_token1);
 			const newExchangeRate = pair?.exchangeRate / 10 ** 18;
 			setPrice(newExchangeRate.toFixed(pair?.exchangeRateDecimals));
-			settoken1Amount(
-				Big(amount)
+			setToken1Amount(
+				Big(token0Amount)
 					.mul(newExchangeRate)
 					.toNumber()
 					.toFixed(pair?.exchangeRateDecimals ?? 0)
@@ -69,10 +74,10 @@ export default function BuyModule({ pair, limit }) {
 					.times(token0.balance)
 					.div(100)
 					.div(10 ** token1.decimals);
-				setAmount(
+				setToken0Amount(
 					token0Amount.toNumber().toFixed(pair.exchangeRateDecimals)
 				);
-				settoken1Amount(
+				setToken1Amount(
 					token0Amount
 						.times(_price)
 						.toNumber()
@@ -83,44 +88,44 @@ export default function BuyModule({ pair, limit }) {
 	});
 
 	const max = () => {
-		if (!token0) return;
-		if(!token0.balance) return;
-		if(!token0.inOrderBalance) return;
+		if (!token0) return 0;
+		if (!token0.balance) return 0;
+		if (!token0.inOrderBalance) return 0;
 
 		return Big((token0?.balance ?? 0) - (token0?.inOrderBalance ?? 0))
-			.div(10 ** token0?.decimals).toNumber();
+			.div(10 ** token0?.decimals)
+			.toNumber();
 	};
 
 	const updateToken0Amount = (e: string) => {
-		setAmount(e);
-		if (isValidNS(e)){
-			if(Number(price) > 0){
-				console.log(e);
-				settoken1Amount(Big(e).times(price).toString());
+		setToken0Amount(e);
+		if (isValidNS(e)) {
+			if (Number(price) > 0) {
+				setToken1Amount(Big(e).times(price).toString());
 			} else {
-				settoken1Amount("0");
+				setToken1Amount("0");
 			}
 		}
 	};
 
-	const updateToken1Amount = (e) => {
-		settoken1Amount(e);
-		if (isValidNS(e)){
-			if(Number(price)){
-				setAmount(Big(e).div(price).toString());
+	const updateToken1Amount = (e: string) => {
+		setToken1Amount(e);
+		if (isValidNS(e)) {
+			if (Number(price)) {
+				setToken0Amount(Big(e).div(price).toString());
 			} else {
-				setAmount("0");
+				setToken0Amount("0");
 			}
 		}
 	};
 
 	const onPriceChange = (e) => {
 		setPrice(e);
-		if (isValidNS(e)){
-			if(Number(e) > 0){
-				settoken1Amount(Big(amount).times(e).toString());
+		if (isValidNS(e)) {
+			if (Number(e) > 0) {
+				setToken1Amount(Big(token0Amount).times(e).toString());
 			} else {
-				settoken1Amount("0");
+				setToken1Amount("0");
 			}
 		}
 	};
@@ -131,9 +136,9 @@ export default function BuyModule({ pair, limit }) {
 				<Text fontSize={"sm"}>Price ({pair?.tokens[1].symbol})</Text>
 				<NumberInput
 					isDisabled={!limit}
-					min={pair?.minToken0Order/(10**token0?.decimals) ?? 0}
+					min={pair?.minToken0Order / 10 ** token0?.decimals ?? 0}
 					precision={pair?.exchangeRateDecimals}
-					value={limit ? price : 'Place order at market price'}
+					value={limit ? price : "Place order at market price"}
 					onChange={onPriceChange}
 					variant="filled"
 					border={"1px"}
@@ -147,24 +152,33 @@ export default function BuyModule({ pair, limit }) {
 				</NumberInput>
 			</Flex>
 
-			{limit && <Flex flexDir={"column"} gap={1}>
-				<Text fontSize={"sm"}>Amount ({pair?.tokens[1].symbol})</Text>
-				<NumberInput
-					min={((pair?.minToken0Order ?? 0) * price) / 10 ** token0?.decimals}
-					precision={pair?.exchangeRateDecimals}
-					value={token1Amount}
-					onChange={updateToken1Amount}
-					variant="filled"
-					border={"1px"}
-					borderColor={"gray.700"}
-				>
-					<NumberInputField />
-					<NumberInputStepper>
-						<NumberIncrementStepper />
-						<NumberDecrementStepper />
-					</NumberInputStepper>
-				</NumberInput>
-			</Flex>}
+			{limit && (
+				<Flex flexDir={"column"} gap={1}>
+					<Text fontSize={"sm"}>
+						Amount ({pair?.tokens[1].symbol})
+					</Text>
+					<NumberInput
+						// min={
+						// 	isConnected
+						// 		? ((pair?.minToken0Order ?? 0) * price) /
+						// 		  10 ** token0?.decimals
+						// 		: 0
+						// }
+						precision={pair?.exchangeRateDecimals}
+						value={token1Amount}
+						onChange={updateToken1Amount}
+						variant="filled"
+						border={"1px"}
+						borderColor={"gray.700"}
+					>
+						<NumberInputField />
+						<NumberInputStepper>
+							<NumberIncrementStepper />
+							<NumberDecrementStepper />
+						</NumberInputStepper>
+					</NumberInput>
+				</Flex>
+			)}
 
 			<Flex flexDir={"column"} gap={1} mb={1}>
 				<Flex justify={"space-between"}>
@@ -174,20 +188,27 @@ export default function BuyModule({ pair, limit }) {
 					<Text fontSize={"xs"}>
 						Min:{" "}
 						{tokenFormatter(null).format(
-							((pair?.minToken0Order ?? 0)) / 10 ** token0?.decimals
-						)} {token0?.symbol}
+							(pair?.minToken0Order ?? 0) / 10 ** token0?.decimals
+						)}{" "}
+						{token0?.symbol}
 					</Text>
 				</Flex>
-				
-				<NumberInputWithSlider max={max()} min={((pair?.minToken0Order ?? 0)) / 10 ** token0?.decimals} asset={token0} onUpdate={updateToken0Amount} value={amount} color='red2'/>
 
+				<NumberInputWithSlider
+					max={max()}
+					min={(pair?.minToken0Order ?? 0) / 10 ** token0?.decimals}
+					asset={token0}
+					onUpdate={updateToken0Amount}
+					value={token0Amount}
+					color="red2"
+				/>
 			</Flex>
 
 			<BuySellModal
 				limit={limit}
 				token0={token0}
 				token1={token1}
-				token0Amount={amount}
+				token0Amount={token0Amount}
 				token1Amount={token1Amount}
 				pair={pair}
 				price={price}

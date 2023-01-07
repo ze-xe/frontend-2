@@ -43,7 +43,7 @@ export default function BuySellModal({
 
 	const [loading, setLoading] = React.useState(false);
 
-	const { address, isConnected: isEvmConnected } = useAccount();
+	const { address, isConnected } = useAccount();
 
 	const { chain, incrementAllowance, addPlacedOrder, updateWalletBalance } =
 		useContext(DataContext);
@@ -320,7 +320,7 @@ export default function BuySellModal({
 								loading ||
 								isNaN(Number(token0Amount)) ||
 								!Big(token0Amount).gt(0) ||
-								!isEvmConnected ||
+								!isConnected ||
 								amountExceedsBalance() ||
 								price == "" ||
 								Number(price) <= 0 ||
@@ -333,7 +333,7 @@ export default function BuySellModal({
 							loadingText="Executing..."
 							isLoading={loading}
 						>
-							{!isEvmConnected
+							{!isConnected
 								? "Please connect wallet to continue"
 								: isNaN(Number(token0Amount)) ||
 								  !Big(token0Amount).gt(0)
@@ -351,8 +351,9 @@ export default function BuySellModal({
 						onClick={enable}
 						loadingText="Enabling..."
 						isLoading={loading}
+						disabled={!isConnected}
 						>
-							Enable {market?.inputToken.symbol} as collateral
+							{!isConnected ? 'Please connect your wallet' : `Enable ${market?.inputToken.symbol} as collateral`}
 						</Button>
 					)
 				) : (
@@ -362,8 +363,9 @@ export default function BuySellModal({
 						onClick={() => approve(token1)}
 						loadingText="Approving..."
 						isLoading={loading}
+						disabled={!isConnected}
 					>
-						Approve {token1?.symbol}
+						{!isConnected ? 'Please connect your wallet' : `Approve ${token1?.symbol}`}
 					</Button>
 				)
 			) : (

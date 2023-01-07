@@ -69,9 +69,9 @@ export default function LendingTable() {
 										APY (%)
 									</Th>
 									<Th borderColor={"primary"}>Balance</Th>
-									<Th borderColor={"primary"}>
+									{/* <Th borderColor={"primary"}>
 										Total Deposits
-									</Th>
+									</Th> */}
 									<Th borderColor={"primary"}>
 										<Text fontSize={'10px'}>Enabled as</Text>
 										<Text fontSize={'10px'} mt={-1}>collateral</Text>
@@ -104,14 +104,7 @@ export default function LendingTable() {
 																market
 																	.inputToken
 																	.name
-															}{" "}
-															(
-															{
-																market
-																	.inputToken
-																	.symbol
 															}
-															){" "}
 														</Text>
 														<Text fontSize={"xs"}>
 															{" "}
@@ -162,11 +155,11 @@ export default function LendingTable() {
 												</Text>
 											</Td>
 
-											<Td borderColor={"whiteAlpha.200"}>
+											{/* <Td borderColor={"whiteAlpha.200"}>
 												{dollarFormatter(null).format(
 													market.totalDepositBalanceUSD
 												)}
-											</Td>
+											</Td> */}
 
 											<Td borderColor={"whiteAlpha.200"}>
 												<Flex gap={2}>

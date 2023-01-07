@@ -85,14 +85,7 @@ export default function LendingTable() {
 																market
 																	.inputToken
 																	.name
-															}{" "}
-															(
-															{
-																market
-																	.inputToken
-																	.symbol
 															}
-															){" "}
 														</Text>
 														<Text fontSize={"xs"}>
 															{" "}
