@@ -140,7 +140,7 @@ export default function position() {
 						>
 							<Text fontSize={"md"}>Health</Text>
 							<Text mt={1} fontSize="2xl" fontWeight={"bold"}>
-								{totalCollateralBalance ? tokenFormatter(null).format(
+								{(parseFloat(adjustedDebt) > 0) ? tokenFormatter(null).format(
 									parseFloat(totalCollateralBalance) / parseFloat(adjustedDebt)
 								) : '-'}
 							</Text>

@@ -26,7 +26,7 @@ export default function AllTokens({search, margin = false}) {
 				<Link
 					key={index}
 					href={
-						'/trade/' +
+						(margin ? '/margin/' : '/trade/') +
 						pair.tokens[0].symbol +
 						'_' +
 						pair.tokens[1].symbol

@@ -146,7 +146,6 @@ function DataProvider({ children }: any) {
 					})
 				);
 			Promise.all(requests).then(async (res) => {
-				console.log(res);
 				_pairs = res[0].data.data;
 				setPairs(_pairs);
 				fetchPairData(_pairs, chain);
@@ -195,7 +194,6 @@ function DataProvider({ children }: any) {
 	const subscribePairHistory = (__pairs: any[]) => {
 		const _pairs = __pairs;
 		socket.on("PAIR_HISTORY", ({ pair, amount, orderType, exchangeRate }) => {
-			console.log("PAIR_HISTORY", { pair, amount, orderType, exchangeRate });
 			for (let i in _pairs) {
 				if (_pairs[i].id === pair) {
 					_pairs[i].priceDiff = Big(exchangeRate)
@@ -225,7 +223,6 @@ function DataProvider({ children }: any) {
 			});
 			setOrders(newOrders);
 			socket.on("PAIR_ORDER", ({ amount, orderType, exchangeRate, pair }) => {
-				console.log("PAIR_ORDER", { amount, orderType, exchangeRate, pair });
 				let _orders = (orderType == 0 || orderType == 2)
 					? newOrders[pair.toLowerCase()].buyOrders
 					: newOrders[pair.toLowerCase()].sellOrders.reverse();

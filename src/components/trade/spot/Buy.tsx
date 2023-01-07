@@ -17,6 +17,7 @@ import { tokenFormatter } from "../../../utils/formatters";
 import { AppDataContext } from "../../../context/AppData";
 import NumberInputWithSlider from "../../app/NumberInputWithSlider";
 import { isValidNS } from "../../../utils/number";
+import { useAccount } from 'wagmi';
 
 const Big = require("big.js");
 
@@ -26,6 +27,8 @@ export default function BuyModule({ pair, limit }) {
 	const [token0Amount, settoken0Amount] = React.useState("0");
 
 	const [sliderValue, setSliderValue] = React.useState(NaN);
+
+	const {address, isConnected} = useAccount();
 
 	const [token0, setToken0] = React.useState(null);
 	const [token1, setToken1] = React.useState(null);
@@ -97,6 +100,7 @@ export default function BuyModule({ pair, limit }) {
 	};
 
 	const updateToken1Amount = (e: string) => {
+		console.log(e);
 		setToken1Amount(e);
 		if (isValidNS(e)) {
 			if (Number(price) > 0) {
@@ -155,13 +159,12 @@ export default function BuyModule({ pair, limit }) {
 				<Flex flexDir={"column"} gap={1}>
 					<Text fontSize={"sm"}>Amount ({token0?.symbol})</Text>
 					<NumberInput
-						min={pair?.minToken0Order / 10 ** token0?.decimals}
-						precision={10}
+						// min={isConnected ? pair?.minToken0Order / 10 ** token0?.decimals : 0}
+						precision={pair?.exchangeRateDecimals}
 						value={token0Amount}
 						onChange={updateToken0Amount}
 						variant="filled"
-						border={"1px"}
-						// borderRadius="6"
+						border="1px"
 						borderColor={"gray.700"}
 					>
 						<NumberInputField />
