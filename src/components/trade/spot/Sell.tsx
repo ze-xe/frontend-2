@@ -16,7 +16,7 @@ import { tokenFormatter } from "../../../utils/formatters";
 import { AppDataContext } from "../../../context/AppData";
 import BuySellModal from "./BuySellModal";
 import NumberInputWithSlider from "../../app/NumberInputWithSlider";
-import { isValidNS } from "../../../utils/number";
+import { isValidNS, isValidAndPositiveNS } from '../../../utils/number';
 import { useAccount } from "wagmi";
 
 const Big = require("big.js");
@@ -99,9 +99,10 @@ export default function BuyModule({ pair, limit }) {
 
 	const updateToken0Amount = (e: string) => {
 		setToken0Amount(e);
-		if (isValidNS(e)) {
-			if (Number(price) > 0) {
-				setToken1Amount(Big(e).times(price).toString());
+		if (isValidNS(e) ) {
+			console.log(e)
+			if (isValidAndPositiveNS(price)) {
+				setToken1Amount(Big(Number(e)).times(price).toString());
 			} else {
 				setToken1Amount("0");
 			}
@@ -111,8 +112,8 @@ export default function BuyModule({ pair, limit }) {
 	const updateToken1Amount = (e: string) => {
 		setToken1Amount(e);
 		if (isValidNS(e)) {
-			if (Number(price)) {
-				setToken0Amount(Big(e).div(price).toString());
+			if (isValidAndPositiveNS(price)) {
+				setToken0Amount(Big(Number(e)).div(price).toString());
 			} else {
 				setToken0Amount("0");
 			}
@@ -122,8 +123,8 @@ export default function BuyModule({ pair, limit }) {
 	const onPriceChange = (e) => {
 		setPrice(e);
 		if (isValidNS(e)) {
-			if (Number(e) > 0) {
-				setToken1Amount(Big(token0Amount).times(e).toString());
+			if (isValidAndPositiveNS(e)) {
+				setToken1Amount(Big(Number(token0Amount)).times(e).toString());
 			} else {
 				setToken1Amount("0");
 			}
