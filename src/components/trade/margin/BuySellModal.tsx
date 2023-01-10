@@ -31,6 +31,7 @@ export default function BuySellModal({
 	price, // needed for limit orders
 	buy,
 	limit,
+	leverage = 1
 }) {
 	if (token0Amount == "") token0Amount = "0";
 	if (token1Amount == "") token1Amount = "0";
@@ -308,9 +309,11 @@ export default function BuySellModal({
 
 	const shouldEnterAmount = () => {
 		if(!isValidAndPositiveNS(token0Amount)) return true;
-		return token0Amount < pair?.minToken0Order/(10**token0?.decimals) || amountExceedsBalance()
+		return token0Amount < (leverage * pair?.minToken0Order)/(10**token0?.decimals) || amountExceedsBalance()
 	}
 
+	token0Amount = parseFloat(token0Amount);
+	token1Amount = parseFloat(token1Amount);
 
 	return (
 		<>
@@ -324,8 +327,7 @@ export default function BuySellModal({
 							onClick={execute}
 							disabled={
 								loading ||
-								isNaN(Number(token0Amount)) ||
-								!Big(token0Amount).gt(0) ||
+								!isValidAndPositiveNS(token0Amount) ||
 								!isConnected ||
 								amountExceedsBalance() ||
 								price == "" ||
@@ -341,8 +343,7 @@ export default function BuySellModal({
 						>
 							{!isConnected
 								? "Please connect wallet to continue"
-								: isNaN(Number(token0Amount)) ||
-								  !Big(token0Amount).gt(0)
+								: !isValidAndPositiveNS(token0Amount)
 								? "Enter Amount"
 								: amountExceedsBalance()
 								? "Insufficient Trading Balance"

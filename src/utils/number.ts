@@ -1,7 +1,7 @@
 
 export const isValidNS = (value: string|number) => {
     if(typeof value === 'number') value = value.toString(); 
-    else return !isNaN(Number(value));
+    return !isNaN(Number(value));
 };
 
 export const isValidAndPositiveNS = (value: string|number) => {

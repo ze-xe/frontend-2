@@ -5,11 +5,6 @@ import {
 	NumberIncrementStepper,
 	NumberDecrementStepper,
 	Box,
-	Divider,
-	Slider,
-	SliderFilledTrack,
-	SliderTrack,
-	SliderThumb,
 	Button,
 } from "@chakra-ui/react";
 
@@ -18,7 +13,6 @@ import React from "react";
 import { useContext } from "react";
 import { DataContext } from "../../../context/DataProvider";
 import { useEffect } from "react";
-import axios from "axios";
 import { tokenFormatter } from "../../../utils/formatters";
 import { AppDataContext } from "../../../context/AppData";
 import BuySellModal from "./BuySellModal";
@@ -33,7 +27,7 @@ export default function BuyModule({ pair, limit }) {
 	const [pairNow, setPairNow] = React.useState(null);
 	const [token0Amount, setToken0Amount] = React.useState("0");
 	const [token1Amount, setToken1Amount] = React.useState("0");
-	const [leverage, setLeverage] = React.useState(3);
+	const [leverage, setLeverage] = React.useState(0);
 	const [borrowLimit, setBorrowLimit] = React.useState(0);
 	const [nLoops, setNLoops] = React.useState(0);
 	const [liquidationPrice, setLiquidationPrice] = React.useState(0);
@@ -96,37 +90,11 @@ export default function BuyModule({ pair, limit }) {
 		}
 
 		if (
+			pair && token0 &&
 			isValidNS(token1Amount) &&
-			isValidNS(leverage) &&
-			parseFloat(token1Amount) > MIN_TOKEN1
+			isValidNS(leverage) && leverage == 0
 		) {
-			const _borrowLimit =
-				(MIN_TOKEN1 / parseFloat(token1Amount) - 1) / leverage + 1;
-			if (!isValidAndPositiveNS(_borrowLimit)) return;
-			setBorrowLimit(_borrowLimit);
-			if (isValidAndPositiveNS(token1Amount)) {
-				const _nLoops = Math.floor(
-					Math.log(MIN_TOKEN1 / parseFloat(token1Amount)) /
-						Math.log(_borrowLimit)
-				);
-				if (!isValidAndPositiveNS(_nLoops)) return;
-				setNLoops(_nLoops);
-				if (isValidAndPositiveNS(price)) {
-					const _token0Amount = (
-						(parseFloat(token1Amount) *
-							_borrowLimit *
-							(1 - _borrowLimit ** _nLoops)) /
-						(price * (1 - _borrowLimit))
-					).toString();
-					setToken0Amount(_token0Amount);
-					setLiquidationPrice(
-						(leverage *
-							parseFloat(token1Amount) *
-							MAX_BORROW_LIMIT) /
-							Number(_token0Amount)
-					);
-				}
-			}
+			_setLeverage('1.1')
 		}
 	});
 
@@ -134,7 +102,9 @@ export default function BuyModule({ pair, limit }) {
 		setToken0Amount(e);
 		if (isValidNS(e)) {
 			if (Number(price) > 0) {
-				setToken1Amount(Big(Number(e)).times(price).div(leverage).toString());
+				setToken1Amount(
+					Big(Number(e)).times(price).div(leverage).toString()
+				);
 			} else {
 				setToken1Amount("0");
 			}
@@ -145,7 +115,9 @@ export default function BuyModule({ pair, limit }) {
 		setToken1Amount(e);
 		if (isValidNS(e)) {
 			if (Number(price)) {
-				setToken0Amount(Big(Number(e)).div(price).times(leverage).toString());
+				setToken0Amount(
+					Big(Number(e)).div(price).times(leverage).toString()
+				);
 			} else {
 				setToken0Amount("0");
 			}
@@ -170,11 +142,37 @@ export default function BuyModule({ pair, limit }) {
 		borderColor: "gray.700",
 	};
 
-	const _setLeverage = (e: string) => {
-		if (isValidAndPositiveNS(e)) {
-			setLeverage(Number(e));
-			setToken0Amount(Number(e) * Number(token0Amount) / leverage)
+	const _setLeverage = (_newLeverage: string) => {
+		if (!isValidNS(leverage)) return;
+		const newLeverage = Number(_newLeverage);
+		const _borrowLimit = (MIN_TOKEN1 / parseFloat(token1Amount) - 1) / newLeverage + 1;
+		if (!isValidAndPositiveNS(_borrowLimit)) return;
+		setBorrowLimit(_borrowLimit);
+		if (isValidAndPositiveNS(token1Amount)) {
+			const _nLoops = Math.floor(
+				Math.log(MIN_TOKEN1 / parseFloat(token1Amount)) /
+					Math.log(_borrowLimit)
+			);
+			if (!isValidAndPositiveNS(_nLoops)) return;
+			setNLoops(_nLoops);
+			if (isValidAndPositiveNS(price)) {
+				const _token0Amount = (
+					(parseFloat(token1Amount) *
+						_borrowLimit *
+						(1 - _borrowLimit ** _nLoops)) /
+					(price * (1 - _borrowLimit))
+				).toString();
+				setToken0Amount(_token0Amount);
+				setLiquidationPrice(
+					(newLeverage * parseFloat(token1Amount) * MAX_BORROW_LIMIT) /
+						Number(_token0Amount)
+				);
+			}
 		}
+		setLeverage(newLeverage);
+		setToken0Amount(
+			((newLeverage * Number(token0Amount)) / leverage).toString()
+		);
 	};
 
 	const max = () =>
@@ -187,7 +185,7 @@ export default function BuyModule({ pair, limit }) {
 				<Text fontSize={"sm"}>Price ({pair?.tokens[1].symbol})</Text>
 				<NumberInput
 					isDisabled={!limit}
-					min={pair?.minToken0Order/(10**token0?.decimals) ?? 0}
+					min={pair?.minToken0Order / 10 ** token0?.decimals ?? 0}
 					precision={pair?.exchangeRateDecimals}
 					value={limit ? price : "Place order at market price"}
 					onChange={onPriceChange}
@@ -222,12 +220,8 @@ export default function BuyModule({ pair, limit }) {
 				/>
 			</Flex>
 
-			<Flex
-				align={"center"}
-				flexDir='column'
-				mb={2}
-			>
-				<Flex width={'100%'} justify='space-between'>
+			<Flex align={"center"} flexDir="column" mb={2}>
+				<Flex width={"100%"} justify="space-between">
 					<Text fontSize={"sm"}>Leverage</Text>
 					<Text fontSize={"xs"}>
 						Liq Price:{" "}
@@ -240,7 +234,7 @@ export default function BuyModule({ pair, limit }) {
 					justify="space-between"
 					align="center"
 				>
-					<Box >
+					<Box>
 						<NumberInput
 							step={0.1}
 							min={1.1}
@@ -258,30 +252,24 @@ export default function BuyModule({ pair, limit }) {
 							</NumberInputStepper>
 						</NumberInput>
 					</Box>
-						<Button
-							{...buttonStyle}
-							onClick={(e) => _setLeverage("1.5")}
-						>
-							1.5
-						</Button>
-						<Button
-							{...buttonStyle}
-							onClick={(e) => _setLeverage("2")}
-						>
-							2
-						</Button>
-						<Button
-							{...buttonStyle}
-							onClick={(e) => _setLeverage("2.5")}
-						>
-							2.5
-						</Button>
-						<Button
-							{...buttonStyle}
-							onClick={(e) => _setLeverage("3")}
-						>
-							Max
-						</Button>
+					<Button
+						{...buttonStyle}
+						onClick={(e) => _setLeverage("1.5")}
+					>
+						1.5
+					</Button>
+					<Button {...buttonStyle} onClick={(e) => _setLeverage("2")}>
+						2
+					</Button>
+					<Button
+						{...buttonStyle}
+						onClick={(e) => _setLeverage("2.5")}
+					>
+						2.5
+					</Button>
+					<Button {...buttonStyle} onClick={(e) => _setLeverage("3")}>
+						Max
+					</Button>
 				</Flex>
 			</Flex>
 
@@ -318,6 +306,7 @@ export default function BuyModule({ pair, limit }) {
 				buy={false}
 				loops={nLoops}
 				borrowLimit={borrowLimit}
+				leverage={leverage}
 			/>
 		</Flex>
 	);

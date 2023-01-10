@@ -4,10 +4,6 @@ import {
 	NumberInputStepper,
 	NumberIncrementStepper,
 	NumberDecrementStepper,
-	HStack,
-	useNumberInput,
-	Divider,
-	InputRightAddon,
 } from "@chakra-ui/react";
 
 import { Box, Button, Flex, Heading, Input, Text } from "@chakra-ui/react";
@@ -22,21 +18,12 @@ import { AppDataContext } from "../../../context/AppData";
 import NumberInputWithSlider from "../../app/NumberInputWithSlider";
 import { isValidNS, isValidAndPositiveNS } from "../../../utils/number";
 
-import {
-	Slider,
-	SliderTrack,
-	SliderFilledTrack,
-	SliderThumb,
-	SliderMark,
-} from "@chakra-ui/react";
-
 const Big = require("big.js");
 
-const MIN_TOKEN0 = 0.001;
 const MAX_BORROW_LIMIT = 0.75;
 
 export default function BuyModule({ pair, limit }) {
-	const [leverage, setLeverage] = React.useState(1.1);
+	const [leverage, setLeverage] = React.useState(0);
 	const [borrowLimit, setBorrowLimit] = React.useState(0);
 	const [nLoops, setNLoops] = React.useState(0);
 	const [liquidationPrice, setLiquidationPrice] = React.useState(0);
@@ -91,6 +78,7 @@ export default function BuyModule({ pair, limit }) {
 			if (_price.toNumber() > 0) {
 				const token1Amount = Big(30)
 					.times(token1.balance)
+					.times(1.1)
 					.div(100)
 					.div(10 ** token1.decimals);
 
@@ -105,38 +93,9 @@ export default function BuyModule({ pair, limit }) {
 				);
 			}
 		}
-		if (
-			isValidNS(token0Amount) &&
-			isValidNS(leverage) &&
-			parseFloat(token0Amount) > MIN_TOKEN0
-		) {
-			const _borrowLimit =
-				(MIN_TOKEN0 / parseFloat(token0Amount) - 1) / leverage + 1;
-			if (!isValidAndPositiveNS(_borrowLimit)) return;
-			setBorrowLimit(_borrowLimit);
-			if (isValidAndPositiveNS(token1Amount)) {
-				const _nLoops = Math.floor(
-					Math.log(MIN_TOKEN0 / parseFloat(token0Amount)) /
-						Math.log(_borrowLimit)
-				);
-				if (!isValidAndPositiveNS(_nLoops)) return;
-				setNLoops(_nLoops);
-				if (isValidAndPositiveNS(price)) {
-					const _token1Amount =
-						(price *
-							parseFloat(token0Amount) *
-							_borrowLimit *
-							(1 - _borrowLimit ** _nLoops)) /
-						(1 - _borrowLimit);
-					setToken1Amount(_token1Amount.toString());
-					setLiquidationPrice(
-						Number(_token1Amount) /
-							(leverage *
-								parseFloat(token0Amount) *
-								MAX_BORROW_LIMIT)
-					);
-				}
-			}
+
+		if(token0 && pair && leverage == 0 && isValidNS(token0Amount)){
+			_setLeverage('1.1')
 		}
 	});
 
@@ -183,12 +142,32 @@ export default function BuyModule({ pair, limit }) {
 		}
 	};
 
-	const _setLeverage = (e: string) => {
-		const _leverage = leverage;
-		if (isValidAndPositiveNS(e)) {
-			setLeverage(Number(e));
-			setToken1Amount((Number(e) * Number(token1Amount)/ _leverage).toFixed(2));
+	const _setLeverage = (_newLeverage: string) => {
+		if(!isValidNS(leverage)) return;
+		const newLeverage = Number(_newLeverage)
+
+		// calculate borrow limit with a[min], a and x
+		const _borrowLimit = (((pair?.minToken0Order/(10**token0.decimals)) / parseFloat(token0Amount)) - 1) / newLeverage + 1;
+		if (!isValidAndPositiveNS(_borrowLimit)) return;
+		setBorrowLimit(_borrowLimit);
+		if (isValidAndPositiveNS(token1Amount)) {
+			// calculate loops with a[min], a and b
+			const _nLoops = Math.floor(Math.log((pair?.minToken0Order/(10**token0.decimals)) / parseFloat(token0Amount)) / Math.log(_borrowLimit) );
+			if (!isValidAndPositiveNS(_nLoops)) return;
+			setNLoops(_nLoops);
+			if (isValidAndPositiveNS(price)) {
+				const _token1Amount = (price * parseFloat(token0Amount) * _borrowLimit *
+						(1 - _borrowLimit ** _nLoops)) / (1 - _borrowLimit);
+				setLiquidationPrice(
+					Number(_token1Amount) /
+						(newLeverage *
+							parseFloat(token0Amount) *
+							MAX_BORROW_LIMIT)
+				);
+			}
 		}
+		setLeverage(newLeverage);
+		setToken1Amount((newLeverage * Number(token1Amount)/ leverage).toFixed(2));
 	};
 
 	const buttonStyle = {
@@ -334,6 +313,7 @@ export default function BuyModule({ pair, limit }) {
 				buy={true}
 				loops={nLoops}
 				borrowLimit={borrowLimit}
+				leverage={leverage}
 			/>
 		</Flex>
 	);
