@@ -3,34 +3,52 @@ import {
 	Table,
 	Thead,
 	Tbody,
-	Tfoot,
 	Tr,
 	Th,
 	Td,
-	TableCaption,
 	TableContainer,
 	Box,
 	Flex,
 	Text,
 	Button,
 	CircularProgress,
+	useDisclosure,
+	TabPanel,
+	TabList,
+	Tab,
+	Tabs,
+	TabPanels,
+	Tooltip,
+} from "@chakra-ui/react";
+
+import {
+	Modal,
+	ModalOverlay,
+	ModalContent,
+	ModalHeader,
+	ModalFooter,
+	ModalBody,
+	ModalCloseButton,
 } from "@chakra-ui/react";
 
 import Image from "next/image";
 import { LeverDataContext } from "../../../../context/LeverDataProvider";
 import { dollarFormatter, tokenFormatter } from "../../../../utils/formatters";
 import LendModal from "../modals/LendModal";
-import BorrowModal from "../modals/WithdrawModal";
+import WithdrawModal from "../modals/WithdrawModal";
 import { DataContext } from "../../../../context/DataProvider";
 import { useAccount } from "wagmi";
-import { Switch } from '@chakra-ui/react'
+import { Switch } from "@chakra-ui/react";
 import { getContract, send } from "../../../../utils/contract";
+import { InfoIcon } from "@chakra-ui/icons";
 
 export default function LendingTable() {
 	const { markets, enableCollateral } = React.useContext(LeverDataContext);
 	const { tokens, chain } = React.useContext(DataContext);
-	const { isConnected } = useAccount()
+	const { isConnected } = useAccount();
 	const [enabling, setEnabling] = React.useState({});
+	const { isOpen, onOpen, onClose } = useDisclosure();
+	const [marketOpen, setMarketOpen] = React.useState(0);
 
 	const token = (tokenId: string) => {
 		return tokens.find(
@@ -39,52 +57,62 @@ export default function LendingTable() {
 	};
 
 	const enable = async (market: any) => {
-		setEnabling({[market.id] : true});
+		setEnabling({ [market.id]: true });
 		const _lever = await getContract("Lever", chain);
-		console.log(_lever, market);
-		send(_lever, market.isCollateral ? "exitMarket" : "enterMarkets", market.isCollateral ? [market.id] : [[market.id]], chain)
-		.then(async (res: any) => {
-			await res.wait(1);
-			setEnabling({[market.id] : false});
-			enableCollateral(market.id);
-		})
-		.catch((err: any) => {
-			setEnabling({[market.id] : false});
-			console.log(err);
-		});
+		send(
+			_lever,
+			market.isCollateral ? "exitMarket" : "enterMarkets",
+			market.isCollateral ? [market.id] : [[market.id]],
+			chain
+		)
+			.then(async (res: any) => {
+				await res.wait(1);
+				setEnabling({ [market.id]: false });
+				enableCollateral(market.id);
+			})
+			.catch((err: any) => {
+				setEnabling({ [market.id]: false });
+				console.log(err);
+			});
+	};
+
+	const openMarket = (index: number) => {
+		setMarketOpen(index);
+		console.log(markets[index]);
+		onOpen();
 	}
 
 	return (
 		<>
 			{tokens.length > 0 && (
-				<Box bgColor={"background2"} p={2}>
+				<Box bgColor={"background2"}>
 					<TableContainer>
 						<Table variant="simple">
 							<Thead>
 								<Tr>
-									<Th borderColor={"primary"}>
+									<Th>
 										Supply Asset
 									</Th>
-									<Th borderColor={"primary"}>
-										APY (%)
-									</Th>
-									<Th borderColor={"primary"}>Balance</Th>
-									{/* <Th borderColor={"primary"}>
-										Total Deposits
-									</Th> */}
-									<Th borderColor={"primary"}>
-										<Text fontSize={'10px'}>Enabled as</Text>
-										<Text fontSize={'10px'} mt={-1}>collateral</Text>
-									</Th>
+									<Th>APY (%)</Th>
+									<Th>Balance</Th>
+									<Th isNumeric maxW='60px'>
+										<Flex align={'center'} justify='flex-end'>
 
-									<Th borderColor={"primary"} isNumeric></Th>
+										<Text fontSize={"10px"}>
+											Enabled
+										</Text>
+										<Tooltip label="If this asset is enabled as collateral">
+										<InfoIcon ml={1}/>
+										</Tooltip>
+										</Flex>
+									</Th>
 								</Tr>
 							</Thead>
 							<Tbody>
-								{markets.map((market) => {
+								{markets.map((market: any, index: number) => {
 									return (
-										<Tr>
-											<Td borderColor={"whiteAlpha.200"}>
+										<Tr h='90px'>
+											<Td borderColor={"whiteAlpha.200"} cursor={'pointer'} onClick={(e) => openMarket(index)}>
 												<Flex gap={2} align="center">
 													<Image
 														src={`/assets/crypto_logos/${market.inputToken.symbol.toLowerCase()}.png`}
@@ -120,7 +148,7 @@ export default function LendingTable() {
 												</Flex>
 											</Td>
 
-											<Td borderColor={"whiteAlpha.200"}>
+											<Td borderColor={"whiteAlpha.200"} cursor={'pointer'} onClick={(e) => openMarket(index)}>
 												<Text>
 													{parseFloat(
 														market.rates[1].rate
@@ -129,64 +157,75 @@ export default function LendingTable() {
 												</Text>
 												<Text fontSize={"xs"}>
 													+{" "}
-													{tokenFormatter(2).format(market.rewardsAPR ? market.rewardsAPR[0] : '0')}{" "}
+													{tokenFormatter(2).format(
+														market.rewardsAPR
+															? market
+																	.rewardsAPR[0]
+															: "0"
+													)}{" "}
 													%
 												</Text>
 											</Td>
 
-											<Td borderColor={"whiteAlpha.200"}>
+											<Td borderColor={"whiteAlpha.200"} cursor={'pointer'} onClick={(e) => openMarket(index)}>
 												<Text>
-													{isConnected ? tokenFormatter(
-														null
-													).format(
-														market.collateralBalance / 10 ** market.inputToken.decimals
-													) : '-'}{" "}
+													{isConnected
+														? tokenFormatter(
+																null
+														  ).format(
+																market.collateralBalance /
+																	10 **
+																		market
+																			.inputToken
+																			.decimals
+														  )
+														: "-"}{" "}
 													{market.inputToken.symbol}
 												</Text>
 
 												<Text fontSize={"xs"} mt={1}>
-													{isConnected ? dollarFormatter(
-														null
-													).format(
-														market.collateralBalance *
-															market.inputToken
-																.lastPriceUSD / 10 ** market.inputToken.decimals
-													) : '-'}
+													{isConnected
+														? dollarFormatter(
+																null
+														  ).format(
+																(market.collateralBalance *
+																	market
+																		.inputToken
+																		.lastPriceUSD) /
+																	10 **
+																		market
+																			.inputToken
+																			.decimals
+														  )
+														: "-"}
 												</Text>
 											</Td>
 
-											{/* <Td borderColor={"whiteAlpha.200"}>
-												{dollarFormatter(null).format(
-													market.totalDepositBalanceUSD
-												)}
-											</Td> */}
-
-											<Td borderColor={"whiteAlpha.200"}>
-												<Flex gap={2}>
-													<Switch display={!enabling[market.id] ? 'block' : 'none'} size='md' colorScheme={'purple'} isChecked={market.isCollateral} onChange={() => enable(market)} />
-													<CircularProgress display={enabling[market.id] ? 'block' : 'none'} size={'20px'} thickness='30px' isIndeterminate color='primary' />
-												</Flex>
-											</Td>
-
-											<Td
-												borderColor={"whiteAlpha.200"}
-												isNumeric
-											>
-												<Flex
-													gap={0}
-													justify="flex-end"
-												>
-													<LendModal
-														market={market}
-														token={token(
-															market.inputToken.id
-														)}
+											<Td borderColor={"whiteAlpha.200"} maxW='60px'>
+												<Flex gap={2} justify='flex-end'>
+													<Switch
+														display={
+															!enabling[market.id]
+																? "block"
+																: "none"
+														}
+														size="md"
+														colorScheme={"primary"}
+														isChecked={
+															market.isCollateral
+														}
+														onChange={(e) => enable(market)}
 													/>
-													<BorrowModal
-														market={market}
-														token={token(
-															market.inputToken.id
-														)}
+													<CircularProgress
+														display={
+															enabling[market.id]
+																? "block"
+																: "none"
+														}
+														size={"20px"}
+														thickness="30px"
+														isIndeterminate
+														color={"purple"}
 													/>
 												</Flex>
 											</Td>
@@ -196,6 +235,37 @@ export default function LendingTable() {
 							</Tbody>
 						</Table>
 					</TableContainer>
+
+					{(markets.length > 0 && tokens.length > 0) && <Modal isOpen={isOpen} onClose={onClose} isCentered>
+						<ModalOverlay />
+						<ModalContent bgColor={"#1D1334"} borderRadius={0}>
+							<ModalHeader>{markets[marketOpen]?.inputToken.name}</ModalHeader>
+							<ModalCloseButton />
+							<ModalBody mb={2}>
+								<Tabs>
+									<TabList>
+										<Tab>Deposit</Tab>
+										<Tab>Withdraw</Tab>
+									</TabList>
+
+									<TabPanels>
+										<TabPanel px={0}>
+											<LendModal
+												market={markets[marketOpen]}
+												token={token(markets[marketOpen].inputToken.id)}
+											/>
+										</TabPanel>
+										<TabPanel px={0}>
+											<WithdrawModal
+												market={markets[marketOpen]}
+												token={token(markets[marketOpen].inputToken.id)}
+											/>
+										</TabPanel>
+									</TabPanels>
+								</Tabs>
+							</ModalBody>
+						</ModalContent>
+					</Modal>}
 				</Box>
 			)}
 		</>

@@ -1,7 +1,7 @@
 import React from "react";
 import { Avatar, Box, Button, Divider, Flex, Progress, Text } from "@chakra-ui/react";
 import Overview from "../components/portfolio/overview";
-import Position from "../components/portfolio/position";
+import Rewards from "../components/portfolio/rewards";
 
 import Head from "next/head";
 import { useAccount, useBalance, useEnsAvatar } from "wagmi";
@@ -11,6 +11,9 @@ import { tokenFormatter } from "../utils/formatters";
 import { ethers } from 'ethers';
 import Faucet from "../components/portfolio/faucet";
 import Disconnect from "../components/portfolio/disconnect";
+import { MdOutlineGeneratingTokens } from "react-icons/md";
+import { BiExit } from "react-icons/bi";
+import { RiCopperCoinFill, RiDashboardFill } from "react-icons/ri";
 
 export default function portfolio() {
 	const { address: _address } = useAccount();
@@ -28,7 +31,7 @@ export default function portfolio() {
 
 	const tabStyle = {
 		_hover: {
-			bg: "whiteAlpha.50",
+			bg: "whiteAlpha.300",
 		},
 		_selected: {
 			bg: "whiteAlpha.200",
@@ -48,7 +51,7 @@ export default function portfolio() {
 				<link rel="icon" type="image/x-icon" href="/favicon.png"></link>
 			</Head>
 			<Box mt={1} fontFamily="Poppins">
-				<Tabs orientation="vertical" colorScheme={"purple"} outline='none'>
+				<Tabs orientation="vertical" colorScheme={"primary"} outline='none'>
 					<TabList bgColor="background2" borderColor={'black'}>
 						<Flex minH={'95vh'} justify={'space-between'} flexDir='column'>
 						<Box>
@@ -78,17 +81,17 @@ export default function portfolio() {
 							</Flex>
 						</Box>
 						<Divider borderColor='background1'/>
-						<Tab {...tabStyle}>Overview</Tab>
+						<Tab {...tabStyle}>  <RiDashboardFill/> <Text ml={2}>Overview</Text></Tab>
 						<Divider borderColor='background1'/>
-						<Tab {...tabStyle}>Position</Tab>
+						<Tab {...tabStyle}> <RiCopperCoinFill/> <Text ml={2}>Rewards</Text></Tab>
 						<Divider borderColor='background1'/>
 						</Box>
 
 						<Box>
 						<Divider borderColor='background1'/>
-						<Tab {...tabStyle}>Get Testnet Tokens</Tab>
+						<Tab {...tabStyle}><MdOutlineGeneratingTokens/> <Text ml={2}>Faucet</Text> </Tab>
 						<Divider borderColor='background1'/>
-						<Tab {...tabStyle}>Sign Out</Tab>
+						<Tab {...tabStyle}> <BiExit/> <Text ml={2}>Sign Out</Text></Tab>
 						<Divider borderColor='background1'/>
 						</Box>
 						</Flex>
@@ -99,7 +102,7 @@ export default function portfolio() {
 							<Overview />
 						</TabPanel>
 						<TabPanel p={0} px={1}>
-							<Position />
+							<Rewards />
 						</TabPanel>
 
 						<TabPanel p={0} px={1}>

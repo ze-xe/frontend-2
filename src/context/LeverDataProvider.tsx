@@ -53,35 +53,12 @@ function LeverDataProvider({ children }: any) {
 			]);	
 		}
 
-		Promise.all([multicallContract.callStatic.aggregate(calls), call(leverContract, 'getAssetsIn', [address], chain)])
-		.then(([res, assetsIn]) => {
+		Promise.all([multicallContract.callStatic.aggregate(calls), call(leverContract, 'getAssetsIn', [address], chain), call(leverContract, 'getAccountLiquidity', [address], chain)])
+		.then(([res, assetsIn, accountLiquidity]) => {
 			let _totalCollateralBalance = Big(0);
 			let _totalBorrowBalance = Big(0);
-			let _availableToBorrow = Big(0);
 			let _adjustedDebt = Big(0);
 
-			for (let i = 0; i < res[1].length - 1; i += 3) {
-				const marketIndex = i / 3;
-				_markets[marketIndex].balance = BigNumber.from(res[1][i]).toString();
-				_markets[marketIndex].collateralBalance = Big(BigNumber.from(res[1][i + 1]).toString()).mul(_markets[marketIndex]?.exchangeRate * 10 ** 10).toString();
-				_markets[marketIndex].borrowBalance = BigNumber.from(res[1][i + 2]).toString();
-				_markets[marketIndex].rewardsAPR = [0, 0];
-				if(_markets[marketIndex].rewardTokenEmissionsUSD){
-					_markets[marketIndex].rewardsAPR = [((100 * (_markets[marketIndex].rewardTokenEmissionsUSD[0] * 365)) / _markets[marketIndex].totalDepositBalanceUSD), ((100 * (_markets[marketIndex].rewardTokenEmissionsUSD[1] * 365)) / _markets[marketIndex].totalDepositBalanceUSD)];
-				}
-				_totalCollateralBalance = _totalCollateralBalance.add(
-					Big(_markets[marketIndex].collateralBalance).mul(_markets[marketIndex].inputTokenPriceUSD).div(1e18)
-				);
-				_totalBorrowBalance = _totalBorrowBalance.add(
-					Big(_markets[marketIndex].borrowBalance).mul(_markets[marketIndex].inputTokenPriceUSD).div(1e18)
-				);
-				_availableToBorrow = _availableToBorrow.add(
-					Big(_markets[marketIndex].collateralBalance).mul(_markets[marketIndex].inputTokenPriceUSD).mul(_markets[marketIndex].maximumLTV).div(100).div(1e18)
-				);
-				_adjustedDebt = _adjustedDebt.add(
-					Big(_markets[marketIndex].borrowBalance).mul(_markets[marketIndex].inputTokenPriceUSD).div(1e18).div(_markets[marketIndex].maximumLTV).mul(100)
-				);
-			}
 			// set all assets to lowercase
 			assetsIn = assetsIn.map((asset: string) => asset.toLowerCase());
 			for(let i in _markets){
@@ -92,9 +69,30 @@ function LeverDataProvider({ children }: any) {
 				}
 			}
 
+			for (let i = 0; i < res[1].length - 1; i += 3) {
+				const marketIndex = i / 3;
+				_markets[marketIndex].balance = BigNumber.from(res[1][i]).toString();
+				_markets[marketIndex].collateralBalance = Big(BigNumber.from(res[1][i + 1]).toString()).mul(_markets[marketIndex]?.exchangeRate * 10 ** 10).toString();
+				_markets[marketIndex].borrowBalance = BigNumber.from(res[1][i + 2]).toString();
+				_markets[marketIndex].rewardsAPR = [0, 0];
+				if(_markets[marketIndex].rewardTokenEmissionsUSD){
+					_markets[marketIndex].rewardsAPR = [((100 * (_markets[marketIndex].rewardTokenEmissionsUSD[0] * 365)) / _markets[marketIndex].totalDepositBalanceUSD), ((100 * (_markets[marketIndex].rewardTokenEmissionsUSD[1] * 365)) / _markets[marketIndex].totalDepositBalanceUSD)];
+				}
+				if(_markets[marketIndex].isCollateral) _totalCollateralBalance = _totalCollateralBalance.add(
+					Big(_markets[marketIndex].collateralBalance).mul(_markets[marketIndex].inputTokenPriceUSD).div(1e18)
+				);
+				_totalBorrowBalance = _totalBorrowBalance.add(
+					Big(_markets[marketIndex].borrowBalance).mul(_markets[marketIndex].inputTokenPriceUSD).div(1e18)
+				);
+				_adjustedDebt = _adjustedDebt.add(
+					Big(_markets[marketIndex].borrowBalance).mul(_markets[marketIndex].inputTokenPriceUSD).div(1e18).div(_markets[marketIndex].maximumLTV).mul(100)
+				);
+			}
+			
+
 			setTotalCollateralBalance(_totalCollateralBalance.toString());
 			setTotalBorrowBalance(_totalBorrowBalance.toString());
-			setAvailableToBorrow(_availableToBorrow.sub(_totalBorrowBalance).toString());
+			setAvailableToBorrow(ethers.utils.formatEther(accountLiquidity[1]));
 			setAdjustedDebt(_adjustedDebt.toString());
 			setMarkets(_markets);
 		});

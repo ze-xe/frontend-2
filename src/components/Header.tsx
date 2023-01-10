@@ -163,10 +163,13 @@ export const Header = () => {
 						display={{ sm: "none", md: "flex" }}
 						align="center"
 						justify={"flex-end"}
-						gap={4}
+						gap={2}
 					>
 						{isConnected && !activeChain.unsupported ? (
-							<MenuOption href="/portfolio" title="Portfolio" />
+							<Flex gap={2}>
+							<MenuOption href="/position" title="Position" />
+							<MenuOption href="/portfolio" title={address.slice(0, 5)+'...'+address.slice(38)} />
+							</Flex>
 						) : (
 							<Box>
 								<ConnectButton
@@ -187,12 +190,14 @@ export const Header = () => {
 
 const MenuOption = ({ href, title, disabled = false, size = "sm" }) => {
 	const route = useRouter();
+	const isPath = route.pathname.includes(href);
 
 	return (
 		<Link href={href}>
 			<Box
 				height={"100%"}
-				_hover={{ bg: "whiteAlpha.50" }}
+				_hover={{ bg: "whiteAlpha.200" }}
+				bg={isPath && "whiteAlpha.50" }
 				px={4}
 				py={2}
 				mx={-1}
@@ -210,7 +215,7 @@ const MenuOption = ({ href, title, disabled = false, size = "sm" }) => {
 						disabled={disabled}
 						color={
 							route.pathname.includes(href)
-								? "primary"
+								? "primary.400"
 								: "gray.200"
 						}
 						textUnderlineOffset="4px"
@@ -222,8 +227,8 @@ const MenuOption = ({ href, title, disabled = false, size = "sm" }) => {
 					</Button>
 				</Tooltip>
 			</Box>
-			{route.pathname.includes(href) && (
-				<Box h={"1px"} width="100%" bgColor={"primary"}></Box>
+			{isPath && (
+				<Box h={"1px"} width="100%" bgColor={"primary.400"}></Box>
 			)}
 		</Link>
 	);
