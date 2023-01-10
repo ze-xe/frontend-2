@@ -134,7 +134,7 @@ export default function BuyModule({ pair, limit }) {
 		setToken0Amount(e);
 		if (isValidNS(e)) {
 			if (Number(price) > 0) {
-				setToken1Amount(Big(e).times(price).toString());
+				setToken1Amount(Big(Number(e)).times(price).div(leverage).toString());
 			} else {
 				setToken1Amount("0");
 			}
@@ -145,7 +145,7 @@ export default function BuyModule({ pair, limit }) {
 		setToken1Amount(e);
 		if (isValidNS(e)) {
 			if (Number(price)) {
-				setToken0Amount(Big(e).div(price).toString());
+				setToken0Amount(Big(Number(e)).div(price).times(leverage).toString());
 			} else {
 				setToken0Amount("0");
 			}
@@ -156,7 +156,7 @@ export default function BuyModule({ pair, limit }) {
 		setPrice(e);
 		if (isValidNS(e)) {
 			if (Number(e) > 0) {
-				setToken1Amount(Big(token0Amount).times(e).toString());
+				setToken1Amount(Big(Number(token0Amount)).times(e).toString());
 			} else {
 				setToken1Amount("0");
 			}
@@ -173,6 +173,7 @@ export default function BuyModule({ pair, limit }) {
 	const _setLeverage = (e: string) => {
 		if (isValidAndPositiveNS(e)) {
 			setLeverage(Number(e));
+			setToken0Amount(Number(e) * Number(token0Amount) / leverage)
 		}
 	};
 
@@ -290,11 +291,12 @@ export default function BuyModule({ pair, limit }) {
 					<NumberInput
 						min={0}
 						precision={pair?.exchangeRateDecimals}
-						value={(parseFloat(token1Amount) * leverage) / price}
-						onChange={updateToken1Amount}
+						value={token0Amount}
+						onChange={updateToken0Amount}
 						variant="filled"
 						border={"1px"}
 						borderColor={"gray.700"}
+						step={0.01}
 					>
 						<NumberInputField />
 						<NumberInputStepper>

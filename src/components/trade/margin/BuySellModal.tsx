@@ -18,7 +18,7 @@ import {
 import { ethers } from "ethers";
 import { tokenFormatter } from "../../../utils/formatters";
 import { LeverDataContext } from "../../../context/LeverDataProvider";
-import { isValidNS } from '../../../utils/number';
+import { isValidNS, isValidAndPositiveNS } from '../../../utils/number';
 
 export default function BuySellModal({
 	pair,
@@ -306,11 +306,17 @@ export default function BuySellModal({
 		}
 	};
 
+	const shouldEnterAmount = () => {
+		if(!isValidAndPositiveNS(token0Amount)) return true;
+		return token0Amount < pair?.minToken0Order/(10**token0?.decimals) || amountExceedsBalance()
+	}
+
+
 	return (
 		<>
-			{isValidNS(token0Amount) && Big(token0Amount).lt(token0?.allowance ?? 1e50) ? (
-				Big(token1Amount).lt(token1?.allowance ?? 1e50) ? (
-					market && market.isCollateral ? (
+			{(isValidNS(token0Amount) && Big(token0Amount).lt(token0?.allowance ?? 1e50) || shouldEnterAmount()) ? (
+				(isValidNS(token1Amount) && Big(token1Amount).lt(token1?.allowance ?? 1e50) || shouldEnterAmount()) ? (
+					((market && market.isCollateral) || shouldEnterAmount()) ? (
 						<Button
 							width={"100%"}
 							mt="2"

@@ -100,7 +100,6 @@ export default function BuyModule({ pair, limit }) {
 	};
 
 	const updateToken1Amount = (e: string) => {
-		console.log(e);
 		setToken1Amount(e);
 		if (isValidNS(e)) {
 			if (Number(price) > 0) {

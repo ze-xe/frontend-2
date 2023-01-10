@@ -152,9 +152,20 @@ export default function BuyModule({ pair, limit }) {
 		setToken0Amount(e);
 		if (isValidNS(e)) {
 			if (Number(price) > 0) {
-				setToken1Amount(Big(Number(e)).times(price).toString());
+				setToken1Amount(Big(Number(e)).times(price).times(leverage).toString());
 			} else {
 				setToken1Amount("0");
+			}
+		}
+	};
+
+	const updateToken1Amount = (e: string) => {
+		setToken1Amount(e);
+		if (isValidNS(e)) {
+			if (Number(price) > 0) {
+				setToken0Amount(Big(Number(e)).div(price).div(leverage).toString());
+			} else {
+				setToken0Amount("0");
 			}
 		}
 	};
@@ -173,8 +184,10 @@ export default function BuyModule({ pair, limit }) {
 	};
 
 	const _setLeverage = (e: string) => {
+		const _leverage = leverage;
 		if (isValidAndPositiveNS(e)) {
 			setLeverage(Number(e));
+			setToken1Amount((Number(e) * Number(token1Amount)/ _leverage).toFixed(2));
 		}
 	};
 
@@ -225,7 +238,7 @@ export default function BuyModule({ pair, limit }) {
 					max={max()}
 					asset={token0}
 					onUpdate={updateToken0Amount}
-					value={parseFloat(token0Amount)}
+					value={token0Amount}
 					color="green2"
 				/>
 			</Flex>
@@ -294,9 +307,9 @@ export default function BuyModule({ pair, limit }) {
 					<Text fontSize={"sm"}>Total ({token1?.symbol})</Text>
 					<NumberInput
 						min={0}
-						precision={10}
-						value={price * parseFloat(token0Amount) * leverage}
-						onChange={updateToken0Amount}
+						precision={pair?.exchangeRateDecimals}
+						value={token1Amount}
+						onChange={updateToken1Amount}
 						variant="filled"
 						border={"1px"}
 						borderColor={"gray.700"}
