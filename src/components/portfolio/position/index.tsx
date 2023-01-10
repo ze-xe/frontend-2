@@ -49,13 +49,23 @@ export default function position() {
 		let apr = 0;
 		let totalCollateral = 0;
 		for (let i in markets) {
-			let collateral = (markets[i].inputToken.lastPriceUSD * markets[i].collateralBalance) / 1e18;
-			let borrow = (markets[i].inputToken.lastPriceUSD * markets[i].borrowBalance) / 1e18;
+			let collateral =
+				(markets[i].inputToken.lastPriceUSD *
+					markets[i].collateralBalance) /
+				1e18;
+			let borrow =
+				(markets[i].inputToken.lastPriceUSD *
+					markets[i].borrowBalance) /
+				1e18;
 			totalCollateral += collateral;
-			apr += (parseFloat(markets[i].rates[1].rate) +
-					parseFloat(markets[i].rewardsAPR[1])) * collateral;
-			apr += (parseFloat(markets[i].rewardsAPR[0]) -
-					parseFloat(markets[i].rates[0].rate)) *	borrow;
+			apr +=
+				(parseFloat(markets[i].rates[1].rate) +
+					parseFloat(markets[i].rewardsAPR[1])) *
+				collateral;
+			apr +=
+				(parseFloat(markets[i].rewardsAPR[0]) -
+					parseFloat(markets[i].rates[0].rate)) *
+				borrow;
 		}
 		return apr / totalCollateral;
 	};
@@ -132,20 +142,27 @@ export default function position() {
 								</Text>
 							</Box>
 							<Text mt={1} fontSize="sm" color={"gray"}>
-								Available To Borrow {dollarFormatter(null).format(parseFloat(availableToBorrow))}
+								Available To Borrow{" "}
+								{dollarFormatter(null).format(
+									parseFloat(availableToBorrow)
+								)}
 							</Text>
 						</Flex>
 
-						<Progress
-							value={
-								parseFloat(adjustedDebt) > 0
-									? (100 * parseFloat(adjustedDebt)) /
-									  parseFloat(totalCollateralBalance)
-									: 0
-							}
-							h="1"
-							colorScheme={"primary"}
-						/>
+						<Flex>
+							<Box
+								h={4}
+								width={`${
+									parseFloat(adjustedDebt) > 0
+										? (100 * parseFloat(adjustedDebt)) /
+										  parseFloat(totalCollateralBalance)
+										: 0
+								}%`}
+								bg="primary.400"
+							></Box>
+							
+							<Box h={4} width="100%" bg="whiteAlpha.300"></Box>
+						</Flex>
 					</Box>
 				</Box>
 				<Flex width={"100%"} gap={1}>

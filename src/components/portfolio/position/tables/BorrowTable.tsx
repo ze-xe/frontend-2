@@ -141,13 +141,13 @@ export default function LendingTable() {
 
 											<Td borderColor={"whiteAlpha.200"}>
 											<Text>
-												{tokenFormatter(null).format(
+												{tokenFormatter(null, true).format(
 													(market.totalDepositBalanceUSD - market.totalBorrowBalanceUSD) / market.inputToken.lastPriceUSD
 													)} {market.inputToken.symbol}
 													</Text>
 
 												<Text fontSize={'xs'} mt={1}>
-												{dollarFormatter(null).format(
+												{dollarFormatter(null, true).format(
 													market.totalDepositBalanceUSD - market.totalBorrowBalanceUSD
 												)}
 												</Text>

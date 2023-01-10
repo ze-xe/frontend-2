@@ -66,8 +66,8 @@ export default function portfolio() {
 									bgGradient={
 										"linear(to-r, #E11860, #CB1DC3)"
 									}
-									icon={<Text fontSize={'5xl'}>🐼</Text>}
-									size={"xl"}
+									icon={<Text fontWeight={'bold'}>{address?.slice(-2)}</Text>}
+									size={"2xl"}
 								></Avatar>
 								<Text ml={4} mt={4} fontSize="xl" fontWeight={"bold"}>
 									{address?.slice(0, 6) +

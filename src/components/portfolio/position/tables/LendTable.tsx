@@ -78,7 +78,6 @@ export default function LendingTable() {
 
 	const openMarket = (index: number) => {
 		setMarketOpen(index);
-		console.log(markets[index]);
 		onOpen();
 	}
 
@@ -186,7 +185,7 @@ export default function LendingTable() {
 												<Text fontSize={"xs"} mt={1}>
 													{isConnected
 														? dollarFormatter(
-																null
+																null, true
 														  ).format(
 																(market.collateralBalance *
 																	market
