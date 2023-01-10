@@ -3,12 +3,12 @@
   "version": "0.0.1",
   "description": "zexe frontend",
   "scripts": {
-    "dev": "next",
-    "build": "next build",
-    "config:prod": "curl https://raw.githubusercontent.com/ze-xe/contracts-0.1/main/deployments/arbitrumGoerli/deployments.json -o ./src/deployments/deployments.json && curl https://raw.githubusercontent.com/ze-xe/contracts-0.1/main/deployments/arbitrumGoerli/config.json -o ./src/deployments/config.json",
-    "config:dev": "curl https://raw.githubusercontent.com/ze-xe/contracts-0.1/dev/deployments/arbitrumGoerli/deployments.json -o ./src/deployments/deployments.json && curl https://raw.githubusercontent.com/ze-xe/contracts-0.1/dev/deployments/arbitrumGoerli/config.json -o ./src/deployments/config.json",
-    "config:staging": "curl https://raw.githubusercontent.com/ze-xe/contracts-0.1/staging/deployments/arbitrumGoerli/deployments.json -o ./src/deployments/deployments.json && curl https://raw.githubusercontent.com/ze-xe/contracts-0.1/staging/deployments/arbitrumGoerli/config.json -o ./src/deployments/config.json",
-    "start": "next start"
+    "dev": "yarn config:dev && next",
+    "build": "yarn config:staging && next build",
+    "start": "next start",
+    "config:dev": "export NODE_ENV=dev && export NETWORK=arbitrumGoerli && node src/scripts/config.js",
+    "config:staging": "export NODE_ENV=staging && export NETWORK=arbitrumGoerli && node src/scripts/config.js",
+    "lint": "next lint"
   },
   "dependencies": {
     "@ajna/pagination": "^1.4.19",
@@ -42,6 +42,8 @@
     "@types/node": "^18.0.0",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
+    "eslint": "8.31.0",
+    "eslint-config-next": "13.1.1",
     "typescript": "^4.7.2"
   }
 }
