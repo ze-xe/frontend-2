@@ -68,17 +68,17 @@ const Index = () => {
 					url: "https://www.zexe.io/trade",
 					title: "Trade on Zexe",
 					description: "Zexe is an Orderbook DEX (decentralised exchange) with Spot and Derivatives market. It is a fully decentralized orderbook exchange with a focus on low fees and high liquidity.",
-					// images: [
-					// 	{
-					// 		url: "https://www.example.ie/og-image-01.jpg",
-					// 		width: 800,
-					// 		height: 600,
-					// 		alt: "Og Image Alt",
-					// 		type: "image/jpeg",
-					// 	},
-					// 	{ url: "https://www.example.ie/og-image-03.jpg" },
-					// 	{ url: "https://www.example.ie/og-image-04.jpg" },
-					// ],
+					images: [
+						// {
+						// 	url: "https://www.example.ie/og-image-01.jpg",
+						// 	width: 800,
+						// 	height: 600,
+						// 	alt: "Og Image Alt",
+						// 	type: "image/jpeg",
+						// },
+						// { url: "https://www.example.ie/og-image-03.jpg" },
+						// { url: "https://www.example.ie/og-image-04.jpg" },
+					],
 					siteName: "ZEXE",
 				}}
 				twitter={{
@@ -247,7 +247,6 @@ const Index = () => {
 					</Box>
 					<Box
 						py={5}
-						// bgColor="rgba(26, 229, 200, 0.2)"
 					>
 						<Flex
 							flexDir={{ sm: "column", md: "row" }}
@@ -297,10 +296,6 @@ const Index = () => {
 							<Text fontSize={"sm"}>Testnet figures</Text>
 						</Flex>
 					</Box>
-
-					{/* <Image src="/assets/cyborg.png" height={400} width={700}  alt="none" /> */}
-					{/* <Button display={"flex"} gap="1" variant={'outline'} disabled><Text>Try Now</Text> <Text fontSize={"10px"}>Coming Soon</Text> </Button> */}
-					{/* <Footer /> */}
 				</Box>
 			</Flex>
 		</>

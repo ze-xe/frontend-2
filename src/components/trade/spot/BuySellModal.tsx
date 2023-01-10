@@ -55,7 +55,6 @@ export default function BuySellModal({
 			: token0.balance / 10 ** token0.decimals;
 
 		if (isNaN(Number(amount)) || isNaN(Number(balance))) return true;
-		console.log(amount, balance)
 		return Big(amount).gt(balance);
 	};
 
@@ -265,12 +264,11 @@ export default function BuySellModal({
 
 	const tokenAmountToSpend = buy ? token1Amount : token0Amount;
 	const tokenToSpend = buy ? token1 : token0;
-	const minTokenAmount = buy ? (pair?.minToken0Order / (10**token0?.decimals)) * price : pair?.minToken0Order/(10**token0?.decimals);
-
+	const minTokenAmount = buy ? (price * pair?.minToken0Order / (10**token0?.decimals)) : pair?.minToken0Order/(10**token0?.decimals);
 
 	return (
 		<>
-			{(Big(isValidNS(tokenAmountToSpend) ? tokenAmountToSpend : 0).lt(tokenToSpend?.allowance ?? 1e50) || tokenAmountToSpend < minTokenAmount || amountExceedsBalance()) ? (
+			{(Big(isValidNS(tokenAmountToSpend) ? tokenAmountToSpend : 0).lt(tokenToSpend?.allowance ?? 1e50) || tokenAmountToSpend < minTokenAmount || tokenAmountToSpend == 0 || amountExceedsBalance()) ? (
 				<Button
 					width={"100%"}
 					mt="2"

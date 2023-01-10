@@ -14,15 +14,6 @@ import {
 } from "@chakra-ui/react";
 import React, { useContext, useState } from "react";
 import Image from "next/image";
-import {
-	Modal,
-	ModalOverlay,
-	ModalContent,
-	ModalHeader,
-	ModalFooter,
-	ModalBody,
-	ModalCloseButton,
-} from "@chakra-ui/react";
 
 import {
 	Slider,
@@ -46,7 +37,6 @@ import { MinusIcon } from "@chakra-ui/icons";
 import { LeverDataContext } from "../../../../context/LeverDataProvider";
 
 export default function WithdrawModal({ market, token }) {
-	const { isOpen, onOpen, onClose } = useDisclosure();
 	const [sliderValue, setSliderValue] = React.useState(0);
 	const [showTooltip, setShowTooltip] = React.useState(false);
 	const [inputAmount, setInputAmount] = useState("0");
@@ -61,10 +51,7 @@ export default function WithdrawModal({ market, token }) {
 
 	const updateSliderValue = (value: number) => {
 		setSliderValue(value);
-		setInputAmount(
-			(
-				(value * depositBalance() / 100).toString()
-		));
+		setInputAmount(((value * depositBalance()) / 100).toString());
 	};
 
 	const updateMax = () => {
@@ -86,7 +73,9 @@ export default function WithdrawModal({ market, token }) {
 		setConfirmed(false);
 		setHash(null);
 		setResponse("");
-		let amount = Big(inputAmount).div(market?.exchangeRate).times(10 ** (token?.decimals-10));
+		let amount = Big(inputAmount)
+			.div(market?.exchangeRate)
+			.times(10 ** (token?.decimals - 10));
 		const exchange = await getContract("Exchange", chain);
 		send(exchange, "redeem", [token.id, amount.toFixed(0)], chain)
 			.then(async (res: any) => {
@@ -96,8 +85,19 @@ export default function WithdrawModal({ market, token }) {
 				await res.wait(1);
 				setConfirmed(true);
 				setResponse("Transaction Successful!");
-				updateWalletBalance(token.id, Big(inputAmount).times(10**token?.decimals).toString());
-				updateCollateralBalance(market?.id, Big(inputAmount).times(10**token?.decimals).neg().toString());
+				updateWalletBalance(
+					token.id,
+					Big(inputAmount)
+						.times(10 ** token?.decimals)
+						.toString()
+				);
+				updateCollateralBalance(
+					market?.id,
+					Big(inputAmount)
+						.times(10 ** token?.decimals)
+						.neg()
+						.toString()
+				);
 			})
 			.catch((err: any) => {
 				setLoading(false);
@@ -106,208 +106,152 @@ export default function WithdrawModal({ market, token }) {
 			});
 	};
 
-	const _onClose = () => {
-		setInputAmount("0");
-		setLoading(false);
-		setResponse(null);
-		setSliderValue(0);
-		onClose();
-	};
-
-	const depositBalance = () => market?.collateralBalance / 10 ** token?.decimals;
+	const depositBalance = () =>
+		market?.collateralBalance / 10 ** token?.decimals;
 
 	return (
 		<>
 			<Box>
+				<Text textAlign={"right"} fontSize="xs" mb={1} mt={-2}>
+					Balance {depositBalance()}
+				</Text>
+
+				<InputGroup>
+					<InputLeftAddon
+						bgColor={"transparent"}
+						borderColor="whiteAlpha.300"
+						borderRadius={0}
+					>
+						<Image
+							src={`/assets/crypto_logos/${market.inputToken.symbol.toLowerCase()}.png`}
+							alt={""}
+							width={30}
+							height={30}
+							style={{
+								maxWidth: "25px",
+								maxHeight: "25px",
+							}}
+						/>
+					</InputLeftAddon>
+					<NumberInput
+						w={"100%"}
+						defaultValue={0}
+						max={token?.balance / 10 ** token?.decimals}
+						clampValueOnBlur={false}
+						min={0}
+						onChange={(e) => updateAmount(e)}
+						value={inputAmount}
+					>
+						<NumberInputField borderRadius={0} />
+						<NumberInputStepper>
+							<NumberIncrementStepper />
+							<NumberDecrementStepper />
+						</NumberInputStepper>
+					</NumberInput>
+					<InputRightAddon
+						bgColor={"transparent"}
+						borderRadius={0}
+						borderColor="whiteAlpha.300"
+					>
+						<Button
+							variant={"ghost"}
+							h="1.75rem"
+							size="sm"
+							onClick={updateMax}
+						>
+							Max
+						</Button>
+					</InputRightAddon>
+				</InputGroup>
+
+				<Slider
+					id="slider"
+					defaultValue={0}
+					min={0}
+					max={100}
+					mb={10}
+					mt={5}
+					onChange={(v) => updateSliderValue(v)}
+					value={sliderValue}
+					onMouseEnter={() => setShowTooltip(true)}
+					onMouseLeave={() => setShowTooltip(false)}
+				>
+					<SliderMark value={25} mt="3" ml="-2.5" fontSize="xs">
+						25%
+					</SliderMark>
+					<SliderMark value={50} mt="3" ml="-2.5" fontSize="xs">
+						50%
+					</SliderMark>
+					<SliderMark value={75} mt="3" ml="-2.5" fontSize="xs">
+						75%
+					</SliderMark>
+					<SliderTrack>
+						<SliderFilledTrack bgColor={"primary"} />
+					</SliderTrack>
+					<Tooltip
+						hasArrow
+						bg="primary"
+						color="white"
+						placement="top"
+						isOpen={showTooltip}
+						label={`${sliderValue}%`}
+					>
+						<SliderThumb />
+					</Tooltip>
+				</Slider>
+
 				<Button
-					size={"sm"}
-					variant={"outline"}
-					onClick={onOpen}
-					aria-label={""}
-				><MinusIcon boxSize={"20px"} /></Button>
-			</Box>
+					width={"100%"}
+					bgColor="primary"
+					disabled={
+						inputAmount == "0" || amountExceedsBalance() || loading
+					}
+					isLoading={loading}
+					loadingText="Sign the transaction in your wallet"
+					onClick={withdraw}
+				>
+					{amountExceedsBalance()
+						? "Insufficient Balance"
+						: inputAmount == "0"
+						? "Enter Amount"
+						: "Withdraw"}
+				</Button>
 
-			<Modal isOpen={isOpen} onClose={_onClose} isCentered>
-				<ModalOverlay />
-				<ModalContent bgColor={"#1D1334"} borderRadius={0}>
-					<ModalHeader>
-						Withdrawing {market?.inputToken.name}
-					</ModalHeader>
-					<ModalCloseButton />
-					<ModalBody mb={2}>
-						<Box>
-							<Text
-								textAlign={"right"}
-								fontSize="xs"
-								mb={1}
-								mt={-2}
+				{response && (
+					<Box my={2}>
+						<Box width={"100%"} mb={2}>
+							<Alert
+								status={
+									response.includes("confirm")
+										? "info"
+										: confirmed &&
+										  response.includes("Success")
+										? "success"
+										: "error"
+								}
+								variant="subtle"
 							>
-								Balance{" "}
-								{depositBalance()}
-							</Text>
-
-							<InputGroup>
-								<InputLeftAddon
-									bgColor={"transparent"}
-									borderColor="whiteAlpha.300"
-									borderRadius={0}
-								>
-									<Image
-													src={`/assets/crypto_logos/${market.inputToken.symbol.toLowerCase()}.png`}
-										alt={""}
-										width={30}
-										height={30}
-										style={{
-											maxWidth: "25px",
-											maxHeight: "25px",
-										}}
-									/>
-								</InputLeftAddon>
-								<NumberInput
-									w={"100%"}
-									defaultValue={0}
-									max={
-										token?.balance /
-										10 ** token?.decimals
-									}
-									clampValueOnBlur={false}
-									min={0}
-									onChange={(e) => updateAmount(e)}
-									value={inputAmount}
-								>
-									<NumberInputField borderRadius={0} />
-									<NumberInputStepper>
-										<NumberIncrementStepper />
-										<NumberDecrementStepper />
-									</NumberInputStepper>
-								</NumberInput>
-								<InputRightAddon
-									bgColor={"transparent"}
-									borderRadius={0}
-									borderColor="whiteAlpha.300"
-								>
-									<Button
-										variant={"ghost"}
-										h="1.75rem"
-										size="sm"
-										onClick={updateMax}
-									>
-										Max
-									</Button>
-								</InputRightAddon>
-							</InputGroup>
-
-							<Slider
-								id="slider"
-								defaultValue={0}
-								min={0}
-								max={100}
-								mb={10}
-								mt={5}
-								onChange={(v) => updateSliderValue(v)}
-								value={sliderValue}
-								onMouseEnter={() => setShowTooltip(true)}
-								onMouseLeave={() => setShowTooltip(false)}
-							>
-								<SliderMark
-									value={25}
-									mt="3"
-									ml="-2.5"
-									fontSize="xs"
-								>
-									25%
-								</SliderMark>
-								<SliderMark
-									value={50}
-									mt="3"
-									ml="-2.5"
-									fontSize="xs"
-								>
-									50%
-								</SliderMark>
-								<SliderMark
-									value={75}
-									mt="3"
-									ml="-2.5"
-									fontSize="xs"
-								>
-									75%
-								</SliderMark>
-								<SliderTrack>
-									<SliderFilledTrack
-										bgColor={"primary"}
-									/>
-								</SliderTrack>
-								<Tooltip
-									hasArrow
-									bg="primary"
-									color="white"
-									placement="top"
-									isOpen={showTooltip}
-									label={`${sliderValue}%`}
-								>
-									<SliderThumb />
-								</Tooltip>
-							</Slider>
-
-							<Button
-								width={"100%"}
-								bgColor="primary"
-								disabled={inputAmount == '0' || amountExceedsBalance() || loading}
-								isLoading={loading}
-								loadingText="Sign the transaction in your wallet"
-								onClick={withdraw}
-							>
-								{amountExceedsBalance()
-									? "Insufficient Balance"
-									: inputAmount == '0' ? 'Enter Amount' : "Withdraw"}
-							</Button>
-
-							{response && (
-								<Box my={2}>
-									<Box width={"100%"} mb={2}>
-										<Alert
-											status={
-												response.includes("confirm")
-													? "info"
-													: confirmed &&
-														response.includes(
-															"Success"
-														)
-													? "success"
-													: "error"
-											}
-											variant="subtle"
+								<AlertIcon />
+								<Box>
+									<Text fontSize="md" mb={0}>
+										{response}
+									</Text>
+									{hash && (
+										<Link
+											href={explorer() + hash}
+											target="_blank"
 										>
-											<AlertIcon />
-											<Box>
-												<Text fontSize="md" mb={0}>
-													{response}
-												</Text>
-												{hash && (
-													<Link
-														href={
-															explorer() +
-															hash
-														}
-														target="_blank"
-													>
-														<Text
-															fontSize={"sm"}
-														>
-															View on explorer
-														</Text>
-													</Link>
-												)}
-											</Box>
-										</Alert>
-									</Box>
+											<Text fontSize={"sm"}>
+												View on explorer
+											</Text>
+										</Link>
+									)}
 								</Box>
-							)}
+							</Alert>
 						</Box>
-					</ModalBody>
-				</ModalContent>
-			</Modal>
+					</Box>
+				)}
+			</Box>
 		</>
 	);
 }

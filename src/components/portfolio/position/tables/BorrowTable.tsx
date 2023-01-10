@@ -13,6 +13,12 @@ import {
 	Flex,
 	Text,
 	Button,
+	TabPanel,
+	TabList,
+	Tab,
+	Tabs,
+	TabPanels,
+	useDisclosure,
 } from "@chakra-ui/react";
 
 import Image from "next/image";
@@ -24,17 +30,23 @@ import BorrowModal from "../modals/BorrowModal";
 import { DataContext } from "../../../../context/DataProvider";
 import { useAccount } from 'wagmi';
 
-const imageIds = {
-	ETH: "1027",
-	BTC: "1",
-	USDC: "3408",
-	DAI: "4943",
-};
+
+import {
+	Modal,
+	ModalOverlay,
+	ModalContent,
+	ModalHeader,
+	ModalFooter,
+	ModalBody,
+	ModalCloseButton,
+} from "@chakra-ui/react";
 
 export default function LendingTable() {
 	const { markets } = React.useContext(LeverDataContext);
 	const { tokens } = React.useContext(DataContext);
-	const { isConnected } = useAccount()
+	const { isConnected } = useAccount();
+	const [marketOpen, setMarketOpen] = React.useState(0);
+	const { isOpen, onOpen, onClose } = useDisclosure();
 
 	const token = (tokenId: string) => {
 		return tokens.find(
@@ -42,29 +54,29 @@ export default function LendingTable() {
 		);
 	};
 
+	const openMarket = (index: number) => {
+		setMarketOpen(index);
+		onOpen();
+	}
+
 	return (
 		<>
 			{tokens.length > 0 && (
-				<Box bgColor={"background2"} p={2}>
+				<Box bgColor={"background2"}>
 					<TableContainer>
 						<Table variant="simple">
 							<Thead>
 								<Tr>
-									<Th borderColor={"primary"}>Borrow Asset</Th>
-									<Th borderColor={"primary"}>
-										APY (%)
-									</Th>
-									<Th borderColor={"primary"}>Balance</Th>
-									<Th borderColor={"primary"}>Liquidity</Th>
-
-
-									<Th borderColor={"primary"} isNumeric></Th>
+									<Th>Borrow Asset</Th>
+									<Th>APY (%)</Th>
+									<Th>Balance</Th>
+									<Th>Liquidity</Th>
 								</Tr>
 							</Thead>
 							<Tbody>
-								{markets.map((market) => {
+								{markets.map((market, index) => {
 									return (
-										<Tr>
+										<Tr cursor={'pointer'} onClick={() => openMarket(index)} h='90px'>
 											<Td borderColor={"whiteAlpha.200"}>
 												<Flex gap={2} align="center">
 													<Image
@@ -127,43 +139,18 @@ export default function LendingTable() {
 												</Text>
 											</Td>
 
-
 											<Td borderColor={"whiteAlpha.200"}>
 											<Text>
-												{tokenFormatter(null).format(
+												{tokenFormatter(null, true).format(
 													(market.totalDepositBalanceUSD - market.totalBorrowBalanceUSD) / market.inputToken.lastPriceUSD
 													)} {market.inputToken.symbol}
 													</Text>
 
 												<Text fontSize={'xs'} mt={1}>
-												{dollarFormatter(null).format(
+												{dollarFormatter(null, true).format(
 													market.totalDepositBalanceUSD - market.totalBorrowBalanceUSD
 												)}
 												</Text>
-											</Td>
-
-											<Td
-												borderColor={"whiteAlpha.200"}
-												isNumeric
-											>
-												<Flex
-													gap={0}
-													justify="flex-end"
-												>
-													<BorrowModal
-														market={market}
-														token={token(
-															market.inputToken.id
-														)}
-													/>
-													<RepayModal
-														market={market}
-														token={token(
-															market.inputToken.id
-														)}
-													/>
-													
-												</Flex>
 											</Td>
 										</Tr>
 									);
@@ -171,6 +158,37 @@ export default function LendingTable() {
 							</Tbody>
 						</Table>
 					</TableContainer>
+
+					{(markets.length > 0 && tokens.length > 0) && <Modal isOpen={isOpen} onClose={onClose} isCentered>
+						<ModalOverlay />
+						<ModalContent bgColor={"#1D1334"} borderRadius={0}>
+							<ModalHeader>{markets[marketOpen]?.inputToken.name}</ModalHeader>
+							<ModalCloseButton />
+							<ModalBody mb={2}>
+								<Tabs>
+									<TabList>
+										<Tab>Deposit</Tab>
+										<Tab>Withdraw</Tab>
+									</TabList>
+
+									<TabPanels>
+										<TabPanel px={0}>
+											<BorrowModal
+												market={markets[marketOpen]}
+												token={token(markets[marketOpen].inputToken.id)}
+											/>
+										</TabPanel>
+										<TabPanel px={0}>
+											<RepayModal
+												market={markets[marketOpen]}
+												token={token(markets[marketOpen].inputToken.id)}
+											/>
+										</TabPanel>
+									</TabPanels>
+								</Tabs>
+							</ModalBody>
+						</ModalContent>
+					</Modal>}
 				</Box>
 			)}
 		</>

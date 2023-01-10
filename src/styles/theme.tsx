@@ -58,7 +58,18 @@ const theme = extendTheme({
     // red: '#D82626',
     green2: '#18B05F',
     red2: '#C83232',
-    primary: '#F60DC9',
+    primary: {
+      50: '#F60DC9',
+      100: '#F60DC9',
+      200: '#F60DC9',
+      300: '#F60DC9',
+      400: '#F60DC9',
+      500: '#F60DC9',
+      600: '#F60DC9',
+      700: '#F60DC9',
+      800: '#F60DC9',
+      900: '#F60DC9',
+    },
     background1: '#0E0020',
     background2: '#130B25',
   },
@@ -100,7 +111,7 @@ const theme = extendTheme({
       baseStyle: {
         borderRadius: '0px'
       }
-    }
+    },
   }
 })
 

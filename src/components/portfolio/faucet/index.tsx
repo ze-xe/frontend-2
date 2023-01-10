@@ -181,7 +181,7 @@ export default function faucets() {
 									<Text>{token.symbol}</Text>
 
 									<Text fontSize={'sm'} my={2} mt={4}>
-										Balance{' '}
+										Wallet{' '}
 										{tokenFormatter(null).format(token.balance / 10 ** token.decimals)}
 									</Text>
 								</Box>
