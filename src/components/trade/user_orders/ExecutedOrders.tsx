@@ -85,7 +85,7 @@ export default function ExecutedOrders({ pair }) {
 									.slice((currentPage - 1) * 3, (currentPage - 1) * 3 + 3)
 									.map((order: any, index: number) => {
 										return (
-											<Tr>
+											<Tr key={index}>
 												<Td borderColor="gray.900">
 													<Text
 														fontSize={"xs"}

@@ -51,11 +51,12 @@ const Index = () => {
 	const { protocolData } = useContext(LeverDataContext);
 
 	const dividerStyle = {
-		borderColor: "#E50EC0",
+		borderColor: { xs: "transparent", sm: "transparent", md: "#E50EC0" },
 		mx: 4,
 		my: 5,
 		height: "130px",
 		display: { xs: "none", sm: "block" },
+		orientation: 'vertical'
 	};
 
 	return (
@@ -99,20 +100,18 @@ const Index = () => {
 				bgColor={"#09001F"}
 				bgImage="/Rectangle.png"
 				bgRepeat={"no-repeat"}
-				bgSize={{ xs: "0", sm: "600px", md: "contain" }}
+				bgSize={{ xs: "0", sm: "contain", md: "contain" }}
+				bgPosition={"center top"}
 			>
 				<Box
 					bgImage="/Rectangle2.png"
 					bgRepeat={"no-repeat"}
-					bgSize={{ xs: "0", sm: "600px", md: "contain" }}
-					pt={"3%"}
-					bgPosition={{ sm: "70vw 40vh", md: "0 50vh" }}
-					height={"100vh"}
+					bgSize={{ xs: "0", sm: "1000px", md: "contain" }}
+					bgPosition={"center bottom"}
 				>
 					<Box
 						maxW={"1200px"}
 						ml={"10%"}
-						pb={{ xs: "200", sm: "200", md: "0" }}
 					>
 						<Box>
 							<Text
@@ -120,7 +119,7 @@ const Index = () => {
 								fontSize={"56.53px"}
 								letterSpacing="-10px"
 								color={"#F60DC9"}
-								mb={0}
+								mt={10}
 							>
 								zexe
 							</Text>
@@ -129,11 +128,12 @@ const Index = () => {
 						<Flex
 							flexDir={"column"}
 							justify={"center"}
-							mt={"120px"}
+							mt={{xs: '80px', sm: '120px', md: "160px"}}
 							mb={"60px"}
 							fontFamily={"BG"}
-							fontSize={{ xs: "38", sm: "40", md: "67.5" }}
+							fontSize={{ xs: "38", sm: "40", md: "64.5" }}
 							lineHeight={"121%"}
+							mr={"10%"}
 						>
 							<Text fontWeight="bold">ORDERBOOK DEX</Text>
 							<Text
@@ -163,7 +163,7 @@ const Index = () => {
 								</Text>
 							</Box>
 
-							<Divider {...dividerStyle} orientation="vertical" />
+							<Divider {...dividerStyle} />
 
 							<Box w={"250px"} my={5}>
 								<RiExchangeFundsFill {...featuresIcon} />
@@ -183,7 +183,7 @@ const Index = () => {
 								</Text>
 							</Box>
 
-							<Divider {...dividerStyle} orientation="vertical" />
+							<Divider {...dividerStyle} />
 
 							<Box w={"200px"} my={5}>
 								<GiCardExchange {...featuresIcon} />
@@ -201,7 +201,7 @@ const Index = () => {
 								</Text>
 							</Box>
 
-							<Divider {...dividerStyle} orientation="vertical" />
+							<Divider {...dividerStyle} />
 
 							<Box w={"200px"} my={5}>
 								<GiBank {...featuresIcon} />
@@ -243,15 +243,17 @@ const Index = () => {
 							</Link>
 						</Flex>
 
-						<Divider mt={20} mb={5} />
+						<Divider mt={{xs: 16, sm: 20, md: 28}} mb={5} />
 					</Box>
 					<Box
 						py={5}
+						pb={20}
 					>
 						<Flex
-							flexDir={{ sm: "column", md: "row" }}
+							flexDir={{ xs: "column", sm: "column", md: "row" }}
 							gap={10}
 							ml="10%"
+							mb={10}
 						>
 							<Box>
 								<Text fontWeight={"bold"} fontFamily="Poppins">

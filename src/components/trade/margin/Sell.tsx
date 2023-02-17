@@ -41,6 +41,43 @@ export default function BuyModule({ pair, limit }) {
 	const { exchangeRate: price, setExchangeRate: setPrice } =
 		useContext(AppDataContext);
 
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	const _setLeverage = (_newLeverage: string) => {
+		if (!isValidNS(leverage)) return;
+		const newLeverage = Number(_newLeverage);
+		const _borrowLimit =
+			(MIN_TOKEN1 / parseFloat(token1Amount) - 1) / newLeverage + 1;
+		if (!isValidAndPositiveNS(_borrowLimit)) return;
+		setBorrowLimit(_borrowLimit);
+		if (isValidAndPositiveNS(token1Amount)) {
+			const _nLoops = Math.floor(
+				Math.log(MIN_TOKEN1 / parseFloat(token1Amount)) /
+					Math.log(_borrowLimit)
+			);
+			if (!isValidAndPositiveNS(_nLoops)) return;
+			setNLoops(_nLoops);
+			if (isValidAndPositiveNS(price)) {
+				const _token0Amount = (
+					(parseFloat(token1Amount) *
+						_borrowLimit *
+						(1 - _borrowLimit ** _nLoops)) /
+					(price * (1 - _borrowLimit))
+				).toString();
+				setToken0Amount(_token0Amount);
+				setLiquidationPrice(
+					(newLeverage *
+						parseFloat(token1Amount) *
+						MAX_BORROW_LIMIT) /
+						Number(_token0Amount)
+				);
+			}
+		}
+		setLeverage(newLeverage);
+		setToken0Amount(
+			((newLeverage * Number(token0Amount)) / (leverage < 1 ? 1 : leverage)).toFixed(2)
+		);
+	};
+
 	useEffect(() => {
 		const _token0 = tokens.find((t) => t.id === pair?.tokens[0].id);
 		const _token1 = tokens.find((t) => t.id === pair?.tokens[1].id);
@@ -90,13 +127,27 @@ export default function BuyModule({ pair, limit }) {
 		}
 
 		if (
-			pair && token0 &&
+			pair &&
+			token0 &&
 			isValidNS(token1Amount) &&
-			isValidNS(leverage) && leverage == 0
+			isValidNS(leverage) &&
+			leverage == 0
 		) {
-			_setLeverage('1.1')
+			_setLeverage("1.1");
 		}
-	});
+	}, [
+		tokens,
+		pair,
+		pairNow,
+		token1,
+		token0,
+		sliderValue,
+		token1Amount,
+		leverage,
+		setPrice,
+		token0Amount,
+		_setLeverage,
+	]);
 
 	const updateToken0Amount = (e: string) => {
 		setToken0Amount(e);
@@ -140,39 +191,6 @@ export default function BuyModule({ pair, limit }) {
 		variant: "solid",
 		border: "1px",
 		borderColor: "gray.700",
-	};
-
-	const _setLeverage = (_newLeverage: string) => {
-		if (!isValidNS(leverage)) return;
-		const newLeverage = Number(_newLeverage);
-		const _borrowLimit = (MIN_TOKEN1 / parseFloat(token1Amount) - 1) / newLeverage + 1;
-		if (!isValidAndPositiveNS(_borrowLimit)) return;
-		setBorrowLimit(_borrowLimit);
-		if (isValidAndPositiveNS(token1Amount)) {
-			const _nLoops = Math.floor(
-				Math.log(MIN_TOKEN1 / parseFloat(token1Amount)) /
-					Math.log(_borrowLimit)
-			);
-			if (!isValidAndPositiveNS(_nLoops)) return;
-			setNLoops(_nLoops);
-			if (isValidAndPositiveNS(price)) {
-				const _token0Amount = (
-					(parseFloat(token1Amount) *
-						_borrowLimit *
-						(1 - _borrowLimit ** _nLoops)) /
-					(price * (1 - _borrowLimit))
-				).toString();
-				setToken0Amount(_token0Amount);
-				setLiquidationPrice(
-					(newLeverage * parseFloat(token1Amount) * MAX_BORROW_LIMIT) /
-						Number(_token0Amount)
-				);
-			}
-		}
-		setLeverage(newLeverage);
-		setToken0Amount(
-			((newLeverage * Number(token0Amount)) / leverage).toString()
-		);
 	};
 
 	const max = () =>

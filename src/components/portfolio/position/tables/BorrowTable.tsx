@@ -76,7 +76,7 @@ export default function LendingTable() {
 							<Tbody>
 								{markets.map((market, index) => {
 									return (
-										<Tr cursor={'pointer'} onClick={() => openMarket(index)} h='90px'>
+										<Tr key={index} cursor={'pointer'} onClick={() => openMarket(index)} h='90px'>
 											<Td borderColor={"whiteAlpha.200"}>
 												<Flex gap={2} align="center">
 													<Image
@@ -165,10 +165,10 @@ export default function LendingTable() {
 							<ModalHeader>{markets[marketOpen]?.inputToken.name}</ModalHeader>
 							<ModalCloseButton />
 							<ModalBody mb={2}>
-								<Tabs>
+								<Tabs colorScheme={'primary'}>
 									<TabList>
-										<Tab>Deposit</Tab>
-										<Tab>Withdraw</Tab>
+										<Tab>Borrow</Tab>
+										<Tab>Repay</Tab>
 									</TabList>
 
 									<TabPanels>

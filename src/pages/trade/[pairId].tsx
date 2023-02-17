@@ -32,7 +32,7 @@ const Trade = () => {
 			setPair(_pair);
 			if(!_pair) router.push('/trade/' + pairs[0].tokens[0].symbol + '_' + pairs[0].tokens[1].symbol)
 		}
-	});
+	}, [pairs, router, pairId]);
 
 	return (
 		<>

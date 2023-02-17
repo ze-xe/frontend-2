@@ -8,7 +8,7 @@ export const deployments = require('../deployments/deployments.json');
 export const Endpoints = {
 	[ChainID.NILE]: 'https://api.zexe.io/',
 	[ChainID.AURORA]: 'https://aurora.api.zexe.io/',
-	[ChainID.ARB_GOERLI]: `https://api.zexe.io/v/${config.version}/`,
+	[ChainID.ARB_GOERLI]: `https://api.zexe.io/v/0.0.6/`,
 };
 
 // list of tokens

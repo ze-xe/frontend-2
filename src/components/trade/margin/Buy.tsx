@@ -41,6 +41,35 @@ export default function BuyModule({ pair, limit }) {
 	const { exchangeRate: price, setExchangeRate: setPrice } =
 		useContext(AppDataContext);
 
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	const _setLeverage = (_newLeverage: string) => {
+		if(!isValidNS(leverage)) return;
+		const newLeverage = Number(_newLeverage)
+
+		// calculate borrow limit with a[min], a and x
+		const _borrowLimit = (((pair?.minToken0Order/(10**token0.decimals)) / parseFloat(token0Amount)) - 1) / newLeverage + 1;
+		if (!isValidAndPositiveNS(_borrowLimit)) return;
+		setBorrowLimit(_borrowLimit);
+		if (isValidAndPositiveNS(token1Amount)) {
+			// calculate loops with a[min], a and b
+			const _nLoops = Math.floor(Math.log((pair?.minToken0Order/(10**token0.decimals)) / parseFloat(token0Amount)) / Math.log(_borrowLimit) );
+			if (!isValidAndPositiveNS(_nLoops)) return;
+			setNLoops(_nLoops);
+			if (isValidAndPositiveNS(price)) {
+				const _token1Amount = (price * parseFloat(token0Amount) * _borrowLimit *
+						(1 - _borrowLimit ** _nLoops)) / (1 - _borrowLimit);
+				setLiquidationPrice(
+					Number(_token1Amount) /
+						(newLeverage *
+							parseFloat(token0Amount) *
+							MAX_BORROW_LIMIT)
+				);
+			}
+		}
+		setLeverage(newLeverage);
+		setToken1Amount((newLeverage * Number(token1Amount)/ (leverage < 1 ? 1 : leverage)).toFixed(2));
+	};
+
 	useEffect(() => {
 		const _token0 = tokens.find((t) => t.id === pair?.tokens[0].id);
 		const _token1 = tokens.find((t) => t.id === pair?.tokens[1].id);
@@ -82,6 +111,7 @@ export default function BuyModule({ pair, limit }) {
 					.div(100)
 					.div(10 ** token1.decimals);
 
+				console.log(token1Amount.toNumber().toFixed(pair.exchangeRateDecimals));
 				setToken1Amount(
 					token1Amount.toNumber().toFixed(pair.exchangeRateDecimals)
 				);
@@ -97,7 +127,7 @@ export default function BuyModule({ pair, limit }) {
 		if(token0 && pair && leverage == 0 && isValidNS(token0Amount)){
 			_setLeverage('1.1')
 		}
-	});
+	}, [tokens, pair, pairNow, token1, token0, sliderValue, leverage, token0Amount, setPrice, token1Amount, _setLeverage]);
 
 	const max = () => {
 		if (!token0?.balance) return 0;
@@ -111,7 +141,7 @@ export default function BuyModule({ pair, limit }) {
 		setToken0Amount(e);
 		if (isValidNS(e)) {
 			if (Number(price) > 0) {
-				setToken1Amount(Big(Number(e)).times(price).times(leverage).toString());
+				setToken1Amount(Big(Number(e)).times(price).times(leverage ?? 1).toString());
 			} else {
 				setToken1Amount("0");
 			}
@@ -119,6 +149,7 @@ export default function BuyModule({ pair, limit }) {
 	};
 
 	const updateToken1Amount = (e: string) => {
+		console.log("updateToken1Amount", e);
 		setToken1Amount(e);
 		if (isValidNS(e)) {
 			if (Number(price) > 0) {
@@ -140,34 +171,6 @@ export default function BuyModule({ pair, limit }) {
 				setToken0Amount("0");
 			}
 		}
-	};
-
-	const _setLeverage = (_newLeverage: string) => {
-		if(!isValidNS(leverage)) return;
-		const newLeverage = Number(_newLeverage)
-
-		// calculate borrow limit with a[min], a and x
-		const _borrowLimit = (((pair?.minToken0Order/(10**token0.decimals)) / parseFloat(token0Amount)) - 1) / newLeverage + 1;
-		if (!isValidAndPositiveNS(_borrowLimit)) return;
-		setBorrowLimit(_borrowLimit);
-		if (isValidAndPositiveNS(token1Amount)) {
-			// calculate loops with a[min], a and b
-			const _nLoops = Math.floor(Math.log((pair?.minToken0Order/(10**token0.decimals)) / parseFloat(token0Amount)) / Math.log(_borrowLimit) );
-			if (!isValidAndPositiveNS(_nLoops)) return;
-			setNLoops(_nLoops);
-			if (isValidAndPositiveNS(price)) {
-				const _token1Amount = (price * parseFloat(token0Amount) * _borrowLimit *
-						(1 - _borrowLimit ** _nLoops)) / (1 - _borrowLimit);
-				setLiquidationPrice(
-					Number(_token1Amount) /
-						(newLeverage *
-							parseFloat(token0Amount) *
-							MAX_BORROW_LIMIT)
-				);
-			}
-		}
-		setLeverage(newLeverage);
-		setToken1Amount((newLeverage * Number(token1Amount)/ leverage).toFixed(2));
 	};
 
 	const buttonStyle = {

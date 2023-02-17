@@ -165,6 +165,7 @@ export default function LendModal({ market, token }) {
 
 				<Slider
 					id="slider"
+					colorScheme={'primary'}
 					defaultValue={0}
 					min={0}
 					max={100}
