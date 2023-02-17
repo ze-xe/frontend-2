@@ -71,7 +71,7 @@ export default function PlaceOrder({
 				setTokenAmountToSpend(_tokenAmountToSpend);
 			}
 		}
-	});
+	}, [token0, token1, buy, amountToPlace, price]);
 
 	const place = async () => {
 		setLoading(true);

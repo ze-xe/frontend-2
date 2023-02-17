@@ -66,7 +66,7 @@ export default function BuySellModal({
 					.toFixed(0)
 			);
 		}
-	});
+	}, [token0Amount, token0, orderToPlace]);
 
 	const approve = async () => {
 		setLoading(true);

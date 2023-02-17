@@ -15,7 +15,7 @@ import { MdOutlineGeneratingTokens } from "react-icons/md";
 import { BiExit } from "react-icons/bi";
 import { RiCopperCoinFill, RiDashboardFill } from "react-icons/ri";
 
-export default function portfolio() {
+export default function Portfolio() {
 	const { address: _address } = useAccount();
 	const [address, setAddress] = React.useState(null);
 	const [balance, setBalance] = React.useState(null);
@@ -27,7 +27,7 @@ export default function portfolio() {
 	useEffect(() => {
 		setAddress(_address);
 		if(data) setBalance(parseFloat(ethers.utils.formatEther(data.value)))
-	});
+	}, [_address, data]);
 
 	const tabStyle = {
 		_hover: {

@@ -4,7 +4,7 @@ import React from 'react'
 import { BiExit } from 'react-icons/bi';
 import { useDisconnect } from 'wagmi';
 
-export default function index() {
+export default function Index() {
     const { disconnect } = useDisconnect();
 
     const _disconnect = () => {

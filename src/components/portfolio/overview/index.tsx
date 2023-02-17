@@ -53,7 +53,7 @@ export default function Overview() {
 			}
 			setTotalBalance(total.toString());
 		}
-	});
+	}, [tokens, totalBalance]);
 
 	return (
 		<>
@@ -210,14 +210,6 @@ export default function Overview() {
 															variant="outline"
 														>
 															Trade
-														</Button>
-													</Link>
-													<Link href={"/faucet"}>
-														<Button
-															size={"sm"}
-															variant="outline"
-														>
-															Faucet
 														</Button>
 													</Link>
 												</Td>

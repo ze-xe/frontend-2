@@ -10,7 +10,7 @@ import { DataContext } from "../../../context/DataProvider";
 import { call, getContract, send } from "../../../utils/contract";
 import { useAccount, useNetwork } from "wagmi";
 
-export default function position() {
+export default function Position() {
 	const {
 		markets,
 		availableToBorrow,

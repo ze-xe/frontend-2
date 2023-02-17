@@ -4,7 +4,7 @@ import { Box, Text, Flex } from '@chakra-ui/react'
 import { useContext, useEffect } from 'react';
 import { DataContext } from '../../context/DataProvider';
 
-export default function trade() {
+export default function Trade() {
     
     const router = useRouter();
     const {pairs} = useContext(DataContext);

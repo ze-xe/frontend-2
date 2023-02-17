@@ -89,7 +89,7 @@ export default function BuyModule({ pair, limit }) {
 				);
 			}
 		}
-	});
+	}, [tokens, pair, pairNow, token1, sliderValue, setPrice, token1Amount]);
 
 	const max = () => {
 		if (!token1?.balance) return 0;

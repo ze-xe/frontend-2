@@ -165,6 +165,7 @@ export default function WithdrawModal({ market, token }) {
 				</InputGroup>
 
 				<Slider
+					colorScheme={'primary'}
 					id="slider"
 					defaultValue={0}
 					min={0}

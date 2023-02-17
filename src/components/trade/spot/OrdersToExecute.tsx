@@ -151,7 +151,7 @@ export default function OrdersToExecute({
 				setTokenAmountToSpend(_tokenAmountToSpend);
 			}
 		}
-	});
+	}, [orders, buy, amountToFill, pair.tokens, price]);
 
 	const status = response
 		? response.includes("confirm")

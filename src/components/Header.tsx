@@ -98,7 +98,7 @@ export const Header = () => {
 				fetchLeverData(null, ChainID.ARB_GOERLI);
 			}
 		}
-	}, [isConnected, isConnecting]);
+	}, [activeConnector, fetchData, fetchLeverData, isConnected, isConnecting, setChain]);
 
 	const { chain: activeChain } = useNetwork();
 
@@ -158,6 +158,7 @@ export const Header = () => {
 					justify={"flex-end"}
 					align="center"
 					direction={"row"}
+					display={{ base: "none", md: "flex" }}
 				>
 					<Flex
 						display={{ sm: "none", md: "flex" }}

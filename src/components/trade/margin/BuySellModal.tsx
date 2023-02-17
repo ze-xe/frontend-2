@@ -79,7 +79,7 @@ export default function BuySellModal({
 				setMarket(markets.find((m) => m.inputToken.id === (buy ? token0: token1).id));
 			}
 		}
-	});
+	}, [token0Amount, token0, orderToPlace, markets, market, buy, token1]);
 
 	const approve = async (_token: any) => {
 		setLoading(true);

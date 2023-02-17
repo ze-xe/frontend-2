@@ -26,7 +26,7 @@ import { tokenFormatter } from '../../../utils/formatters';
 import { useEffect } from 'react';
 import { ethers } from 'ethers';
 import { mintAmount } from '../../../utils/const';
-
+import { useState } from 'react';
 function RadioCard(props) {
 	const { getInputProps, getCheckboxProps } = useRadio(props);
 
@@ -61,12 +61,12 @@ function RadioCard(props) {
 	);
 }
 
-export default function faucets() {
+export default function Faucets({}) {
 	const { tokens, chain, explorer } = useContext(DataContext);
 	const { address: evmAddress, isConnected: isEvmConnected } = useAccount();
 
-	const [selectedToken, setSelectedToken] = React.useState(0);
-	const [hydrated, setHydrated] = React.useState(false);
+	const [selectedToken, setSelectedToken] = useState(0);
+	const [hydrated, setHydrated] = useState(false);
 
 	const { data } = useBalance({
 		address: evmAddress
@@ -124,9 +124,8 @@ export default function faucets() {
 		});
 	};
 
-	useEffect(() => {setHydrated(true)});
-
-	if(!hydrated) return (<></>)
+	// useEffect(() => {setHydrated(true)}, []);
+	// if(!hydrated) return (<></>)
 
 	return (
 		<Flex justify={'center'} width='100%'>
@@ -194,8 +193,8 @@ export default function faucets() {
 						<InputGroup size="lg" width={'100%'}>
 							<InputLeftElement
 								pointerEvents="none"
-								children={
-									<Image
+							>
+								<Image
 										src={
 											`/assets/crypto_logos/` +
 											tokens[
@@ -210,8 +209,7 @@ export default function faucets() {
 											maxHeight: 30,
 											borderRadius: '50%',
 										}}></Image>
-								}
-							/>
+							</InputLeftElement>
 							<Input
 								disabled
 								// borderRadius={'8px 0 0 8px'}

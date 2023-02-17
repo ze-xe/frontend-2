@@ -73,7 +73,7 @@ export default function UpdateOrder({ pair, token1, token0, price, order }) {
 				);
 			}
 		}
-	});
+	}, [token0.tradingBalance, token0.decimals, order.orderType, order.exchangeRate, token1.tradingBalance, token1.decimals, pair.exchangeRateDecimals]);
 
 	const amountExceedsBalance = () => {
 		if (token0Amount == '0' || token0Amount == '' || !token1.tradingBalance)
