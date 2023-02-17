@@ -28,6 +28,9 @@ const sentryWebpackPluginOptions = {
   // recommended:
   //   release, url, org, project, authToken, configFile, stripPrefix,
   //   urlPrefix, include, ignore
+  org: 'chainscore',
+  project: 'zexe',
+  authToken: '7e24296e82594c3ba83e55c071e5259d2e38e6b0b52b44398e8139700ed30d15',
 
   silent: true, // Suppresses all logs
   // For all available options, see:
