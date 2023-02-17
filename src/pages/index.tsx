@@ -163,7 +163,7 @@ const Index = () => {
 								</Text>
 							</Box>
 
-							<Divider {...dividerStyle} />
+							<Divider {...dividerStyle} orientation='vertical' />
 
 							<Box w={"250px"} my={5}>
 								<RiExchangeFundsFill {...featuresIcon} />
@@ -183,7 +183,7 @@ const Index = () => {
 								</Text>
 							</Box>
 
-							<Divider {...dividerStyle} />
+							<Divider {...dividerStyle} orientation='vertical' />
 
 							<Box w={"200px"} my={5}>
 								<GiCardExchange {...featuresIcon} />
@@ -201,7 +201,7 @@ const Index = () => {
 								</Text>
 							</Box>
 
-							<Divider {...dividerStyle} />
+							<Divider {...dividerStyle} orientation='vertical' />
 
 							<Box w={"200px"} my={5}>
 								<GiBank {...featuresIcon} />
