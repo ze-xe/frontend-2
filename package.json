@@ -3,8 +3,8 @@
   "version": "0.0.1",
   "description": "zexe frontend",
   "scripts": {
-    "dev": "yarn config:dev && next",
-    "build": "yarn config:staging && next build",
+    "dev": "next",
+    "build": "next build",
     "start": "next start",
     "config:dev": "export NODE_ENV=dev && export NETWORK=arbitrumGoerli && node src/scripts/config.js",
     "config:staging": "export NODE_ENV=staging && export NETWORK=arbitrumGoerli && node src/scripts/config.js",

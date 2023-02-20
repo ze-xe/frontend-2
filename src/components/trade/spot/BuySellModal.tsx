@@ -70,7 +70,7 @@ export default function BuySellModal({
 
 	const approve = async () => {
 		setLoading(true);
-		const token = await getContract("ERC20", chain, tokenToSpend.id);
+		const token = await getContract("BTC", chain, tokenToSpend.id);
 		send(
 			token,
 			"approve",

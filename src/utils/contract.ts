@@ -14,13 +14,8 @@ export function getAddress(contractName: string, chain: number = ChainID.ARB_GOE
 export async function getContract(contractName: string, chain: number, address: string = null) {
   const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
   address = address ?? getAddress(contractName, chain);
-  if(chain == ChainID.NILE){
-    let contract = await ((window as any).tronWeb).contract(getABI(contractName), address)
-    return contract;
-  } else {
-    let contract = new ethers.Contract(address, getABI(contractName), provider.getSigner());
-    return contract;
-  }
+  let contract = new ethers.Contract(address, getABI(contractName), provider.getSigner());
+  return contract;
 }
 
 export async function getInterface(contractName: string, chain: number, address: string = null) {
