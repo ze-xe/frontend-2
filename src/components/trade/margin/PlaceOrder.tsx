@@ -93,13 +93,15 @@ export default function PlaceOrder({
 		// The named list of all type definitions
 		const types = {
 			Order: [
-				{ name: "maker", type: "address" },
-				{ name: "token0", type: "address" },
-				{ name: "token1", type: "address" },
-				{ name: "amount", type: "uint256" },
-				{ name: "buy", type: "bool" },
-				{ name: "salt", type: "uint32" },
-				{ name: "exchangeRate", type: "uint216" },
+				{ name: 'maker', type: 'address' },
+                { name: 'token0', type: 'address' },
+                { name: 'token1', type: 'address' },
+                { name: 'amount', type: 'uint256' },
+                { name: 'orderType', type: 'uint8' },
+                { name: 'salt', type: 'uint32' },
+                { name: 'exchangeRate', type: 'uint176' },
+                { name: 'borrowLimit', type: 'uint32' },
+                { name: 'loops', type: 'uint8' }
 			],
 		};
 
@@ -108,9 +110,11 @@ export default function PlaceOrder({
 			token0: token0.id,
 			token1: token1.id,
 			amount: _amount,
-			buy,
+			orderType: buy ? 1 : 0,
 			salt: (Math.random() * 1000000).toFixed(0),
 			exchangeRate: ethers.utils.parseEther(price.toString()).toString(),
+			borrowLimit: 0,
+			loops: 0,
 		};
 
 		signTypedDataAsync({

@@ -95,6 +95,12 @@ const Index = () => {
 				<link rel="icon" type="image/x-icon" href="/favicon.png"></link>
 			</Head>
 
+			<Flex h={10} bg='white' justify={'center'} align='center'>
+				<Text color={'black'} fontFamily='Silkscreen'>
+					App is under Upgrade! Beta version will be available soon.
+				</Text>
+				</Flex>
+
 			<Flex
 				flexDir="column"
 				bgColor={"#09001F"}
@@ -227,6 +233,7 @@ const Index = () => {
 									color="white"
 									// color={"black"}
 									_hover={{ opacity: "0.5" }}
+									disabled={true}
 								>
 									Trade Now
 								</Button>
